@@ -4,6 +4,7 @@
 import { offset } from '../core/clip.js';
 import { ringsBBox, sub, norm, perp, add, scale, dist } from '../core/geom.js';
 import { rng, hash } from '../core/rng.js';
+import { drawLink } from './link-symbols.js';
 
 function ringsPath(rings, path = new Path2D()) {
   for (const ring of rings) {
@@ -74,21 +75,59 @@ function diagonalLines(box, spacing, both) {
   return path;
 }
 
+function polylinesPath(polylines) {
+  const path = new Path2D();
+  for (const pts of polylines) {
+    path.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) path.lineTo(pts[i][0], pts[i][1]);
+  }
+  return path;
+}
+
+// Posts roughly every square along each railing, plus both ends.
+function railingPosts(runs) {
+  const posts = [];
+  for (const run of runs) {
+    const pts = run.points;
+    posts.push(pts[0]);
+    let carried = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1];
+      const b = pts[i];
+      const l = dist(a, b);
+      let t = 1 - carried;
+      while (t <= l) {
+        posts.push([a[0] + ((b[0] - a[0]) * t) / l, a[1] + ((b[1] - a[1]) * t) / l]);
+        t += 1;
+      }
+      carried = (carried + l) % 1;
+    }
+    if (dist(pts[0], pts[pts.length - 1]) > 1e-6) posts.push(pts[pts.length - 1]);
+  }
+  return posts;
+}
+
 /** Build (or reuse) the paths for this level geometry and style. */
 function layers(geo, style, map) {
   const key = style.key + '|' + map.size.w + 'x' + map.size.h;
   if (geo.cache.layersKey === key) return geo.cache.layers;
   const { w, h } = map.size;
   const mapBox = { minX: 0, minY: 0, maxX: w, maxY: h };
+  const byKind = (kind) => geo.edgeRuns.filter((r) => r.kind === kind);
   const L = {
     floor: ringsPath(geo.floor),
-    walls: ringsPath(geo.floor, segmentsPath(geo.inner)),
+    open: geo.open.length ? ringsPath(geo.open) : null,
+    walls: ringsPath(geo.structure, segmentsPath(geo.inner)),
+    edgeWalls: polylinesPath(byKind('wall').map((r) => r.points)),
+    railings: polylinesPath(byKind('railing').map((r) => r.points)),
+    posts: railingPosts(byKind('railing')),
+    drops: polylinesPath(byKind('drop').map((r) => r.points)),
     grid: gridPath(w, h),
-    rock: ringsPath(geo.floor, ringsPath([[[0, 0], [w, 0], [w, h], [0, h]]])),
+    rock: ringsPath(geo.structure, ringsPath([[[0, 0], [w, 0], [w, h], [0, h]]])),
   };
   if (style.shading === 'hatch' || style.shading === 'crosshatch') {
-    const band = offset(geo.floor, style.band);
-    L.band = ringsPath(geo.floor, ringsPath(band));
+    const band = offset(geo.structure, style.band);
+    L.band = ringsPath(geo.structure, ringsPath(band));
     const box = band.length ? ringsBBox(band) : mapBox;
     L.hatch = style.shading === 'hatch' ? clusterHatch(box, map.seed) : diagonalLines(box, 0.18, true);
   } else if (style.shading === 'lines') {
@@ -212,11 +251,20 @@ export function drawDoor(ctx, door, style) {
 
 // ---- level ---------------------------------------------------------------
 
+export const OPEN_MODES = [
+  { id: 'transparent', name: 'Transparent' },
+  { id: 'faded', name: 'Faded level below' },
+  { id: 'solid', name: 'Solid fill' },
+];
+
 /**
  * Draw one level. ctx's transform must already map squares to pixels.
- * opts.pxPerSquare keeps hairlines visible when zoomed out.
+ *  links:    [{link, role}] touching this level
+ *  below:    {level, geo, links} for the level underneath (shown through openings)
+ *  openMode: how open-to-below areas are filled: 'transparent' | 'faded' | 'solid'
+ *  pxPerSquare keeps hairlines visible when zoomed out.
  */
-export function drawLevel(ctx, { map, level, geo, style, pxPerSquare = 64 }) {
+export function drawLevel(ctx, { map, level, geo, style, links = [], below = null, openMode = 'faded', pxPerSquare = 64 }) {
   const { w, h } = map.size;
   const L = layers(geo, style, map);
   const hair = 1 / pxPerSquare;
@@ -237,6 +285,25 @@ export function drawLevel(ctx, { map, level, geo, style, pxPerSquare = 64 }) {
     ctx.restore();
   }
 
+  // Open to below.
+  if (L.open) {
+    ctx.save();
+    ctx.clip(L.open, 'evenodd');
+    if (openMode === 'transparent') {
+      ctx.clearRect(0, 0, w, h);
+    } else if (openMode === 'solid' || !below) {
+      ctx.fillStyle = style.tokens.mid;
+      ctx.fillRect(0, 0, w, h);
+    } else {
+      // The level below, washed with a mid tone so it reads as further away.
+      drawLevel(ctx, { map, level: below.level, geo: below.geo, style, links: below.links, openMode: 'solid', pxPerSquare });
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = style.tokens.shade;
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.restore();
+  }
+
   // Grid.
   if (style.gridMode !== 'off') {
     ctx.save();
@@ -247,6 +314,26 @@ export function drawLevel(ctx, { map, level, geo, style, pxPerSquare = 64 }) {
     ctx.restore();
   }
 
+  // Links sit on the floor, under walls and doors.
+  for (const { link, role } of links) drawLink(ctx, link, role, style);
+
+  // Edges of open areas: drops dashed, railings thin with posts.
+  ctx.save();
+  ctx.strokeStyle = style.ink;
+  ctx.lineCap = 'butt';
+  ctx.lineWidth = Math.max(hair, 0.04);
+  ctx.setLineDash([0.18, 0.12]);
+  ctx.stroke(L.drops);
+  ctx.setLineDash([]);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = Math.max(hair * 1.5, style.wallWidth * 0.38);
+  ctx.stroke(L.railings);
+  ctx.fillStyle = style.ink;
+  const post = Math.max(0.1, style.wallWidth * 0.9);
+  for (const p of L.posts) ctx.fillRect(p[0] - post / 2, p[1] - post / 2, post, post);
+  ctx.restore();
+
   // Walls.
   ctx.save();
   ctx.lineJoin = 'round';
@@ -254,10 +341,12 @@ export function drawLevel(ctx, { map, level, geo, style, pxPerSquare = 64 }) {
   ctx.strokeStyle = style.ink;
   ctx.lineWidth = style.wallWidth;
   ctx.stroke(L.walls);
+  ctx.stroke(L.edgeWalls);
   if (style.wallStyle === 'double') {
     ctx.strokeStyle = style.paper;
     ctx.lineWidth = style.wallWidth * 0.38;
     ctx.stroke(L.walls);
+    ctx.stroke(L.edgeWalls);
   }
   ctx.restore();
 

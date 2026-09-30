@@ -6,6 +6,7 @@ import { translateShape } from '../core/shapes.js';
 import { regionAt, sampleX, sampleY, STEP } from '../core/rooms.js';
 import { pointInRings, distToRings, distToSegment, snapPoint, polylineSegments, add, scale } from '../core/geom.js';
 import { drawLevel, levelPaths } from '../render/renderer.js';
+import { linksOnLevel, linkContains } from '../core/links.js';
 import { resolveStyle } from '../render/style.js';
 
 const HISTORY_LIMIT = 200;
@@ -18,7 +19,11 @@ export class App {
     this.catalog = catalog;
     this.tools = tools;
     this.onChange = onChange || (() => {});
-    this.opts = { mode: 'add', walled: true, radius: 0, roughness: 0.5, brush: 1, doorType: 'door', doorWidth: 1, roomType: null };
+    this.opts = {
+      mode: 'add', walled: true, radius: 0, roughness: 0.5, brush: 1, doorType: 'door', doorWidth: 1, roomType: null,
+      linkType: 'stairs', linkSpan: 1, spiralSize: 2, edgeKind: 'wall',
+    };
+    this.showBelow = true;
     this.view = { scale: 32, ox: 40, oy: 40 };
     this.undoStack = [];
     this.redoStack = [];
@@ -39,6 +44,21 @@ export class App {
 
   get level() {
     return this.map.levels[this.levelIndex];
+  }
+
+  get levelBelow() {
+    return this.map.levels[this.levelIndex - 1] || null;
+  }
+
+  setLevel(index) {
+    index = Math.max(0, Math.min(this.map.levels.length - 1, index));
+    if (index === this.levelIndex) return;
+    this.tool?.cancel?.(this);
+    this.levelIndex = index;
+    this.selection = null;
+    this.hoverItem = null;
+    this.onChange('level');
+    this.requestRender();
   }
 
   get setting() {
@@ -137,6 +157,7 @@ export class App {
   }
 
   changed(label) {
+    this.levelIndex = Math.max(0, Math.min(this.levelIndex, this.map.levels.length - 1));
     this.requestRender();
     this.onChange(label);
     clearTimeout(this.autosaveTimer);
@@ -215,6 +236,9 @@ export class App {
       const d = level.doors[i];
       if (distToSegment(p, d.a, d.b) < tol) return { kind: 'door', id: d.id, item: d };
     }
+    for (const { link } of linksOnLevel(this.map, level).reverse()) {
+      if (linkContains(link, p)) return { kind: 'link', id: link.id, item: link };
+    }
     for (let i = level.walls.length - 1; i >= 0; i--) {
       const w = level.walls[i];
       if (polylineSegments(wallPolyline(w)).some(([a, b]) => distToSegment(p, a, b) < tol)) return { kind: 'wall', id: w.id, item: w };
@@ -229,7 +253,7 @@ export class App {
   }
 
   findItem(level, hit) {
-    const list = { door: level.doors, wall: level.walls, shape: level.shapes }[hit.kind];
+    const list = { door: level.doors, wall: level.walls, shape: level.shapes, link: this.map.links }[hit.kind];
     return list?.find((x) => x.id === hit.id);
   }
 
@@ -251,6 +275,12 @@ export class App {
             d.b = [d.b[0] + dx, d.b[1] + dy];
           }
         }
+      } else if (hit.kind === 'link') {
+        const k = map.links.find((x) => x.id === hit.id);
+        if (k) {
+          k.x += dx;
+          k.y += dy;
+        }
       } else if (hit.kind === 'wall') {
         const w = level.walls.find((x) => x.id === hit.id);
         if (!w) return;
@@ -266,10 +296,11 @@ export class App {
   }
 
   deleteItem(hit) {
-    const key = { door: 'doors', wall: 'walls', shape: 'shapes' }[hit.kind];
+    const key = { door: 'doors', wall: 'walls', shape: 'shapes', link: 'links' }[hit.kind];
     if (!key) return;
     this.commit('Delete', (map, level) => {
-      level[key] = level[key].filter((x) => x.id !== hit.id);
+      const owner = key === 'links' ? map : level;
+      owner[key] = owner[key].filter((x) => x.id !== hit.id);
     });
     if (this.selection?.id === hit.id) this.select(null);
   }
@@ -399,6 +430,8 @@ export class App {
     }
     if (e.key === 'Delete' || e.key === 'Backspace') return this.deleteSelection(), true;
     if (e.key === 'f') return this.fitView(), true;
+    if (e.key === 'PageUp') return this.setLevel(this.levelIndex + 1), true;
+    if (e.key === 'PageDown') return this.setLevel(this.levelIndex - 1), true;
     if (e.key === '+' || e.key === '=') return this.zoomAt(this.canvas.clientWidth / 2, this.canvas.clientHeight / 2, 1.25), true;
     if (e.key === '-') return this.zoomAt(this.canvas.clientWidth / 2, this.canvas.clientHeight / 2, 0.8), true;
     const tool = this.tools.find((t) => t.key === e.key.toLowerCase());
@@ -435,7 +468,18 @@ export class App {
     world();
     const geo = this.geometry();
     const style = this.style;
-    drawLevel(ctx, { map: this.map, level: this.level, geo, style, pxPerSquare: s });
+    const below = this.levelBelow;
+    drawLevel(ctx, {
+      map: this.map,
+      level: this.level,
+      geo,
+      style,
+      links: linksOnLevel(this.map, this.level),
+      below: below && { level: below, geo: this.geometry(below), links: linksOnLevel(this.map, below) },
+      openMode: 'faded',
+      pxPerSquare: s,
+    });
+    if (below && this.showBelow) this.drawGhost(ctx, below);
 
     // Map border.
     ctx.strokeStyle = 'rgba(255,255,255,0.35)';
@@ -449,6 +493,23 @@ export class App {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (this.showLabels) this.drawRoomLabels(ctx, geo);
+  }
+
+  // The level below as faint outlines, for lining things up.
+  drawGhost(ctx, below) {
+    const geo = this.geometry(below);
+    const paths = levelPaths(geo, this.style, this.map);
+    const s = this.view.scale;
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = '#e05cc8';
+    ctx.lineWidth = 1.5 / s;
+    ctx.setLineDash([5 / s, 3 / s]);
+    ctx.stroke(paths.walls);
+    ctx.stroke(paths.edgeWalls);
+    ctx.stroke(paths.railings);
+    for (const { link } of linksOnLevel(this.map, below)) ctx.strokeRect(link.x, link.y, link.w, link.h);
+    ctx.restore();
   }
 
   regionPath(geo, index) {
@@ -547,6 +608,8 @@ export class App {
       ctx.moveTo(...pts[0]);
       for (const p of pts.slice(1)) ctx.lineTo(...p);
       ctx.lineWidth = 6 / s;
+    } else if (hit.kind === 'link') {
+      ctx.rect(item.x, item.y, item.w, item.h);
     } else if (hit.kind === 'door') {
       ctx.moveTo(...item.a);
       ctx.lineTo(...item.b);

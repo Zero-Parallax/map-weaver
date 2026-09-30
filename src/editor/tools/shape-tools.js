@@ -17,8 +17,9 @@ function modeOptions(app, { walled = true, radius = false, extra = [] } = {}) {
       'Mode',
       segmented(
         [
-          { id: 'add', name: 'Add floor', title: 'Hold Alt to switch while drawing' },
+          { id: 'add', name: 'Add floor', title: 'Hold Alt to cut away instead' },
           { id: 'subtract', name: 'Cut away' },
+          { id: 'void', name: 'Open to below', title: 'Balconies, galleries, stairwells: see down to the level below' },
         ],
         o.mode,
         (v) => app.setOpt('mode', v),
@@ -37,9 +38,16 @@ function modeOptions(app, { walled = true, radius = false, extra = [] } = {}) {
 }
 
 function opFor(app, ev) {
-  const sub = app.opts.mode === 'subtract';
-  return ev.alt ? (sub ? 'add' : 'subtract') : sub ? 'subtract' : 'add';
+  const mode = app.opts.mode;
+  if (!ev.alt) return mode;
+  return mode === 'subtract' ? 'add' : 'subtract';
 }
+
+const PREVIEW = {
+  add: ['rgba(40,160,255,0.18)', '#2a9df4'],
+  subtract: ['rgba(220,60,60,0.18)', '#e04848'],
+  void: ['rgba(170,90,230,0.22)', '#a55ae6'],
+};
 
 function strokePreview(ctx, app, rings, op) {
   ctx.save();
@@ -50,18 +58,19 @@ function strokePreview(ctx, app, rings, op) {
     for (const p of ring.slice(1)) ctx.lineTo(...p);
     ctx.closePath();
   }
-  ctx.fillStyle = op === 'subtract' ? 'rgba(220,60,60,0.18)' : 'rgba(40,160,255,0.18)';
+  const [fill, stroke] = PREVIEW[op] || PREVIEW.add;
+  ctx.fillStyle = fill;
   ctx.fill('evenodd');
   ctx.setLineDash([6 / app.view.scale, 4 / app.view.scale]);
   ctx.lineWidth = 2 / app.view.scale;
-  ctx.strokeStyle = op === 'subtract' ? '#e04848' : '#2a9df4';
+  ctx.strokeStyle = stroke;
   ctx.stroke();
   ctx.restore();
 }
 
 function addShape(app, shape, op) {
   const walled = op === 'add' && app.opts.walled && shape.kind !== 'cells';
-  app.commit(op === 'add' ? 'Add floor' : 'Cut floor', (map, level) => {
+  app.commit({ add: 'Add floor', subtract: 'Cut floor', void: 'Open to below' }[op], (map, level) => {
     level.shapes.push({ id: newId('s'), op, walled, ...shape });
   });
 }
@@ -254,6 +263,7 @@ export const brushTool = {
           [
             { id: 'add', name: 'Paint' },
             { id: 'subtract', name: 'Erase' },
+            { id: 'void', name: 'Open' },
           ],
           app.opts.mode,
           (v) => app.setOpt('mode', v),
@@ -302,7 +312,7 @@ export const brushTool = {
   overlay(app, ctx) {
     const cells = this.cells ? [...this.cells.values()] : [];
     ctx.save();
-    ctx.fillStyle = this.op === 'subtract' && this.cells ? 'rgba(220,60,60,0.3)' : 'rgba(40,160,255,0.3)';
+    ctx.fillStyle = (this.cells && PREVIEW[this.op]?.[0]) || PREVIEW.add[0];
     for (const [x, y] of cells) ctx.fillRect(x, y, 1, 1);
     if (this.hover) {
       const n = app.opts.brush;

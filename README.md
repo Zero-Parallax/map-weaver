@@ -27,11 +27,17 @@ Set `PORT` to use another port.
 | Wall | W | Click grid points to chain walls, including diagonals |
 | Arc wall | A | Centre, start point, then sweep round |
 | Door | D | Click a wall. Door, double, secret, locked, portcullis, sliding, archway, window |
+| Stairs & lifts | S | Stairs (drag foot to top), spiral stairs, ladders, lifts, trapdoors |
+| Balcony edge | G | Click an edge of an open-to-below area: railing, full wall or open drop |
 | Room type | T | Click inside a room to tag it; right-click clears |
 | Erase | E | Click a door, wall or shape to delete it |
 
 - **Alt** while drawing a shape: cut away floor instead of adding it.
 - **Shift**: snap to half squares. **Ctrl**: no snapping.
+- **Open to below** (shape mode): balconies, galleries and mezzanines. The edges get railings;
+  the level below shows through, faded. Stairs cut their own opening in the level above.
+- **Levels**: add, rename and delete in the panel; PageUp / PageDown switch. The level below
+  shows as pink outlines for lining things up.
 - **Separate room** (panel): the shape gets its own walls, even where it touches other floor.
   Turn it off to extend the floor it touches instead.
 - Pan with the middle mouse button or Space + drag. Wheel zooms. **F** fits the map.

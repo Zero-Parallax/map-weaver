@@ -64,7 +64,7 @@ export const roomTool = {
   hint: 'Pick a room type, then click inside rooms to tag them. Right-click clears a tag.',
   options: (app) => {
     const types = app.setting?.roomTypes || [];
-    if (!app.opts.roomType || !types.some((t) => t.id === app.opts.roomType)) app.opts.roomType = types[0]?.id;
+    currentRoomType(app);
     return el(
       'div',
       { class: 'room-types' },
@@ -93,7 +93,7 @@ export const roomTool = {
       });
       return;
     }
-    const type = app.opts.roomType;
+    const type = currentRoomType(app);
     if (!type) return;
     app.commit('Tag room', (map, level) => tagRegion(level, rooms, index, type, ev.world));
   },
@@ -101,6 +101,13 @@ export const roomTool = {
     if (app) app.hoverRegion = -1;
   },
 };
+
+/** The chosen room type, falling back to the setting's first type. */
+function currentRoomType(app) {
+  const types = app.setting?.roomTypes || [];
+  if (!types.some((t) => t.id === app.opts.roomType)) app.opts.roomType = types[0]?.id ?? null;
+  return app.opts.roomType;
+}
 
 /** Set the type of the room at region index (creating a tag if needed). */
 export function tagRegion(level, rooms, index, type, at) {

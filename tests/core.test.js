@@ -117,3 +117,88 @@ test('maps round-trip through save and load', () => {
   assert.deepEqual(loaded, m);
   assert.throws(() => loadMap({ format: 'other' }), /not a Map Weaver map/);
 });
+
+// ---- levels, openings, links ----------------------------------------------
+
+import { insertLevel, removeLevel } from '../src/core/model.js';
+import { createLink, linksOnLevel } from '../src/core/links.js';
+
+test('an open-to-below area inside a room gets railings on all four sides', () => {
+  const lv = level([
+    { kind: 'rect', x: 2, y: 2, w: 10, h: 10 },
+    { kind: 'rect', x: 5, y: 5, w: 4, h: 3, op: 'void' },
+  ]);
+  const geo = computeLevelGeometry(lv, map);
+  assert.equal(geo.edgeRuns.length, 4);
+  assert.ok(geo.edgeRuns.every((r) => r.kind === 'railing'));
+  assert.ok(Math.abs(area(geo.open) - 12) < 1e-6);
+  assert.ok(Math.abs(area(geo.structure) - 100) < 1e-6);
+  // The railings are not walls, so doors cannot go there.
+  assert.ok(!geo.wallSegments.some(([a, b]) => a[0] === 5 && b[0] === 5));
+});
+
+test('a gallery along a wall keeps the outer wall and rails the inner side', () => {
+  const lv = level([
+    { kind: 'rect', x: 0, y: 0, w: 10, h: 10 },
+    { kind: 'rect', x: 0, y: 3, w: 10, h: 7, op: 'void' },
+  ]);
+  const geo = computeLevelGeometry(lv, map);
+  assert.equal(geo.edgeRuns.length, 1);
+  const pts = geo.edgeRuns[0].points;
+  assert.ok(pts.every((p) => Math.abs(p[1] - 3) < 1e-9));
+  // The outer outline still includes the open part.
+  assert.ok(Math.abs(area(geo.structure) - 100) < 1e-6);
+});
+
+test('edge overrides turn a run into a wall or a drop', () => {
+  const lv = level([
+    { kind: 'rect', x: 2, y: 2, w: 10, h: 10 },
+    { kind: 'rect', x: 5, y: 5, w: 4, h: 3, op: 'void' },
+  ]);
+  lv.edges = [{ at: [7, 5], kind: 'wall' }, { at: [5, 6.5], kind: 'drop' }];
+  const geo = computeLevelGeometry(lv, map);
+  const kinds = geo.edgeRuns.map((r) => r.kind).sort();
+  assert.deepEqual(kinds, ['drop', 'railing', 'railing', 'wall']);
+  assert.ok(geo.wallSegments.some(([a, b]) => a[1] === 5 && b[1] === 5));
+});
+
+test('stairs open the floor above with no railing on the arrival side', () => {
+  const m = createMap({ size: { w: 30, h: 30 } });
+  const upper = insertLevel(m, 1, 'Upper');
+  const lower = m.levels[0];
+  lower.shapes.push({ id: 'a', kind: 'rect', op: 'add', x: 0, y: 0, w: 12, h: 12 });
+  upper.shapes.push({ id: 'b', kind: 'rect', op: 'add', x: 0, y: 0, w: 12, h: 12 });
+  m.links.push(createLink('stairs', lower.id, upper.id, { x: 4, y: 4, w: 2, h: 3 }, 'n'));
+  assert.deepEqual(linksOnLevel(m, upper).map((x) => x.role), ['top']);
+  const geo = computeLevelGeometry(upper, m);
+  assert.ok(Math.abs(area(geo.open) - 6) < 1e-6);
+  // Three railed sides; the north (arrival) side is a gap.
+  assert.equal(geo.edgeRuns.length, 3);
+  assert.ok(!geo.edgeRuns.some((r) => r.points.every((p) => Math.abs(p[1] - 4) < 1e-9)));
+  // The lower level is untouched.
+  assert.equal(computeLevelGeometry(lower, m).open.length, 0);
+});
+
+test('spiral stairs leave a gap in a round railing', () => {
+  const m = createMap({ size: { w: 30, h: 30 } });
+  const upper = insertLevel(m, 1, 'Upper');
+  upper.shapes.push({ id: 'b', kind: 'rect', op: 'add', x: 0, y: 0, w: 12, h: 12 });
+  m.links.push(createLink('spiral', m.levels[0].id, upper.id, { x: 4, y: 4, w: 3, h: 3 }, 'e'));
+  const geo = computeLevelGeometry(upper, m);
+  assert.equal(geo.edgeRuns.length, 1);
+  const pts = geo.edgeRuns[0].points;
+  assert.ok(pts.every((p) => !(p[0] > 6.8 && Math.abs(p[1] - 5.5) < 0.4)), 'gap on the east side');
+});
+
+test('removing a level drops links that no longer span two levels', () => {
+  const m = createMap();
+  const l2 = insertLevel(m, 1, 'L2');
+  const l3 = insertLevel(m, 2, 'L3');
+  m.links.push(createLink('stairs', m.levels[0].id, l2.id, { x: 0, y: 0, w: 1, h: 2 }));
+  m.links.push(createLink('lift', m.levels[0].id, l3.id, { x: 5, y: 5, w: 2, h: 2 }));
+  assert.deepEqual(m.levels.map((l) => l.elevation), [0, 2, 4]);
+  removeLevel(m, l2.id);
+  assert.equal(m.links.length, 1);
+  assert.equal(m.links[0].type, 'lift');
+  assert.deepEqual(m.levels.map((l) => l.elevation), [0, 2]);
+});

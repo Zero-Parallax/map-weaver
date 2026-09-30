@@ -3,13 +3,21 @@
 import { App } from './editor/app.js';
 import { el, field, select, segmented, checkbox } from './editor/dom.js';
 import { loadCatalog, listMaps, loadMapFile, saveMapFile } from './io/api.js';
-import { loadMap, newSeed, DOOR_TYPES } from './core/model.js';
+import { loadMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
+import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
+import { linkTool, edgeTool } from './editor/tools/level-tools.js';
 import { regionAt } from './core/rooms.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
 
-const TOOL_GROUPS = [[selectTool], [rectTool, circleTool, polyTool, caveTool, brushTool], [wallTool, arcTool, doorTool], [roomTool, eraseTool]];
+const TOOL_GROUPS = [
+  [selectTool],
+  [rectTool, circleTool, polyTool, caveTool, brushTool],
+  [wallTool, arcTool, doorTool],
+  [linkTool, edgeTool],
+  [roomTool, eraseTool],
+];
 const $ = (id) => document.getElementById(id);
 
 const catalog = await loadCatalog();
@@ -141,7 +149,7 @@ function shapeSection(shape) {
   const radii = [0, 0.5, 1, 1.5, 2, 3, 4].map((r) => ({ id: String(r), name: r ? `${r} sq` : 'Square' }));
   return section(
     `Shape: ${kindName}`,
-    field('Mode', segmented([{ id: 'add', name: 'Floor' }, { id: 'subtract', name: 'Cut away' }], shape.op, (v) => edit('Change mode', (s) => (s.op = v)))),
+    field('Mode', segmented([{ id: 'add', name: 'Floor' }, { id: 'subtract', name: 'Cut away' }, { id: 'void', name: 'Open to below' }], shape.op, (v) => edit('Change mode', (s) => (s.op = v)))),
     shape.op === 'add' && shape.kind !== 'cells' &&
       checkbox('Separate room (own walls)', !!shape.walled, (v) => edit('Toggle walls', (s) => (s.walled = v))),
     (shape.kind === 'rect' || shape.kind === 'poly') &&
@@ -173,6 +181,30 @@ function doorSection(door) {
       const d = level.doors.find((x) => x.id === door.id);
       if (d) d.type = v;
     }))),
+    el('div', { class: 'actions' }, el('button', { class: 'danger', onclick: () => app.deleteSelection() }, 'Delete')),
+  );
+}
+
+function linkSection(link) {
+  const type = LINK_TYPES.find((t) => t.id === link.type);
+  const edit = (label, fn) => app.commit(label, (map) => {
+    const k = map.links.find((x) => x.id === link.id);
+    if (k) fn(k, map);
+  });
+  const levels = app.map.levels.map((l, i) => ({ id: l.id, name: `${i + 1}. ${l.name}` }));
+  const range = linkRange(app.map, link);
+  const dirNames = { n: 'North', e: 'East', s: 'South', w: 'West' };
+  return section(
+    type.name,
+    (link.type === 'stairs' || link.type === 'spiral') &&
+      field(link.type === 'stairs' ? 'Climbs towards' : 'Top step faces',
+        segmented(DIRS.map((d) => ({ id: d, name: dirNames[d] })), link.dir, (v) => edit('Turn stairs', (k) => (k.dir = v)))),
+    type.span === 'multi'
+      ? el('div', { class: 'row' },
+          field('From', select(levels.slice(0, range[1]), link.from, (v) => edit('Change span', (k) => (k.from = v)))),
+          field('To', select(levels.slice(range[0] + 1), link.to, (v) => edit('Change span', (k) => (k.to = v)))))
+      : el('p', { class: 'hint' }, `Links ${levels[range[0]].name} and ${levels[range[1]].name}.`),
+    el('p', { class: 'hint' }, `${link.w} × ${link.h} squares. Drag to move.`),
     el('div', { class: 'actions' }, el('button', { class: 'danger', onclick: () => app.deleteSelection() }, 'Delete')),
   );
 }
@@ -220,6 +252,7 @@ function selectionSections() {
   if (sel.kind === 'shape') return [roomSection(), shapeSection(item)];
   if (sel.kind === 'door') return [doorSection(item)];
   if (sel.kind === 'wall') return [wallSection(item)];
+  if (sel.kind === 'link') return [linkSection(item)];
   return [];
 }
 
@@ -261,12 +294,55 @@ function mapSection() {
   );
 }
 
+function levelSection() {
+  const levels = app.map.levels;
+  const current = app.level;
+  const list = el('div', { class: 'level-list' },
+    [...levels].reverse().map((lv) => {
+      const i = levels.indexOf(lv);
+      return el('button', {
+        type: 'button', class: 'level' + (i === app.levelIndex ? ' on' : ''),
+        onclick: () => app.setLevel(i),
+      }, el('span', {}, lv.name), el('small', {}, `${i + 1}`));
+    }));
+  const add = (offset) => {
+    const index = app.levelIndex + offset;
+    app.commit('Add level', (map) => insertLevel(map, index, `Level ${map.levels.length + 1}`), { prune: false });
+    app.setLevel(index);
+  };
+  return section(
+    'Levels',
+    list,
+    field('Name', el('input', {
+      type: 'text', value: current.name,
+      onchange: (e) => app.commit('Rename level', (map, level) => (level.name = e.target.value.trim() || level.name), { prune: false }),
+    })),
+    el('div', { class: 'actions' },
+      el('button', { onclick: () => add(1), title: 'Add a level above this one' }, 'Add above'),
+      el('button', { onclick: () => add(0), title: 'Add a level below this one' }, 'Add below'),
+      el('button', {
+        class: 'danger', disabled: levels.length < 2,
+        onclick: () => {
+          if (!confirm(`Delete level "${current.name}" and everything on it?`)) return;
+          app.commit('Delete level', (map) => removeLevel(map, current.id), { prune: false });
+          app.setLevel(Math.min(app.levelIndex, app.map.levels.length - 1));
+        },
+      }, 'Delete'),
+    ),
+    app.levelIndex > 0 && checkbox('Show level below as outlines', app.showBelow, (v) => {
+      app.showBelow = v;
+      app.requestRender();
+    }),
+    el('p', { class: 'hint' }, 'PageUp / PageDown switch levels.'),
+  );
+}
+
 let panelTimer = null;
 function renderPanel() {
   panelTimer = null;
   const panel = $('panel');
   const scroll = panel.scrollTop;
-  panel.replaceChildren(toolSection(), ...selectionSections().filter(Boolean), mapSection());
+  panel.replaceChildren(toolSection(), ...selectionSections().filter(Boolean), levelSection(), mapSection());
   panel.scrollTop = scroll;
 }
 
@@ -286,7 +362,7 @@ function update(reason) {
   for (const [id, b] of toolButtons) b.classList.toggle('on', id === app.tool?.id);
   undoBtn.disabled = !app.undoStack.length;
   redoBtn.disabled = !app.redoStack.length;
-  $('doc-title').textContent = `${app.fileName || app.map.name}${app.dirty ? ' •' : ''} — ${app.setting?.name || app.map.setting}`;
+  $('doc-title').textContent = `${app.fileName || app.map.name}${app.dirty ? ' •' : ''} — ${app.setting?.name || app.map.setting} — ${app.level.name}`;
   const regions = app.geometry().rooms.regions;
   $('status-rooms').textContent = `${regions.length} rooms, ${regions.filter((r) => r.tag).length} tagged`;
   // Panels are rebuilt in a batch; typing in them is never interrupted mid-keystroke.

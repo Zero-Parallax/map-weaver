@@ -338,3 +338,25 @@ dialog menu {
   padding: 0;
   margin: 10px 0 0;
 }
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.level {
+  display: flex;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.level small {
+  color: var(--muted);
+}
+
+.level.on {
+  border-color: var(--accent);
+  background: #1f3a52;
+}
