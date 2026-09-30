@@ -86,4 +86,9 @@ hatching), grid, walls and doors. The editor and the PNG export share it.
 6. PNG export at a chosen pixels-per-square **(done)** (`src/render/export.js`, saved via
    `PUT /api/exports/<file>.png`)
 
-Phase 2: Foundry VTT export (walls, doors, one-way balcony walls, levels) and PNG asset import.
+Phase 2:
+- Foundry VTT v14 export **(done)**: `src/export/foundry.js` builds Scene data (Levels with
+  `elevation`, `background`, `visibility.levels`; walls with `c`, `levels`, `move/sight/light/sound`,
+  `dir`, `door`, `ds`). Schema checked against the v14 type definitions
+  (`@league-of-foundry-developers/foundry-vtt-types` 14.366).
+- PNG asset import with a tagging screen.

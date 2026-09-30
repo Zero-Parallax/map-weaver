@@ -117,9 +117,16 @@ async function handleApi(req, res, url) {
   if (parts[1] === 'assets' && parts.length === 2 && req.method === 'GET') return sendJson(res, 200, await listAssets());
   if (parts[1] === 'exports' && parts.length === 3 && req.method === 'PUT') {
     const name = decodeURIComponent(parts[2]);
-    if (!/^[\w\- .()]{1,120}\.png$/.test(name) || name.startsWith('.')) return sendJson(res, 400, { error: 'Bad file name' });
+    if (!/^[\w\- .()]{1,120}\.(png|json)$/.test(name) || name.startsWith('.')) return sendJson(res, 400, { error: 'Bad file name' });
     const data = await readRaw(req);
-    if (data.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') return sendJson(res, 400, { error: 'Not a PNG' });
+    if (name.endsWith('.png') && data.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') return sendJson(res, 400, { error: 'Not a PNG' });
+    if (name.endsWith('.json')) {
+      try {
+        JSON.parse(data.toString('utf8'));
+      } catch {
+        return sendJson(res, 400, { error: 'Not valid JSON' });
+      }
+    }
     await fs.mkdir(EXPORTS_DIR, { recursive: true });
     const file = path.join(EXPORTS_DIR, name);
     await fs.writeFile(file, data);

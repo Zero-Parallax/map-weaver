@@ -56,6 +56,22 @@ the building is kept or made transparent. Files go to the `exports/` folder
 (`<map>-L<n>-<level>.png`) and/or download in the browser. Every level has the same size, so
 they line up.
 
+## Foundry VTT (v14, built-in Scene Levels)
+
+**Foundry** in the top bar exports one scene for the whole map:
+
+- a Level per map level (elevation band from the level heights, background image, lower
+  levels visible from above);
+- walls, doors (door, secret, locked, portcullis, window; archways stay open) and, optionally,
+  walls round vision-blocking assets, each tagged with its level;
+- railings as two walls on the same line: one blocks movement both ways, the other blocks
+  sight and light only from the open side, so you can see down from a balcony but not up onto it.
+  If Foundry blocks the wrong side, tick "Flip one-way railing sight" and export again;
+- wall complexity (high / medium / low) sets how closely walls follow curves and caves.
+
+Files land in `exports/`. Copy the PNGs into your Foundry Data folder at the path you entered,
+create a scene, right-click it and choose **Import Data**, then pick the `.foundry-scene.json`.
+
 ## Decorating
 
 Tag a room (Room type tool) and it is furnished straight away; untick "Decorate rooms when

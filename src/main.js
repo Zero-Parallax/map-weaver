@@ -3,7 +3,8 @@
 import { App } from './editor/app.js';
 import { el, field, select, segmented, checkbox } from './editor/dom.js';
 import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport } from './io/api.js';
-import { renderLevelPng, exportSize, exportFileName, MAX_SIDE } from './render/export.js';
+import { renderLevelPng, exportSize, exportFileName, slug, MAX_SIDE } from './render/export.js';
+import { buildFoundryScene, COMPLEXITY } from './export/foundry.js';
 import { OPEN_MODES } from './render/renderer.js';
 import { loadMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
 import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
@@ -188,6 +189,84 @@ function exportDialog() {
   return dialog;
 }
 
+// ---- Foundry export --------------------------------------------------------
+
+const FOUNDRY_KEY = 'map-weaver.foundry';
+const foundryOpts = { pps: 100, folder: 'worlds/my-world/map-weaver/', complexity: 'medium', assetWalls: true, flipOneWay: false };
+try {
+  Object.assign(foundryOpts, JSON.parse(localStorage.getItem(FOUNDRY_KEY) || '{}'));
+} catch {
+  // Remembered options are a convenience only.
+}
+
+function foundryDialog() {
+  const dialog = el('dialog', { class: 'export-dialog' });
+  const status = el('div', { class: 'hint' });
+  const remember = () => {
+    try {
+      localStorage.setItem(FOUNDRY_KEY, JSON.stringify(foundryOpts));
+    } catch {
+      // ignore
+    }
+  };
+  const go = el('button', { type: 'button', class: 'primary', onclick: async () => {
+    go.disabled = true;
+    remember();
+    const map = app.map;
+    const folder = foundryOpts.folder.replace(/\\/g, '/').replace(/\/?$/, '/');
+    const files = map.levels.map((_, i) => exportFileName(map, i));
+    try {
+      for (let i = 0; i < map.levels.length; i++) {
+        status.textContent = `Rendering ${map.levels[i].name}…`;
+        // Openings are transparent so Foundry shows the level below; upper levels are
+        // transparent outside the building too.
+        const blob = await renderLevelPng({
+          map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv), pxPerSquare: foundryOpts.pps,
+          openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent',
+        });
+        await saveExport(files[i], blob);
+      }
+      const scene = buildFoundryScene(map, {
+        geometry: (lv) => app.geometry(lv), imagePath: (i) => folder + files[i], pps: foundryOpts.pps,
+        complexity: foundryOpts.complexity, assetWalls: foundryOpts.assetWalls, resolve: (pl) => assets.resolve(pl), flipOneWay: foundryOpts.flipOneWay,
+      });
+      const jsonName = `${slug(map.name)}.foundry-scene.json`;
+      await saveExport(jsonName, new Blob([JSON.stringify(scene, null, 1)], { type: 'application/json' }));
+      status.replaceChildren(
+        el('p', {}, `Done: ${scene.levels.length} levels, ${scene.walls.length} walls. Files are in the exports folder.`),
+        el('ol', {},
+          el('li', {}, 'Copy ', el('strong', {}, files.join(', ')), ' into your Foundry Data folder at ', el('code', {}, folder)),
+          el('li', {}, 'In Foundry, create a scene, right-click it in the Scenes sidebar and choose Import Data.'),
+          el('li', {}, 'Pick ', el('code', {}, `exports/${jsonName}`), '.')),
+      );
+    } catch (err) {
+      status.textContent = `Export failed: ${err.message}`;
+    } finally {
+      go.disabled = false;
+    }
+  } }, 'Export for Foundry');
+  const { width, height } = exportSize(app.map, foundryOpts.pps);
+  dialog.append(
+    el('h2', {}, 'Export to Foundry VTT v14'),
+    el('p', { class: 'hint' }, `One scene with ${app.map.levels.length} level${app.map.levels.length > 1 ? 's' : ''}: a background image per level and walls, doors and railings tagged with their level.`),
+    field('Pixels per square (Foundry grid size)', el('input', {
+      type: 'number', min: 50, max: 400, value: foundryOpts.pps,
+      onchange: (e) => (foundryOpts.pps = Math.max(50, Math.min(400, Math.round(+e.target.value) || 100))),
+    }), `${width} × ${height} px at the current setting.`),
+    field('Image folder inside Foundry Data', el('input', { type: 'text', value: foundryOpts.folder, onchange: (e) => (foundryOpts.folder = e.target.value.trim()) }),
+      'Where you will copy the PNGs, e.g. worlds/my-world/maps/'),
+    field('Wall complexity', select(Object.entries(COMPLEXITY).map(([id, c]) => ({ id, name: c.name })), foundryOpts.complexity, (v) => (foundryOpts.complexity = v)),
+      'How closely walls follow curves and cave outlines.'),
+    checkbox('Walls round pillars, statues and other vision-blocking assets', foundryOpts.assetWalls, (v) => (foundryOpts.assetWalls = v)),
+    checkbox('Flip one-way railing sight (if Foundry blocks the wrong side)', foundryOpts.flipOneWay, (v) => (foundryOpts.flipOneWay = v)),
+    status,
+    el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, 'Close'), go),
+  );
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  dialog.showModal();
+}
+
 $('file-buttons').append(
   el('button', { onclick: () => confirmDiscard() && app.newMap(app.map.setting), title: 'New map' }, 'New'),
   el('button', { onclick: openDialog, title: 'Open (Ctrl+O)' }, 'Open'),
@@ -196,6 +275,7 @@ $('file-buttons').append(
   el('button', { onclick: download, title: 'Download the map file' }, 'Download'),
   el('button', { onclick: importFile, title: 'Load a map file from disk' }, 'Import'),
   el('button', { onclick: () => exportDialog(), title: 'Export levels as PNG images (Ctrl+E)' }, 'Export PNG'),
+  el('button', { onclick: () => foundryDialog(), title: 'Export a Foundry VTT v14 scene with levels and walls' }, 'Foundry'),
 );
 const undoBtn = el('button', { onclick: () => app.undo(), title: 'Undo (Ctrl+Z)' }, 'Undo');
 const redoBtn = el('button', { onclick: () => app.redo(), title: 'Redo (Ctrl+Y)' }, 'Redo');

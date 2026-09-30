@@ -25,7 +25,8 @@ export async function saveMapFile(name, text) {
 }
 
 export async function saveExport(name, blob) {
-  return json(await fetch('/api/exports/' + encodeURIComponent(name), { method: 'PUT', headers: { 'Content-Type': 'image/png' }, body: blob }));
+  const type = name.endsWith('.json') ? 'application/json' : 'image/png';
+  return json(await fetch('/api/exports/' + encodeURIComponent(name), { method: 'PUT', headers: { 'Content-Type': type }, body: blob }));
 }
 
 /** Settings catalog: {styles, settings: Map(id -> setting)}. */
