@@ -3,7 +3,7 @@
 
 import { runGenerator } from './generators.js';
 import { assetSvg, recolour } from './svg.js';
-import { suitsRoom } from './meta.js';
+import { suitsRoom, ASSET_ALIASES } from './meta.js';
 
 export class AssetLibrary {
   constructor() {
@@ -45,7 +45,7 @@ export class AssetLibrary {
   }
 
   get(id) {
-    return this.assets.get(id)?.meta || null;
+    return (this.assets.get(id) || this.assets.get(ASSET_ALIASES[id]))?.meta || null;
   }
 
   forSetting(settingId, roomType = null) {

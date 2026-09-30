@@ -23,6 +23,18 @@ for (const { meta, drawing, folder } of assets) {
   await fs.writeFile(path.join(dir, `${meta.id}.svg`), assetSvg(meta, drawing));
   for (const s of meta.settings) counts[s] = (counts[s] || 0) + 1;
 }
+// Remove starter files that are no longer defined (your own files live elsewhere, e.g. imported/).
+for (const folder of ['classic', 'common', 'fantasy', 'scifi']) {
+  const dir = path.join(ROOT, 'assets', folder);
+  const files = await fs.readdir(dir).catch(() => []);
+  for (const f of files) {
+    if (f.endsWith('.svg') && !seen.has(f.slice(0, -4))) {
+      await fs.rm(path.join(dir, f));
+      console.log(`Removed ${folder}/${f}`);
+    }
+  }
+}
+
 // Index for when the app is hosted as plain files, without serve.js to list the folder.
 const index = assets.map(({ meta, folder }) => ({ path: `assets/${folder}/${meta.id}.svg`, meta: normalizeMeta(meta).meta }));
 await fs.writeFile(path.join(ROOT, 'assets', 'index.json'), JSON.stringify(index) + '\n');

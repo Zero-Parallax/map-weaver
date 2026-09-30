@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Console</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"console","name":"Console","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["bridge","engine-room","lab","med-bay","airlock","command-centre","security","server-room","cloning-lab"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":4,"tags":[],"generator":{"id":"console","params":{"len":2},"sizes":{"len":[1,4]}}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"console","name":"Console","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["bridge","engine-room","lab","med-bay","airlock","command-centre","security","server-room","cloning-lab","corridor","crew-quarters","cargo-bay","armoury","detention","hangar","market","landing-pad"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":4,"tags":[],"generator":{"id":"console","params":{"len":2},"sizes":{"len":[1,4]}}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}

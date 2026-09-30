@@ -20,6 +20,29 @@
 // }
 
 export const PLACEMENTS = ['wall', 'corner', 'centre', 'door', 'balcony', 'free'];
+
+/** Starter assets that were merged into another, so older maps still show something. */
+export const ASSET_ALIASES = {
+  'nav-station': 'console',
+  'comms-station': 'console',
+  'wall-display': 'console',
+  terminal: 'console',
+  'food-dispenser': 'kitchenette',
+  'crew-locker': 'locker',
+  'seed-rack': 'locker',
+  'tool-wall': 'locker',
+  'eva-suit': 'armour-rack',
+  'restraint-chair': 'pilot-seat',
+  'parts-bin': 'goods-bin',
+  'growth-pod': 'med-bed',
+  'cooling-unit': 'turbine',
+  beacon: 'landing-lights',
+  'waiting-bench': 'sofa',
+  'side-plant': 'grow-tower',
+  'scroll-shelf': 'bookshelf',
+  bust: 'statue',
+  bucket: 'barrel',
+};
 export const LAYERS = ['floor', 'object', 'overhead'];
 export const SIDES = ['n', 'e', 's', 'w'];
 

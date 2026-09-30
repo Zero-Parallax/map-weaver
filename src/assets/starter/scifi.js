@@ -20,7 +20,7 @@ function lights(g, x, y, cols, rows, gap = 10) {
 export default function define({ A, G }) {
   // ---- ship basics ---------------------------------------------------------
 
-  G('console', 'Console', S, 'console', { len: 2 }, { placement: 'wall', roomTypes: ['bridge', 'engine-room', 'lab', 'med-bay', 'airlock', 'command-centre', 'security', 'server-room', 'cloning-lab'], max: 4, weight: 3 }, { len: [1, 4] });
+  G('console', 'Console', S, 'console', { len: 2 }, { placement: 'wall', roomTypes: ['bridge', 'engine-room', 'lab', 'med-bay', 'airlock', 'command-centre', 'security', 'server-room', 'cloning-lab', 'corridor', 'crew-quarters', 'cargo-bay', 'armoury', 'detention', 'hangar', 'market', 'landing-pad'], max: 4, weight: 3 }, { len: [1, 4] });
 
   A('captain-chair', "Captain's chair", S, [1, 1], { placement: 'centre', roomTypes: ['bridge', 'command-centre'], min: 1, max: 1 }, (g) => {
     g.chamfer(4, 4, 92, 92, 20, 's');
@@ -32,9 +32,9 @@ export default function define({ A, G }) {
     g.circle(83, 46, 3, 'p');
   });
 
-  A('pilot-seat', 'Pilot seat', S, [1, 1], { placement: 'free', blocksMovement: false, roomTypes: ['bridge', 'command-centre'], max: 4 }, (g) => {
-    seat(g, 50, 56, 's', 48);
-    screen(g, 26, 6, 48, 16, 'bars');
+  A('pilot-seat', 'Pilot seat', S, [1, 1], { placement: 'free', blocksMovement: false, roomTypes: ['bridge', 'command-centre', 'detention', 'security', 'cloning-lab'], max: 4 }, (g) => {
+    screen(g, 14, 4, 72, 22, 'bars');
+    seat(g, 50, 62, 's', 62);
   });
 
   A('holo-table', 'Holo table', S, [2, 2], { placement: 'centre', roomTypes: ['bridge', 'lab', 'armoury', 'command-centre'], max: 1 }, (g) => {
@@ -44,13 +44,6 @@ export default function define({ A, G }) {
     g.circle(100, 100, 36, 'pl');
     g.lines([[100, 36, 100, 164], [36, 100, 164, 100]], 'pl');
     g.star(100, 100, 14, 4, 5, 'p');
-  });
-
-  A('nav-station', 'Nav station', S, [2, 1], { placement: 'wall', roomTypes: ['bridge', 'command-centre'], max: 2 }, (g) => {
-    g.chamfer(4, 4, 192, 64, 16, 's');
-    screen(g, 14, 10, 60, 50, 'radar');
-    screen(g, 84, 10, 100, 26, 'bars');
-    buttons(g, 84, 50, 100, 7);
   });
 
   A('med-bed', 'Med bed', S, [1, 2], { placement: 'wall', roomTypes: ['med-bay', 'clinic', 'cloning-lab'], max: 6, weight: 3 }, (g) => {
@@ -75,7 +68,7 @@ export default function define({ A, G }) {
     g.rect(31, 23, 38, 16, 'ko');
   });
 
-  A('locker', 'Storage locker', S, [2, 1], { placement: 'wall', roomTypes: ['crew-quarters', 'cargo-bay', 'airlock', 'armoury', 'engine-room', 'hangar', 'workshop'], max: 4, weight: 2 }, (g) => {
+  A('locker', 'Storage locker', S, [2, 1], { placement: 'wall', roomTypes: ['crew-quarters', 'cargo-bay', 'airlock', 'armoury', 'engine-room', 'hangar', 'workshop', 'apartment', 'hydroponics-bay', 'lab'], max: 4, weight: 2 }, (g) => {
     g.chamfer(4, 4, 192, 56, 10, 's');
     for (let i = 0; i < 4; i++) {
       g.rect(12 + i * 46, 10, 38, 44, 'o', 4);
@@ -92,19 +85,12 @@ export default function define({ A, G }) {
     g.rect(172, 16, 16, 38, 'o', 4);
   });
 
-  A('armour-rack', 'Armour rack', S, [2, 1], { placement: 'wall', roomTypes: ['armoury', 'airlock', 'security'], max: 2 }, (g) => {
+  A('armour-rack', 'Armour rack', S, [2, 1], { placement: 'wall', roomTypes: ['armoury', 'airlock', 'security', 'hangar'], max: 2 }, (g) => {
     g.rect(4, 4, 192, 10, 'ko', 3);
     for (const x of [52, 148]) {
       figure(g, x, 46, 1.1, 's');
       g.rect(x - 11, 38, 22, 10, 'ko', 4); // visor
     }
-  });
-
-  A('eva-suit', 'EVA suit locker', S, [1, 1], { placement: 'wall', roomTypes: ['airlock', 'hangar'], min: 1, max: 4 }, (g) => {
-    g.chamfer(4, 4, 92, 80, 14, 's');
-    figure(g, 50, 40, 0.95, 'o');
-    g.circle(50, 40, 13, 'ko');
-    g.rect(40, 36, 20, 7, 'p', 3);
   });
 
   G('cargo-crate', 'Cargo crate', S, 'cargo', { w: 1, h: 1, style: 'container' }, { placement: 'corner', roomTypes: ['cargo-bay', 'engine-room', 'airlock', 'corridor', 'hangar', 'market', 'landing-pad', 'workshop'], max: 8, weight: 3 }, { w: [1, 2], h: [1, 2] });
@@ -133,7 +119,7 @@ export default function define({ A, G }) {
     g.lines(spokes, 'pl');
   });
 
-  A('turbine', 'Engine turbine', S, [2, 2], { placement: 'wall', roomTypes: ['engine-room'], max: 2 }, (g) => {
+  A('turbine', 'Engine turbine', S, [2, 2], { placement: 'wall', roomTypes: ['engine-room', 'server-room'], max: 2 }, (g) => {
     g.chamfer(6, 6, 188, 188, 34, 's');
     g.circle(100, 100, 80, 'ko');
     for (let i = 0; i < 10; i++) {
@@ -170,23 +156,7 @@ export default function define({ A, G }) {
     g.line(14, 96, 86, 96, 't');
   });
 
-  A('crew-locker', 'Crew locker', S, [1, 1], { placement: 'wall', roomTypes: ['crew-quarters', 'apartment'], max: 4 }, (g) => {
-    g.chamfer(8, 4, 84, 56, 10, 's');
-    g.rect(14, 10, 34, 44, 'o', 4);
-    g.rect(52, 10, 34, 44, 'o', 4);
-    g.rect(40, 26, 5, 12, 'ko');
-    g.rect(55, 26, 5, 12, 'ko');
-    g.circle(31, 20, 4, 'k');
-  });
-
   G('mess-table', 'Mess table', S, 'table', { w: 3, h: 1, chairs: true, style: 'metal' }, { placement: 'centre', roomTypes: ['mess-hall', 'crew-quarters', 'cantina', 'apartment'], max: 3, weight: 2 }, { w: [2, 4], h: [1, 2] });
-
-  A('food-dispenser', 'Food dispenser', S, [1, 1], { placement: 'wall', roomTypes: ['mess-hall', 'cantina', 'apartment'], min: 1, max: 2 }, (g) => {
-    g.chamfer(8, 4, 84, 66, 12, 's');
-    screen(g, 18, 10, 64, 22, 'bars');
-    g.rect(28, 40, 44, 22, 'ko', 4);
-    g.circle(50, 51, 7, 'o');
-  });
 
   G('lab-bench', 'Lab bench', S, 'counter', { len: 3, kind: 'lab' }, { placement: 'wall', roomTypes: ['lab', 'med-bay', 'cloning-lab', 'clinic'], max: 3, weight: 2 }, { len: [2, 5] });
 
@@ -196,12 +166,6 @@ export default function define({ A, G }) {
     g.path('M40 36Q56 28 62 44Q70 60 52 66Q36 70 40 56Q46 48 40 36Z', 'k'); // the specimen
     g.circle(66, 30, 4, 'o');
     g.circle(30, 62, 3, 'o');
-  });
-
-  A('terminal', 'Terminal', S, [1, 1], { placement: 'wall', roomTypes: ['corridor', 'crew-quarters', 'cargo-bay', 'armoury', 'airlock', 'security', 'detention', 'server-room', 'hangar', 'market'], max: 2 }, (g) => {
-    g.chamfer(12, 4, 76, 50, 12, 's');
-    screen(g, 20, 10, 60, 26, 'bars');
-    buttons(g, 20, 45, 60, 5);
   });
 
   A('vent', 'Floor vent', S, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['corridor', 'engine-room', 'cargo-bay', 'crew-quarters', 'server-room', 'detention'], max: 2 }, (g) => {
@@ -214,7 +178,7 @@ export default function define({ A, G }) {
     hazard(g, 4, 22, 192, 56, 22);
   });
 
-  A('sofa', 'Lounge seat', S, [2, 1], { placement: 'wall', roomTypes: ['crew-quarters', 'mess-hall', 'apartment', 'cantina'], max: 2 }, (g) => {
+  A('sofa', 'Lounge seat', S, [2, 1], { placement: 'wall', roomTypes: ['crew-quarters', 'mess-hall', 'apartment', 'cantina', 'clinic', 'corridor', 'landing-pad', 'security'], max: 2 }, (g) => {
     g.chamfer(4, 8, 192, 80, 18, 'ko');
     g.rect(16, 30, 82, 50, 's', 10);
     g.rect(102, 30, 82, 50, 's', 10);
@@ -227,9 +191,12 @@ export default function define({ A, G }) {
   });
 
   A('charging-pad', 'Drone pad', S, [1, 1], { placement: 'corner', layer: 'floor', blocksMovement: false, roomTypes: ['cargo-bay', 'engine-room', 'lab', 'hangar', 'workshop'], max: 2 }, (g) => {
-    g.circle(50, 50, 40, 's');
-    g.circle(50, 50, 30, 'd');
-    g.poly([[50, 28], [68, 58], [32, 58]], 'ko');
+    g.chamfer(4, 4, 92, 92, 16, 's');
+    g.chamfer(12, 12, 76, 76, 12, 'd');
+    // A quad drone parked on the pad.
+    g.lines([[30, 30, 70, 70], [70, 30, 30, 70]], 'l');
+    for (const [x, y] of [[30, 30], [70, 30], [30, 70], [70, 70]]) g.circle(x, y, 12, 'o');
+    g.rect(40, 40, 20, 20, 'ko', 5);
   });
 
   A('observation-seat', 'Observation bench', S, [2, 1], { placement: 'balcony', roomTypes: ['*'], max: 2 }, (g) => {
@@ -293,29 +260,7 @@ export default function define({ A, G }) {
     g.rect(160, 185, 80, 30, 'ko');
   });
 
-  A('beacon', 'Beacon', S, [1, 1], { placement: 'corner', roomTypes: ['landing-pad', 'hangar', 'mine'], max: 4 }, (g) => {
-    g.chamfer(20, 20, 60, 60, 14, 's');
-    g.circle(50, 50, 18, 'ko');
-    g.star(50, 50, 14, 4, 5, 'p');
-  });
-
   // ---- command, security, detention -------------------------------------------
-
-  A('wall-display', 'Wall display', S, [3, 1], { placement: 'wall', roomTypes: ['command-centre', 'security', 'bridge', 'apartment', 'cantina'], max: 2 }, (g) => {
-    g.rect(4, 2, 292, 34, 's', 6);
-    screen(g, 12, 6, 88, 26, 'graph');
-    screen(g, 106, 6, 88, 26, 'radar');
-    screen(g, 200, 6, 88, 26, 'bars');
-  });
-
-  A('comms-station', 'Comms station', S, [2, 1], { placement: 'wall', roomTypes: ['command-centre', 'bridge', 'security', 'landing-pad'], max: 2 }, (g) => {
-    g.chamfer(4, 4, 192, 62, 14, 's');
-    g.circle(44, 34, 24, 'ko');
-    g.path('M30 40Q44 16 58 40', 'pl');
-    g.circle(44, 40, 4, 'p');
-    screen(g, 80, 12, 104, 26, 'bars');
-    buttons(g, 80, 52, 104, 8);
-  });
 
   A('map-table', 'Tactical map table', S, [2, 3], { placement: 'centre', roomTypes: ['command-centre', 'security'], max: 1 }, (g) => {
     g.chamfer(6, 6, 188, 288, 30, 's');
@@ -363,15 +308,9 @@ export default function define({ A, G }) {
     g.path('M34 26Q50 44 66 26M30 40Q50 62 70 40', 'd');
   });
 
-  A('restraint-chair', 'Restraint chair', S, [1, 1], { placement: 'centre', roomTypes: ['detention', 'security', 'cloning-lab'], max: 1 }, (g) => {
-    g.chamfer(18, 10, 64, 80, 14, 's');
-    g.rect(18, 10, 64, 18, 'ko', 8);
-    for (const [x, y] of [[14, 50], [86, 50], [36, 88], [64, 88]]) g.rect(x - 7, y - 5, 14, 10, 'ko', 3);
-  });
-
   // ---- hydroponics --------------------------------------------------------
 
-  A('grow-tower', 'Grow tower', S, [1, 1], { placement: 'free', roomTypes: ['hydroponics-bay', 'apartment', 'market'], max: 6, weight: 2 }, (g) => {
+  A('grow-tower', 'Grow tower', S, [1, 1], { placement: 'free', roomTypes: ['hydroponics-bay', 'apartment', 'market', 'cantina', 'clinic', 'command-centre'], max: 6, weight: 2 }, (g) => {
     g.circle(50, 50, 38, 'ko');
     leaves(g, 50, 50, 64, 8, 'o');
     g.circle(50, 50, 10, 'p');
@@ -391,14 +330,6 @@ export default function define({ A, G }) {
     g.rect(78, 42, 18, 16, 'ko', 3);
   });
 
-  A('seed-rack', 'Seed rack', S, [2, 1], { placement: 'wall', roomTypes: ['hydroponics-bay', 'lab', 'market'], max: 2 }, (g) => {
-    g.chamfer(4, 4, 192, 52, 10, 's');
-    for (let i = 0; i < 8; i++) {
-      g.rect(14 + i * 22, 12, 16, 34, i % 3 ? 'o' : 'ko', 3);
-      g.circle(22 + i * 22, 22, 3, i % 3 ? 'k' : 'p');
-    }
-  });
-
   // ---- server room --------------------------------------------------------
 
   A('server-rack', 'Server rack', S, [1, 2], { placement: 'wall', blocksVision: true, roomTypes: ['server-room', 'command-centre', 'security', 'lab'], max: 8, weight: 3 }, (g) => {
@@ -408,16 +339,6 @@ export default function define({ A, G }) {
       lights(g, 22, y + 8, 5, 1, 9);
       g.rect(70, y + 4, 10, 8, 'ko', 2);
     }
-  });
-
-  A('cooling-unit', 'Cooling unit', S, [1, 1], { placement: 'wall', roomTypes: ['server-room', 'engine-room', 'hangar'], max: 3 }, (g) => {
-    g.chamfer(6, 4, 88, 72, 12, 's');
-    g.circle(50, 40, 28, 'ko');
-    for (let i = 0; i < 6; i++) {
-      const a = (i * Math.PI) / 3;
-      g.poly([[50, 40], [50 + Math.cos(a) * 24, 40 + Math.sin(a) * 24], [50 + Math.cos(a + 0.5) * 24, 40 + Math.sin(a + 0.5) * 24]], 'o');
-    }
-    g.circle(50, 40, 6, 'p');
   });
 
   A('data-core', 'Data core', S, [2, 2], { placement: 'centre', blocksVision: true, roomTypes: ['server-room', 'alien-ruins', 'command-centre'], min: 1, max: 1 }, (g) => {
@@ -454,15 +375,6 @@ export default function define({ A, G }) {
     g.poly([[76, 8], [92, 14], [86, 30], [72, 26]], 'ko');
   });
 
-  A('parts-bin', 'Parts bin', S, [1, 1], { placement: 'corner', roomTypes: ['workshop', 'hangar', 'market', 'mine'], max: 4, weight: 2 }, (g) => {
-    g.chamfer(8, 8, 84, 84, 14, 's');
-    g.chamfer(18, 18, 64, 64, 10, 'm');
-    for (const [x, y] of [[34, 34], [60, 40], [42, 62], [66, 66]]) g.star(x, y, 9, 6, 5, 'o');
-    g.circle(50, 50, 5, 'k');
-  });
-
-  G('tool-wall', 'Tool wall', S, 'shelf', { len: 2, kind: 'parts' }, { placement: 'wall', roomTypes: ['workshop', 'hangar', 'engine-room'], max: 3 }, { len: [1, 4] });
-
   A('welding-station', 'Welding station', S, [1, 1], { placement: 'wall', roomTypes: ['workshop', 'hangar'], max: 1 }, (g) => {
     g.chamfer(8, 4, 84, 44, 10, 's');
     g.circle(28, 26, 12, 'ko');
@@ -476,8 +388,8 @@ export default function define({ A, G }) {
   G('cantina-bar', 'Cantina bar', S, 'counter', { len: 4, kind: 'cantina' }, { placement: 'wall', roomTypes: ['cantina'], min: 1, max: 1 }, { len: [2, 6] });
 
   A('bar-stool', 'Bar stool', S, [1, 1], { placement: 'free', blocksMovement: false, roomTypes: ['cantina', 'mess-hall'], max: 6 }, (g) => {
-    stool(g, 50, 50, 17);
-    g.circle(50, 50, 22, 't');
+    g.circle(50, 50, 34, 'ko');
+    stool(g, 50, 50, 26);
   });
 
   G('cantina-table', 'Round table', S, 'table', { w: 1, h: 1, chairs: true, round: true, style: 'metal' }, { placement: 'centre', roomTypes: ['cantina', 'market', 'mess-hall'], max: 4, weight: 2 }, { w: [1, 2], h: [1, 2] });
@@ -524,7 +436,7 @@ export default function define({ A, G }) {
     g.rect(16, 58, 46, 10, 'o', 3);
   });
 
-  A('goods-bin', 'Goods bin', S, [1, 1], { placement: 'free', roomTypes: ['market', 'cargo-bay', 'hydroponics-bay'], max: 4, weight: 2 }, (g) => {
+  A('goods-bin', 'Goods bin', S, [1, 1], { placement: 'free', roomTypes: ['market', 'cargo-bay', 'hydroponics-bay', 'workshop', 'hangar', 'mine'], max: 4, weight: 2 }, (g) => {
     g.chamfer(8, 8, 84, 84, 16, 'ko');
     g.chamfer(16, 16, 68, 68, 12, 's');
     for (const [x, y, r] of [[36, 38, 12], [62, 36, 11], [40, 64, 11], [66, 62, 12], [50, 50, 10]]) g.circle(x, y, r, 'o');
@@ -552,23 +464,13 @@ export default function define({ A, G }) {
     g.path('M60 58L100 90L140 58', 'd');
   });
 
-  A('kitchenette', 'Kitchenette', S, [2, 1], { placement: 'wall', roomTypes: ['apartment', 'mess-hall', 'crew-quarters'], max: 1 }, (g) => {
+  A('kitchenette', 'Kitchenette', S, [2, 1], { placement: 'wall', roomTypes: ['apartment', 'mess-hall', 'crew-quarters', 'cantina'], min: 1, max: 1 }, (g) => {
     g.chamfer(4, 4, 192, 60, 12, 's');
     g.circle(36, 30, 14, 'ko');
     g.circle(36, 30, 6, 'pl');
     g.circle(76, 30, 14, 'ko');
     g.chamfer(110, 12, 76, 38, 10, 'm'); // sink
     g.circle(148, 31, 5, 'k');
-  });
-
-  A('side-plant', 'Planter', S, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['apartment', 'cantina', 'clinic', 'command-centre', 'market'], max: 2 }, (g) => {
-    g.star(50, 50, 26, 6, 26, 'ko', Math.PI / 6);
-    leaves(g, 50, 50, 44, 7, 'o');
-  });
-
-  A('waiting-bench', 'Waiting bench', S, [2, 1], { placement: 'wall', roomTypes: ['clinic', 'corridor', 'landing-pad', 'security'], max: 2 }, (g) => {
-    g.rect(4, 6, 192, 12, 'ko', 4);
-    for (let i = 0; i < 3; i++) g.rect(10 + i * 62, 22, 56, 46, 's', 12);
   });
 
   // ---- mine ---------------------------------------------------------------
@@ -660,13 +562,6 @@ export default function define({ A, G }) {
     for (const a of [0.8, 2.4, 3.9, 5.5]) g.rect(50 + Math.cos(a) * 44 - 5, 50 + Math.sin(a) * 44 - 5, 10, 10, 's', 2);
   });
 
-  A('growth-pod', 'Growth pod', S, [1, 2], { placement: 'wall', blocksVision: true, roomTypes: ['cloning-lab', 'med-bay', 'lab'], max: 4, weight: 2 }, (g) => {
-    g.chamfer(6, 4, 88, 192, 30, 'ko');
-    g.chamfer(16, 24, 68, 160, 24, 'm');
-    figure(g, 50, 70, 0.75, 'o');
-    g.ellipse(50, 130, 16, 40, 'o');
-    screen(g, 26, 6, 48, 14, 'bars');
-  });
 }
 
 // Hazard-striped ring (reactor shielding).

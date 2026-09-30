@@ -8,7 +8,7 @@ export default function define({ A, G }) {
   G('bar-counter', 'Bar counter', F, 'counter', { len: 4, kind: 'bar' }, { placement: 'wall', roomTypes: ['tavern'], min: 1, max: 1 }, { len: [2, 6] });
 
   A('stool', 'Stool', F, [1, 1], { placement: 'free', blocksMovement: false, roomTypes: ['tavern', 'kitchen', 'smithy'], max: 6 }, (g) => {
-    stool(g, 50, 50, 17);
+    stool(g, 50, 50, 28);
   });
 
   G('round-table', 'Round table', F, 'table', { w: 2, h: 2, chairs: true, round: true }, { placement: 'centre', roomTypes: ['tavern', 'great-hall', 'library'], max: 4, weight: 2 }, { w: [1, 3], h: [1, 3] });
@@ -129,7 +129,6 @@ export default function define({ A, G }) {
   G('display-counter', 'Display counter', F, 'counter', { len: 3, kind: 'shop' }, { placement: 'centre', roomTypes: ['shop'], min: 1, max: 2 }, { len: [2, 5] });
   G('goods-shelf', 'Goods shelf', ['classic', 'fantasy'], 'shelf', { len: 2, kind: 'goods' }, { placement: 'wall', roomTypes: ['shop', 'cellar', 'kitchen', 'storeroom'], max: 4, weight: 2 }, { len: [1, 4] });
   G('wine-rack', 'Wine rack', F, 'shelf', { len: 2, kind: 'bottles' }, { placement: 'wall', roomTypes: ['cellar', 'tavern'], max: 3 }, { len: [1, 4] });
-  G('scroll-shelf', 'Scroll shelf', F, 'shelf', { len: 2, kind: 'scrolls' }, { placement: 'wall', roomTypes: ['library', 'temple'], max: 3 }, { len: [1, 3] });
 
   A('plant', 'Potted plant', F, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['great-hall', 'bedroom', 'shop', 'tavern', 'library'], max: 2 }, (g) => {
     g.circle(50, 50, 22, 's');
@@ -167,9 +166,4 @@ export default function define({ A, G }) {
     g.circle(100, 100, 14, 'o');
   });
 
-  // A noble's bust for halls and libraries.
-  A('bust', 'Bust on plinth', F, [1, 1], { placement: 'corner', roomTypes: ['great-hall', 'library', 'shop'], max: 2 }, (g) => {
-    g.rect(14, 14, 72, 72, 's', 4);
-    figure(g, 50, 46, 0.8, 'o');
-  });
 }

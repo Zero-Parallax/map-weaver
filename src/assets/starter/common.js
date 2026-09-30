@@ -24,7 +24,7 @@ export default function define({ A, G }) {
     g.circle(50, 65, 3, 'p');
   });
 
-  A('barrel', 'Barrel', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'kitchen', 'tavern', 'barracks', 'smithy'], max: 4, weight: 2 }, (g) => {
+  A('barrel', 'Barrel', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'kitchen', 'tavern', 'barracks', 'smithy', 'prison'], max: 4, weight: 2 }, (g) => {
     g.circle(50, 50, 39, 'o');
     g.circle(50, 50, 32, 'l');
     const chord = (x) => Math.sqrt(32 * 32 - (x - 50) ** 2);
@@ -62,7 +62,7 @@ export default function define({ A, G }) {
     g.lines([[70, 124, 84, 124], [70, 140, 84, 140], [70, 156, 84, 156], [70, 172, 84, 172]], 'l');
   });
 
-  G('bookshelf', 'Bookshelf', CF, 'shelf', { len: 2, kind: 'books' }, { placement: 'wall', roomTypes: ['library', 'bedroom', 'throne-room', 'shop'], max: 6, weight: 3 }, { len: [1, 4] });
+  G('bookshelf', 'Bookshelf', CF, 'shelf', { len: 2, kind: 'books' }, { placement: 'wall', roomTypes: ['library', 'bedroom', 'throne-room', 'shop', 'temple'], max: 6, weight: 3 }, { len: [1, 4] });
   G('table-chairs', 'Table with chairs', CF, 'table', { w: 2, h: 1, chairs: true }, { placement: 'centre', roomTypes: ['barracks', 'library', 'tavern', 'kitchen', 'great-hall', 'chamber'], max: 3, weight: 2 }, { w: [1, 4], h: [1, 2] });
   G('table', 'Table', CF, 'table', { w: 2, h: 1, chairs: false }, { placement: 'free', roomTypes: ['storeroom', 'kitchen', 'smithy', 'library', 'shop', 'chamber'], max: 2 }, { w: [1, 3], h: [1, 2] });
   G('rug', 'Rug', CF, 'rug', { w: 2, h: 3, pattern: 'border' }, { placement: 'centre', layer: 'floor', blocksMovement: false, roomTypes: ['throne-room', 'bedroom', 'library', 'great-hall', 'temple'], max: 1 }, { w: [2, 4], h: [2, 5] });
@@ -79,7 +79,7 @@ export default function define({ A, G }) {
     g.circle(50, 50, 10, 'ko');
   });
 
-  A('statue', 'Statue', CF, [1, 1], { placement: 'corner', blocksVision: true, roomTypes: ['throne-room', 'temple', 'crypt', 'great-hall', 'chamber'], max: 4 }, (g) => {
+  A('statue', 'Statue', CF, [1, 1], { placement: 'corner', blocksVision: true, roomTypes: ['throne-room', 'temple', 'crypt', 'great-hall', 'chamber', 'library', 'shop'], max: 4 }, (g) => {
     g.rect(8, 8, 84, 84, 's', 4);
     g.rect(16, 16, 68, 68, 'l', 2);
     figure(g, 50, 46, 0.95, 'o');
@@ -224,12 +224,6 @@ export default function define({ A, G }) {
       s.push([x, y, x + Math.cos(a) * 16, y + Math.sin(a) * 16]);
     }
     g.lines(s, 't');
-  });
-
-  A('bucket', 'Bucket', CF, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['prison', 'kitchen', 'smithy', 'cellar'], max: 1 }, (g) => {
-    g.circle(50, 50, 18, 'o');
-    g.circle(50, 50, 12, 'm');
-    g.path('M32 50Q50 18 68 50', 'l');
   });
 
   A('pit', 'Pit', C, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['corridor', 'chamber', 'prison'], max: 1, tags: ['trap'] }, (g) => {

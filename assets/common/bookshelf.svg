@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Bookshelf</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"bookshelf","name":"Bookshelf","settings":["classic","fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["library","bedroom","throne-room","shop"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":6,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"books"},"sizes":{"len":[1,4]}}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"bookshelf","name":"Bookshelf","settings":["classic","fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["library","bedroom","throne-room","shop","temple"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":6,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"books"},"sizes":{"len":[1,4]}}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}

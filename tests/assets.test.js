@@ -119,3 +119,13 @@ test('assets/index.json lists every starter asset (for hosting without the serve
     assert.deepEqual(entry.meta, normalizeMeta(meta).meta);
   }
 });
+
+import { ASSET_ALIASES } from '../src/assets/meta.js';
+
+test('merged asset ids point at assets that exist', () => {
+  const ids = new Set(buildStarterAssets().map(({ meta }) => meta.id));
+  for (const [from, to] of Object.entries(ASSET_ALIASES)) {
+    assert.ok(!ids.has(from), `${from} still exists`);
+    assert.ok(ids.has(to), `${from} -> ${to} is missing`);
+  }
+});
