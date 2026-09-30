@@ -4,6 +4,7 @@ import { el, segmented, field } from '../dom.js';
 import { EDGE_KINDS, insertLevel } from '../../core/model.js';
 import { LINK_TYPES, createLink } from '../../core/links.js';
 import { edgeRunAt } from '../../core/level-geometry.js';
+import { ask } from '../ask.js';
 import { polylineSegments, projectOnSegment } from '../../core/geom.js';
 
 // ---- links ---------------------------------------------------------------
@@ -96,11 +97,11 @@ export const linkTool = {
     }
     return { type: t, rect, dir, from, to };
   },
-  create(app, plan) {
+  async create(app, plan) {
     const levels = app.map.levels;
     if (plan.from < 0) return app.status('A trapdoor goes in the floor of an upper level. Add a level below first.');
     const missing = plan.to - (levels.length - 1);
-    if (missing > 0 && !confirm(`This needs ${missing} more level${missing > 1 ? 's' : ''} above. Add ${missing > 1 ? 'them' : 'it'}?`)) return;
+    if (missing > 0 && !(await ask(`This needs ${missing} more level${missing > 1 ? 's' : ''} above. Add ${missing > 1 ? 'them' : 'it'}?`, { ok: 'Add' }))) return;
     app.commit(`Add ${plan.type}`, (map) => {
       for (let i = 0; i < missing; i++) insertLevel(map, map.levels.length, `Level ${map.levels.length + 1}`);
       map.links.push(createLink(plan.type, map.levels[plan.from].id, map.levels[plan.to].id, plan.rect, plan.dir));

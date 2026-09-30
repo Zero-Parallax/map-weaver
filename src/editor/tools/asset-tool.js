@@ -5,6 +5,7 @@ import { newId } from '../../core/model.js';
 import { snapCentre, rotatedFootprint } from '../../assets/library.js';
 import { GENERATORS } from '../../assets/generators.js';
 import { openImportDialog } from '../import-dialog.js';
+import { ask } from '../ask.js';
 
 const PLACEMENT_NAMES = { wall: 'against wall', corner: 'corner', centre: 'centre', door: 'near door', balcony: 'balcony edge', free: 'anywhere' };
 
@@ -100,7 +101,7 @@ export const assetTool = {
           imported && el('div', { class: 'actions' },
             el('button', { type: 'button', onclick: () => importArt({ meta: chosen, path: app.assets.entry(chosen.id).path }) }, 'Edit tags'),
             el('button', { type: 'button', class: 'danger', onclick: async () => {
-              if (!confirm(`Delete "${chosen.name}" from the library? Pieces already on maps will disappear.`)) return;
+              if (!(await ask(`Delete "${chosen.name}" from the library? Pieces already on maps will disappear.`, { ok: 'Delete', danger: true }))) return;
               const file = app.assets.entry(chosen.id).path.split('/').pop();
               await fetch(`api/assets/imported/${encodeURIComponent(file)}`, { method: 'DELETE' });
               await app.assets.load();

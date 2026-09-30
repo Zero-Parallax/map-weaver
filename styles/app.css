@@ -513,7 +513,7 @@ dialog menu {
 @media (max-width: 820px) {
   body {
     grid-template-rows: auto 1fr;
-    height: 100dvh;
+    height: 100%;
   }
 
   #topbar {
@@ -626,4 +626,12 @@ dialog menu {
     min-width: 36px;
     padding: 0 6px;
   }
+}
+
+.ask-dialog {
+  width: min(420px, 92vw);
+}
+
+.ask-dialog p {
+  margin: 0 0 12px;
 }

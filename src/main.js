@@ -11,6 +11,7 @@ import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
 import { linkTool, edgeTool } from './editor/tools/level-tools.js';
 import { assetTool, sizeFields } from './editor/tools/asset-tool.js';
 import { AssetLibrary } from './assets/library.js';
+import { ask, askText, notice } from './editor/ask.js';
 import { regionAt } from './core/rooms.js';
 import { DENSITY, DEFAULT_DENSITY } from './decorator/decorate.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
@@ -46,27 +47,45 @@ app.setTool('select');
 
 // ---- top bar ---------------------------------------------------------------
 
-/** Hand the browser a file to save. */
-function downloadBlob(blob, name) {
+/**
+ * Hand the viewer a file to save. On a hosted page (claude.ai) the platform's downloads
+ * capability asks the viewer first; elsewhere a normal browser download.
+ * Resolves false if the viewer declined.
+ */
+async function downloadBlob(blob, name) {
+  const downloads = window.claude?.use ? await window.claude.use('downloads') : null;
+  if (downloads) {
+    try {
+      await downloads.save({ filename: name, data: blob });
+      return true;
+    } catch (err) {
+      if (err?.code === 'declined') return false;
+      throw new Error(err?.message || 'The download was refused.');
+    }
+  }
   const a = el('a', { href: URL.createObjectURL(blob), download: name });
   document.body.append(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  return true;
 }
 
 async function save(asNew = false) {
   if (!server) {
-    download();
-    app.dirty = false;
-    app.status('Map file downloaded. Use Open to load it again.');
+    try {
+      if (!(await download())) return;
+      app.dirty = false;
+      app.status('Map file saved. Use Open to load it again.');
+    } catch (err) {
+      await notice(`Could not save: ${err.message}`);
+    }
     return;
   }
   let name = app.fileName;
   if (!name || asNew) {
-    name = prompt('Save map as:', app.fileName || app.map.name);
+    name = await askText('Save map as:', app.fileName || app.map.name, { ok: 'Save' });
     if (!name) return;
-    name = name.trim();
   }
   try {
     const res = await saveMapFile(name, app.serialize());
@@ -74,17 +93,17 @@ async function save(asNew = false) {
     app.dirty = false;
     app.status(`Saved to ${res.path}`);
   } catch (err) {
-    alert(`Could not save: ${err.message}`);
+    await notice(`Could not save: ${err.message}`);
   }
 }
 
-function confirmDiscard() {
-  return !app.dirty || confirm('Discard unsaved changes?');
+async function confirmDiscard() {
+  return !app.dirty || ask('Discard unsaved changes?', { ok: 'Discard', danger: true });
 }
 
 async function openDialog() {
   if (!server) return importFile();
-  if (!confirmDiscard()) return;
+  if (!(await confirmDiscard())) return;
   const dialog = $('open-dialog');
   const list = $('map-list');
   list.replaceChildren(el('li', {}, 'Loading…'));
@@ -102,7 +121,7 @@ async function openDialog() {
                   app.setMap(loadMap(await loadMapFile(m.name)), m.name);
                   app.status(`Opened ${m.name}`);
                 } catch (err) {
-                  alert(`Could not open ${m.name}: ${err.message}`);
+                  await notice(`Could not open ${m.name}: ${err.message}`);
                 }
               },
             }, m.name, el('small', {}, new Date(m.modified).toLocaleString()))),
@@ -115,11 +134,11 @@ async function openDialog() {
 }
 
 function download() {
-  downloadBlob(new Blob([app.serialize()], { type: 'application/json' }), `${app.fileName || app.map.name}.map.json`);
+  return downloadBlob(new Blob([app.serialize()], { type: 'application/json' }), `${app.fileName || app.map.name}.map.json`);
 }
 
-function importFile() {
-  if (!confirmDiscard()) return;
+async function importFile() {
+  if (!(await confirmDiscard())) return;
   const input = el('input', { type: 'file', accept: '.json,application/json' });
   input.onchange = async () => {
     const file = input.files[0];
@@ -129,7 +148,7 @@ function importFile() {
       app.dirty = true;
       app.status(`Imported ${file.name}. Save to keep it in the maps folder.`);
     } catch (err) {
-      alert(`Could not import: ${err.message}`);
+      await notice(`Could not import: ${err.message}`);
     }
   };
   input.click();
@@ -165,7 +184,7 @@ function exportDialog() {
         });
         const name = exportFileName(app.map, i);
         if (server && exportOpts.save) saved.push((await saveExport(name, blob)).path);
-        if (!server || exportOpts.download) downloadBlob(blob, name);
+        if (!server || exportOpts.download) await downloadBlob(blob, name);
       }
       status.textContent = saved.length ? `Saved: ${saved.join(', ')}` : 'Done.';
       app.status(saved.length ? `Exported to ${saved.length > 1 ? 'the exports folder' : saved[0]}` : 'Exported.');
@@ -239,7 +258,7 @@ function foundryDialog() {
           openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent',
         });
         if (server) await saveExport(files[i], blob);
-        else downloadBlob(blob, files[i]);
+        else await downloadBlob(blob, files[i]);
       }
       const scene = buildFoundryScene(map, {
         geometry: (lv) => app.geometry(lv), imagePath: (i) => folder + files[i], pps: foundryOpts.pps,
@@ -248,7 +267,7 @@ function foundryDialog() {
       const jsonName = `${slug(map.name)}.foundry-scene.json`;
       const sceneBlob = new Blob([JSON.stringify(scene, null, 1)], { type: 'application/json' });
       if (server) await saveExport(jsonName, sceneBlob);
-      else downloadBlob(sceneBlob, jsonName);
+      else await downloadBlob(sceneBlob, jsonName);
       status.replaceChildren(
         el('p', {}, `Done: ${scene.levels.length} levels, ${scene.walls.length} walls. ${server ? 'Files are in the exports folder.' : 'The files were downloaded.'}`),
         el('ol', {},
@@ -286,7 +305,7 @@ function foundryDialog() {
 
 $('file-buttons').append(
   ...[
-    el('button', { onclick: () => confirmDiscard() && app.newMap(app.map.setting), title: 'New map' }, 'New'),
+    el('button', { onclick: async () => (await confirmDiscard()) && app.newMap(app.map.setting), title: 'New map' }, 'New'),
     el('button', { onclick: openDialog, title: 'Open (Ctrl+O)' }, 'Open'),
     el('button', { onclick: () => save(), title: server ? 'Save (Ctrl+S)' : 'Download the map file (Ctrl+S)' }, 'Save'),
     server && el('button', { onclick: () => save(true) }, 'Save as'),
@@ -521,11 +540,12 @@ function mapSection() {
       type: 'text', value: m.name,
       onchange: (e) => app.commit('Rename', (map) => (map.name = e.target.value.trim() || 'Untitled map'), { prune: false }),
     })),
-    field('Setting', select(settings, m.setting, (v) => {
+    field('Setting', select(settings, m.setting, async (v) => {
       const s = catalog.settings.get(v);
+      const useLook = s?.defaults ? await ask(`Switch to the ${s.name} default look too?`, { ok: 'Switch look', cancel: 'Keep this look' }) : false;
       app.commit('Change setting', (map) => {
         map.setting = v;
-        if (s?.defaults && confirm(`Switch to the ${s.name} default look too?`)) Object.assign(map.style, s.defaults);
+        if (useLook) Object.assign(map.style, s.defaults);
       }, { prune: false });
     })),
     field('Palette', select(catalog.styles.palettes, m.style.palette, (v) => styleEdit('Palette', 'palette', v))),
@@ -575,8 +595,8 @@ function levelSection() {
       el('button', { onclick: () => add(0), title: 'Add a level below this one' }, 'Add below'),
       el('button', {
         class: 'danger', disabled: levels.length < 2,
-        onclick: () => {
-          if (!confirm(`Delete level "${current.name}" and everything on it?`)) return;
+        onclick: async () => {
+          if (!(await ask(`Delete level "${current.name}" and everything on it?`, { ok: 'Delete level', danger: true }))) return;
           app.commit('Delete level', (map) => removeLevel(map, current.id), { prune: false });
           app.setLevel(Math.min(app.levelIndex, app.map.levels.length - 1));
         },
