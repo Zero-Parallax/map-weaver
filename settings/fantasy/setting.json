@@ -1,0 +1,19 @@
+{
+  "id": "fantasy",
+  "name": "Fantasy",
+  "description": "Towns, taverns and keeps.",
+  "defaults": { "palette": "sepia", "shading": "hatch", "grid": "floor" },
+  "walls": { "width": 0.14, "style": "line", "band": 0.7 },
+  "roomTypes": [
+    { "id": "tavern", "name": "Tavern" },
+    { "id": "bedroom", "name": "Bedroom" },
+    { "id": "kitchen", "name": "Kitchen" },
+    { "id": "great-hall", "name": "Great hall" },
+    { "id": "shop", "name": "Shop" },
+    { "id": "smithy", "name": "Smithy" },
+    { "id": "library", "name": "Library" },
+    { "id": "temple", "name": "Temple" },
+    { "id": "cellar", "name": "Cellar" },
+    { "id": "cave", "name": "Cave" }
+  ]
+}

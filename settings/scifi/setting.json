@@ -1,0 +1,19 @@
+{
+  "id": "scifi",
+  "name": "Sci-fi",
+  "description": "Starships and stations, drawn in the same two-tone style.",
+  "defaults": { "palette": "terminal", "shading": "lines", "grid": "floor" },
+  "walls": { "width": 0.2, "style": "double", "band": 0.6 },
+  "roomTypes": [
+    { "id": "bridge", "name": "Bridge" },
+    { "id": "med-bay", "name": "Med bay" },
+    { "id": "engine-room", "name": "Engine room" },
+    { "id": "airlock", "name": "Airlock" },
+    { "id": "crew-quarters", "name": "Crew quarters" },
+    { "id": "mess-hall", "name": "Mess hall" },
+    { "id": "cargo-bay", "name": "Cargo bay" },
+    { "id": "lab", "name": "Lab" },
+    { "id": "armoury", "name": "Armoury" },
+    { "id": "corridor", "name": "Corridor" }
+  ]
+}

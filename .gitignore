@@ -1,0 +1,6 @@
+node_modules/
+maps/*
+!maps/.gitkeep
+exports/
+.DS_Store
+Thumbs.db

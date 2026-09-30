@@ -1,0 +1,14 @@
+{
+  "name": "map-weaver",
+  "version": "0.1.0",
+  "description": "Local browser-based 2D top-down battle map maker with rule-based auto-decoration.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node serve.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

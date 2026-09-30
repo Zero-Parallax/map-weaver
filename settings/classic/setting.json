@@ -1,0 +1,19 @@
+{
+  "id": "classic",
+  "name": "Classic D&D",
+  "description": "Old-school dungeon crawl in the style of early module maps.",
+  "defaults": { "palette": "blue-white", "shading": "solid", "grid": "floor" },
+  "walls": { "width": 0.12, "style": "line", "band": 0.7 },
+  "roomTypes": [
+    { "id": "corridor", "name": "Corridor" },
+    { "id": "chamber", "name": "Chamber" },
+    { "id": "throne-room", "name": "Throne room" },
+    { "id": "temple", "name": "Temple" },
+    { "id": "crypt", "name": "Crypt" },
+    { "id": "barracks", "name": "Barracks" },
+    { "id": "storeroom", "name": "Storeroom" },
+    { "id": "prison", "name": "Prison" },
+    { "id": "library", "name": "Library" },
+    { "id": "cave", "name": "Cave" }
+  ]
+}

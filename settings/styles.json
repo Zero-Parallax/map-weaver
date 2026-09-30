@@ -1,0 +1,21 @@
+{
+  "palettes": [
+    { "id": "blue-white", "name": "Blue & white", "ink": "#2f62a8", "paper": "#ffffff" },
+    { "id": "black-white", "name": "Black & white", "ink": "#1b1b1b", "paper": "#ffffff" },
+    { "id": "sepia", "name": "Sepia", "ink": "#4f3219", "paper": "#f3e8d0" },
+    { "id": "blueprint", "name": "Blueprint", "ink": "#e9f2ff", "paper": "#1f4f8a" },
+    { "id": "terminal", "name": "Terminal", "ink": "#7fdcff", "paper": "#0d1824" }
+  ],
+  "shadings": [
+    { "id": "solid", "name": "Solid rock", "description": "Everything outside the floor filled with ink, like classic module maps." },
+    { "id": "hatch", "name": "Hatched border", "description": "Clusters of hatch strokes in a band around the walls." },
+    { "id": "crosshatch", "name": "Cross-hatched border", "description": "Regular cross-hatching in a band around the walls." },
+    { "id": "lines", "name": "Line hatching", "description": "Diagonal lines over all solid rock." },
+    { "id": "none", "name": "None", "description": "Plain paper outside the floor." }
+  ],
+  "grids": [
+    { "id": "floor", "name": "On floors" },
+    { "id": "all", "name": "Everywhere" },
+    { "id": "off", "name": "Off" }
+  ]
+}
