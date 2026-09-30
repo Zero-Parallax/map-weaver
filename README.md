@@ -98,7 +98,14 @@ The starter sets are generated: edit `src/assets/starter.js` and run
 node tools/generate-assets.js
 ```
 
-To add your own, drop an SVG with that metadata block into `assets/` and reload.
+To add your own SVG, drop a file with that metadata block into `assets/` and reload.
+
+**Your own PNG art:** in the Assets panel choose **Import PNG art…**, pick PNG files and tag
+each one: settings, size in squares (guessed from your art's pixels per square), placement,
+the side that faces the wall, layer, what it blocks, room types, weights and search tags. The
+tags are written into the PNG itself (an `iTXt` chunk) and the file is saved to
+`assets/imported/`. Imported pieces work with the decorator like any other asset; they are
+drawn as they are rather than recoloured. Select one in the library to **Edit tags** or delete it.
 
 ## Tests
 

@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readMeta, normalizeMeta } from './src/assets/meta.js';
+import { readPngMeta, isPng } from './src/assets/png-meta.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const MAPS_DIR = path.join(ROOT, 'maps');
@@ -96,9 +97,9 @@ async function listAssets() {
       if (e.name.startsWith('.')) continue;
       const full = path.join(dir, e.name);
       if (e.isDirectory()) await walk(full);
-      else if (e.name.toLowerCase().endsWith('.svg')) {
+      else if (/\.(svg|png)$/i.test(e.name)) {
         const rel = path.relative(ROOT, full).split(path.sep).join('/');
-        const raw = readMeta(await fs.readFile(full, 'utf8'));
+        const raw = e.name.toLowerCase().endsWith('.png') ? readPngMeta(new Uint8Array(await fs.readFile(full))) : readMeta(await fs.readFile(full, 'utf8'));
         if (!raw) {
           out.push({ path: rel, errors: ['no Map Weaver metadata'] });
           continue;
@@ -115,6 +116,25 @@ async function listAssets() {
 async function handleApi(req, res, url) {
   const parts = url.pathname.split('/').filter(Boolean); // ['api', 'maps', name?]
   if (parts[1] === 'assets' && parts.length === 2 && req.method === 'GET') return sendJson(res, 200, await listAssets());
+  if (parts[1] === 'assets' && parts[2] === 'imported' && parts.length === 4) {
+    // Your own PNG art, with Map Weaver metadata inside the file.
+    const name = decodeURIComponent(parts[3]);
+    if (!/^[\w\-.]{1,100}\.png$/.test(name) || name.startsWith('.')) return sendJson(res, 400, { error: 'Bad file name' });
+    const file = path.join(ASSETS_DIR, 'imported', name);
+    if (req.method === 'DELETE') {
+      await fs.rm(file, { force: true });
+      return sendJson(res, 200, { ok: true });
+    }
+    if (req.method !== 'PUT') return sendJson(res, 405, { error: 'Method not allowed' });
+    const data = new Uint8Array(await readRaw(req));
+    if (!isPng(data)) return sendJson(res, 400, { error: 'Not a PNG' });
+    const raw = readPngMeta(data);
+    const { errors } = raw ? normalizeMeta(raw) : { errors: ['no Map Weaver metadata'] };
+    if (errors.length) return sendJson(res, 400, { error: errors.join(', ') });
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(file, data);
+    return sendJson(res, 200, { ok: true, path: path.relative(ROOT, file).split(path.sep).join('/') });
+  }
   if (parts[1] === 'exports' && parts.length === 3 && req.method === 'PUT') {
     const name = decodeURIComponent(parts[2]);
     if (!/^[\w\- .()]{1,120}\.(png|json)$/.test(name) || name.startsWith('.')) return sendJson(res, 400, { error: 'Bad file name' });

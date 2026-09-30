@@ -12,6 +12,23 @@ export class AssetLibrary {
     this.texts = new Map(); // key -> svg text (promise)
     this.images = new Map(); // key|palette -> {img, ready}
     this.onImageReady = () => {};
+    this.version = Date.now(); // cache-buster for re-saved PNGs
+  }
+
+  entry(id) {
+    return this.assets.get(id) || null;
+  }
+
+  /** Imported PNG art (not recoloured; can be re-tagged). */
+  isImported(id) {
+    return /^assets\/imported\/.+\.png$/i.test(this.assets.get(id)?.path || '');
+  }
+
+  /** Drop cached text and images for an asset (after it was re-saved). */
+  forget(id) {
+    this.version = Date.now();
+    for (const k of [...this.texts.keys()]) if (k === id || k.startsWith(id + ':')) this.texts.delete(k);
+    for (const k of [...this.images.keys()]) if (k.split('|')[0] === id || k.startsWith(id + ':')) this.images.delete(k);
   }
 
   async load() {
@@ -71,6 +88,21 @@ export class AssetLibrary {
     if (!r) return null;
     const key = `${r.key}|${tokens.ink}|${tokens.paper}`;
     let entry = this.images.get(key);
+    if (!entry && this.isImported(r.meta.id)) {
+      // PNG art is drawn as it is.
+      entry = { img: new Image(), ready: false };
+      this.images.set(key, entry);
+      entry.url = `/${this.assets.get(r.meta.id).path}?v=${this.version}`;
+      entry.promise = new Promise((resolve) => {
+        entry.img.onload = () => {
+          entry.ready = true;
+          resolve();
+          this.onImageReady();
+        };
+        entry.img.onerror = () => resolve();
+        entry.img.src = entry.url;
+      });
+    }
     if (!entry) {
       entry = { img: new Image(), ready: false };
       this.images.set(key, entry);

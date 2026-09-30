@@ -4,6 +4,7 @@ import { el, field, select } from '../dom.js';
 import { newId } from '../../core/model.js';
 import { snapCentre, rotatedFootprint } from '../../assets/library.js';
 import { GENERATORS } from '../../assets/generators.js';
+import { openImportDialog } from '../import-dialog.js';
 
 const PLACEMENT_NAMES = { wall: 'against wall', corner: 'corner', centre: 'centre', door: 'near door', balcony: 'balcony edge', free: 'anywhere' };
 
@@ -73,9 +74,19 @@ export const assetTool = {
       if (!grid.children.length) grid.append(el('p', { class: 'hint' }, 'No assets match.'));
     }
     fill();
+    const imported = chosen && app.assets.isImported(chosen.id);
+    const importArt = (edit) => openImportDialog({
+      app, assets: app.assets, catalog: app.catalog, edit,
+      onSaved: (ids) => {
+        if (ids.length === 1) app.opts.asset = ids[0];
+        app.setOpt('assetSearch', app.opts.assetSearch);
+      },
+    });
     return el(
       'div',
       {},
+      el('div', { class: 'actions', style: { marginTop: 0, marginBottom: '8px' } },
+        el('button', { type: 'button', onclick: () => importArt(null), title: 'Add your own PNG art to the library' }, 'Import PNG art…')),
       el('div', { class: 'row' },
         search,
         select([{ id: '', name: 'All rooms' }, ...types], o.assetRoom || '', (v) => app.setOpt('assetRoom', v || null))),
@@ -83,7 +94,17 @@ export const assetTool = {
         el('div', { class: 'asset-chosen' },
           el('strong', {}, chosen.name),
           el('small', {}, ` ${PLACEMENT_NAMES[chosen.placement]}${chosen.blocksMovement ? ', blocks movement' : ''}`),
-          sizeFields(chosen, o.assetParams || {}, (params) => app.setOpt('assetParams', params))),
+          sizeFields(chosen, o.assetParams || {}, (params) => app.setOpt('assetParams', params)),
+          imported && el('div', { class: 'actions' },
+            el('button', { type: 'button', onclick: () => importArt({ meta: chosen, path: app.assets.entry(chosen.id).path }) }, 'Edit tags'),
+            el('button', { type: 'button', class: 'danger', onclick: async () => {
+              if (!confirm(`Delete "${chosen.name}" from the library? Pieces already on maps will disappear.`)) return;
+              const file = app.assets.entry(chosen.id).path.split('/').pop();
+              await fetch(`/api/assets/imported/${encodeURIComponent(file)}`, { method: 'DELETE' });
+              await app.assets.load();
+              app.assets.forget(chosen.id);
+              app.setOpt('asset', null);
+            } }, 'Delete'))),
       grid,
       app.assets.invalid.length > 0 &&
         el('p', { class: 'hint' }, `${app.assets.invalid.length} SVG file(s) in assets/ have no valid metadata and are hidden.`),

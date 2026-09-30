@@ -91,4 +91,6 @@ Phase 2:
   `elevation`, `background`, `visibility.levels`; walls with `c`, `levels`, `move/sight/light/sound`,
   `dir`, `door`, `ds`). Schema checked against the v14 type definitions
   (`@league-of-foundry-developers/foundry-vtt-types` 14.366).
-- PNG asset import with a tagging screen.
+- PNG asset import with a tagging screen **(done)**: `src/assets/png-meta.js` reads and writes
+  the same metadata JSON in an `iTXt` chunk (keyword `map-weaver-asset`);
+  `src/editor/import-dialog.js` is the tagging screen; `PUT/DELETE /api/assets/imported/<file>.png`.

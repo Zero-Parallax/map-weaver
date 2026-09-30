@@ -86,3 +86,24 @@ test('rotation swaps footprints and keeps assets on the grid', () => {
   assert.ok(placementContains(pl, { w: 1, h: 2 }, [4.9, 7.6]));
   assert.ok(!placementContains(pl, { w: 1, h: 2 }, [4.2, 8.2]));
 });
+
+// ---- PNG metadata ---------------------------------------------------------
+
+import { readPngMeta, writePngMeta, pngSize, isPng } from '../src/assets/png-meta.js';
+
+const TINY_PNG = Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64'));
+
+test('PNG metadata round trip, replacing rather than stacking', () => {
+  assert.ok(isPng(TINY_PNG));
+  assert.deepEqual(pngSize(TINY_PNG), { width: 1, height: 1 });
+  assert.equal(readPngMeta(TINY_PNG), null);
+  const meta = { id: 'user.statue', name: 'Stätue', settings: ['fantasy'], footprint: { w: 2, h: 2 } };
+  const once = writePngMeta(TINY_PNG, meta);
+  assert.deepEqual(readPngMeta(once), meta);
+  const twice = writePngMeta(once, { ...meta, name: 'Statue 2' });
+  assert.equal(readPngMeta(twice).name, 'Statue 2');
+  assert.equal(twice.length, once.length - Buffer.byteLength('Stätue') + Buffer.byteLength('Statue 2'));
+  // The image data survives untouched and the file still ends with IEND.
+  assert.deepEqual(pngSize(twice), { width: 1, height: 1 });
+  assert.equal(Buffer.from(twice.subarray(-8, -4)).toString('latin1'), 'IEND');
+});
