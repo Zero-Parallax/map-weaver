@@ -398,3 +398,17 @@ dialog menu {
 .asset-chosen small {
   color: var(--muted);
 }
+
+.export-dialog {
+  width: 420px;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+dialog menu {
+  gap: 6px;
+}

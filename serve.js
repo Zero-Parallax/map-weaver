@@ -12,7 +12,8 @@ const MAPS_DIR = path.join(ROOT, 'maps');
 const ASSETS_DIR = path.join(ROOT, 'assets');
 const PORT = Number(process.env.PORT) || 5173;
 const HOST = process.env.HOST || '127.0.0.1';
-const MAX_BODY = 50 * 1024 * 1024;
+const MAX_BODY = 200 * 1024 * 1024;
+const EXPORTS_DIR = path.join(ROOT, 'exports');
 const MAP_EXT = '.map.json';
 
 const TYPES = {
@@ -36,6 +37,24 @@ function send(res, status, body, type = 'text/plain; charset=utf-8') {
 
 function sendJson(res, status, value) {
   send(res, status, JSON.stringify(value), TYPES['.json']);
+}
+
+function readRaw(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > MAX_BODY) {
+        reject(Object.assign(new Error('Body too large'), { status: 413 }));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
 }
 
 function readBody(req) {
@@ -96,6 +115,16 @@ async function listAssets() {
 async function handleApi(req, res, url) {
   const parts = url.pathname.split('/').filter(Boolean); // ['api', 'maps', name?]
   if (parts[1] === 'assets' && parts.length === 2 && req.method === 'GET') return sendJson(res, 200, await listAssets());
+  if (parts[1] === 'exports' && parts.length === 3 && req.method === 'PUT') {
+    const name = decodeURIComponent(parts[2]);
+    if (!/^[\w\- .()]{1,120}\.png$/.test(name) || name.startsWith('.')) return sendJson(res, 400, { error: 'Bad file name' });
+    const data = await readRaw(req);
+    if (data.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') return sendJson(res, 400, { error: 'Not a PNG' });
+    await fs.mkdir(EXPORTS_DIR, { recursive: true });
+    const file = path.join(EXPORTS_DIR, name);
+    await fs.writeFile(file, data);
+    return sendJson(res, 200, { ok: true, path: path.relative(ROOT, file) });
+  }
   if (parts[1] !== 'maps') return sendJson(res, 404, { error: 'Unknown endpoint' });
 
   if (parts.length === 2 && req.method === 'GET') {

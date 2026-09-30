@@ -24,6 +24,10 @@ export async function saveMapFile(name, text) {
   );
 }
 
+export async function saveExport(name, blob) {
+  return json(await fetch('/api/exports/' + encodeURIComponent(name), { method: 'PUT', headers: { 'Content-Type': 'image/png' }, body: blob }));
+}
+
 /** Settings catalog: {styles, settings: Map(id -> setting)}. */
 export async function loadCatalog() {
   const [index, styles] = await Promise.all([

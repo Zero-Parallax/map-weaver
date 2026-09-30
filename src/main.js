@@ -2,7 +2,9 @@
 
 import { App } from './editor/app.js';
 import { el, field, select, segmented, checkbox } from './editor/dom.js';
-import { loadCatalog, listMaps, loadMapFile, saveMapFile } from './io/api.js';
+import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport } from './io/api.js';
+import { renderLevelPng, exportSize, exportFileName, MAX_SIDE } from './render/export.js';
+import { OPEN_MODES } from './render/renderer.js';
 import { loadMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
 import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
 import { linkTool, edgeTool } from './editor/tools/level-tools.js';
@@ -114,6 +116,78 @@ function importFile() {
   input.click();
 }
 
+// ---- PNG export ------------------------------------------------------------
+
+const exportOpts = { which: 'current', pps: 100, openMode: 'transparent', outsideMode: 'drawn', save: true, download: false };
+
+function exportDialog() {
+  const dialog = el('dialog', { class: 'export-dialog' });
+  const sizeNote = el('p', { class: 'hint' });
+  const status = el('p', { class: 'hint' });
+  const refresh = () => {
+    const { width, height } = exportSize(app.map, exportOpts.pps);
+    const n = exportOpts.which === 'all' ? app.map.levels.length : 1;
+    sizeNote.textContent = `${width} × ${height} px per level, ${n} file${n > 1 ? 's' : ''}.` + (width > MAX_SIDE || height > MAX_SIDE ? ' Too big for the browser: lower the pixels per square.' : '');
+  };
+  const pps = el('input', { type: 'number', min: 10, max: 400, value: exportOpts.pps, oninput: (e) => {
+    exportOpts.pps = Math.max(10, Math.min(400, Math.round(+e.target.value) || 100));
+    refresh();
+  } });
+  const go = el('button', { type: 'button', class: 'primary', onclick: async () => {
+    go.disabled = true;
+    const indexes = exportOpts.which === 'all' ? app.map.levels.map((_, i) => i) : [app.levelIndex];
+    const saved = [];
+    try {
+      for (const i of indexes) {
+        status.textContent = `Rendering ${app.map.levels[i].name}…`;
+        const blob = await renderLevelPng({
+          map: app.map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv),
+          pxPerSquare: exportOpts.pps, openMode: exportOpts.openMode, outsideMode: exportOpts.outsideMode,
+        });
+        const name = exportFileName(app.map, i);
+        if (exportOpts.save) saved.push((await saveExport(name, blob)).path);
+        if (exportOpts.download) {
+          const a = el('a', { href: URL.createObjectURL(blob), download: name });
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        }
+      }
+      status.textContent = saved.length ? `Saved: ${saved.join(', ')}` : 'Done.';
+      app.status(saved.length ? `Exported to ${saved.length > 1 ? 'the exports folder' : saved[0]}` : 'Exported.');
+    } catch (err) {
+      status.textContent = `Export failed: ${err.message}`;
+    } finally {
+      go.disabled = false;
+    }
+  } }, 'Export');
+  dialog.append(
+    el('h2', {}, 'Export PNG'),
+    field('Levels', segmented([{ id: 'current', name: 'This level' }, { id: 'all', name: 'All levels' }], exportOpts.which, (v) => {
+      exportOpts.which = v;
+      refresh();
+    })),
+    field('Pixels per square', el('div', { class: 'row' }, pps,
+      ...[70, 100, 140, 200].map((n) => el('button', { type: 'button', style: { flex: 'none' }, onclick: () => {
+        pps.value = n;
+        exportOpts.pps = n;
+        refresh();
+      } }, String(n))))),
+    field('Open to below areas', select(OPEN_MODES, exportOpts.openMode, (v) => (exportOpts.openMode = v)),
+      'Transparent suits stacked levels in Foundry; faded shows the level below for printing.'),
+    field('Outside the building', select([{ id: 'drawn', name: 'As drawn (rock / hatching)' }, { id: 'transparent', name: 'Transparent' }], exportOpts.outsideMode, (v) => (exportOpts.outsideMode = v))),
+    checkbox('Save to the exports folder', exportOpts.save, (v) => (exportOpts.save = v)),
+    checkbox('Download in the browser', exportOpts.download, (v) => (exportOpts.download = v)),
+    sizeNote,
+    status,
+    el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, 'Close'), go),
+  );
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  refresh();
+  if (!dialog.open) dialog.showModal();
+  return dialog;
+}
+
 $('file-buttons').append(
   el('button', { onclick: () => confirmDiscard() && app.newMap(app.map.setting), title: 'New map' }, 'New'),
   el('button', { onclick: openDialog, title: 'Open (Ctrl+O)' }, 'Open'),
@@ -121,6 +195,7 @@ $('file-buttons').append(
   el('button', { onclick: () => save(true) }, 'Save as'),
   el('button', { onclick: download, title: 'Download the map file' }, 'Download'),
   el('button', { onclick: importFile, title: 'Load a map file from disk' }, 'Import'),
+  el('button', { onclick: () => exportDialog(), title: 'Export levels as PNG images (Ctrl+E)' }, 'Export PNG'),
 );
 const undoBtn = el('button', { onclick: () => app.undo(), title: 'Undo (Ctrl+Z)' }, 'Undo');
 const redoBtn = el('button', { onclick: () => app.redo(), title: 'Redo (Ctrl+Y)' }, 'Redo');
@@ -429,6 +504,11 @@ for (const type of ['keydown', 'keyup']) {
     if (type === 'keydown' && ctrl && e.key.toLowerCase() === 's') {
       e.preventDefault();
       save(e.shiftKey);
+      return;
+    }
+    if (type === 'keydown' && ctrl && e.key.toLowerCase() === 'e') {
+      e.preventDefault();
+      exportDialog();
       return;
     }
     if (type === 'keydown' && ctrl && e.key.toLowerCase() === 'o') {

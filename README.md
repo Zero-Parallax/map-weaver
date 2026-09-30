@@ -47,6 +47,15 @@ Set `PORT` to use another port.
   angle box and size fields for resizable pieces (tables, shelves, rugs...).
 - Ctrl+Z / Ctrl+Y undo and redo. Ctrl+S saves, Ctrl+O opens.
 
+## Exporting PNGs
+
+**Export PNG** (Ctrl+E) renders the current level or every level at the pixels per square you
+choose, with no editor overlays. Options: how open-to-below areas are filled (transparent for
+stacking in Foundry, faded level below for printing, or solid) and whether everything outside
+the building is kept or made transparent. Files go to the `exports/` folder
+(`<map>-L<n>-<level>.png`) and/or download in the browser. Every level has the same size, so
+they line up.
+
 ## Decorating
 
 Tag a room (Room type tool) and it is furnished straight away; untick "Decorate rooms when
