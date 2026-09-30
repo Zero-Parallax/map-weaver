@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Engine turbine</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"turbine","name":"Engine turbine","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["engine-room"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":2,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<polygon class="o" points="38,8 162,8 192,38 192,162 162,192 38,192 8,162 8,38"/><circle class="s" cx="100" cy="100" r="74"/><path class="l" d="M120 100L161.4 133.6M117.3 110L136.4 159.8M110 117.3L101.7 170M100 120L66.4 161.4M90 117.3L40.2 136.4M82.7 110L30 101.7M80 100L38.6 66.4M82.7 90L63.6 40.2M90 82.7L98.3 30M100 80L133.6 38.6M110 82.7L159.8 63.6M117.3 90L170 98.3"/><circle class="k" cx="100" cy="100" r="18"/>
+</svg>

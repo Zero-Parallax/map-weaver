@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Scroll shelf</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"scroll-shelf","name":"Scroll shelf","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["library","temple"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"scrolls"},"sizes":{"len":[1,3]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="o" x="4" y="4" width="192" height="44" rx="2"/><ellipse class="o" cx="14" cy="26" rx="8" ry="16"/><ellipse class="o" cx="36" cy="26" rx="8" ry="16"/><ellipse class="o" cx="58" cy="26" rx="8" ry="16"/><ellipse class="o" cx="80" cy="26" rx="8" ry="16"/><ellipse class="o" cx="102" cy="26" rx="8" ry="16"/><ellipse class="o" cx="124" cy="26" rx="8" ry="16"/><ellipse class="o" cx="146" cy="26" rx="8" ry="16"/><ellipse class="o" cx="168" cy="26" rx="8" ry="16"/><line class="l" x1="100" y1="6" x2="100" y2="46"/>
+</svg>

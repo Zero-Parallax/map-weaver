@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Weapon locker</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"weapon-locker","name":"Weapon locker","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["armoury","bridge"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":1,"max":3,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<polygon class="o" points="16,6 184,6 194,16 194,52 184,62 16,62 6,52 6,16"/><polygon class="s" points="31,14 41,14 41,48 31,52"/><polygon class="s" points="77,14 87,14 87,48 77,52"/><polygon class="s" points="123,14 133,14 133,48 123,52"/><polygon class="s" points="159,14 169,14 169,48 159,52"/>
+</svg>

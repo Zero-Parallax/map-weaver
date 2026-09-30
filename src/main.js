@@ -6,6 +6,8 @@ import { loadCatalog, listMaps, loadMapFile, saveMapFile } from './io/api.js';
 import { loadMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
 import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
 import { linkTool, edgeTool } from './editor/tools/level-tools.js';
+import { assetTool, sizeFields } from './editor/tools/asset-tool.js';
+import { AssetLibrary } from './assets/library.js';
 import { regionAt } from './core/rooms.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool } from './editor/tools/shape-tools.js';
@@ -16,14 +18,20 @@ const TOOL_GROUPS = [
   [rectTool, circleTool, polyTool, caveTool, brushTool],
   [wallTool, arcTool, doorTool],
   [linkTool, edgeTool],
-  [roomTool, eraseTool],
+  [roomTool, assetTool, eraseTool],
 ];
 const $ = (id) => document.getElementById(id);
 
 const catalog = await loadCatalog();
+const assets = new AssetLibrary();
+try {
+  await assets.load();
+} catch (err) {
+  console.warn(err);
+}
 let ready = false;
 // window.__app is a handle for debugging from the browser console.
-const app = (window.__app = new App({ canvas: $('canvas'), catalog, tools: TOOL_GROUPS.flat(), onChange: (reason) => ready && update(reason) }));
+const app = (window.__app = new App({ canvas: $('canvas'), catalog, assets, tools: TOOL_GROUPS.flat(), onChange: (reason) => ready && update(reason) }));
 $('loading').remove();
 app.setTool('select');
 
@@ -209,6 +217,20 @@ function linkSection(link) {
   );
 }
 
+function placementSection(pl) {
+  const meta = assets.get(pl.asset);
+  if (!meta) return section('Asset', el('p', { class: 'hint' }, `Missing asset "${pl.asset}".`));
+  return section(
+    meta.name,
+    el('p', { class: 'hint' }, `${pl.auto ? 'Placed by the decorator. ' : ''}Drag to move; [ and ] rotate.`),
+    sizeFields(meta, pl.params || {}, (params) => app.resizePlacement(pl.id, params)),
+    el('div', { class: 'actions' },
+      el('button', { onclick: () => app.rotateSelection(-90) }, '⟲ Rotate'),
+      el('button', { onclick: () => app.rotateSelection(90) }, 'Rotate ⟳'),
+      el('button', { class: 'danger', onclick: () => app.deleteSelection() }, 'Delete')),
+  );
+}
+
 function wallSection(wall) {
   return section(
     wall.kind === 'arc' ? 'Arc wall' : 'Wall',
@@ -253,6 +275,7 @@ function selectionSections() {
   if (sel.kind === 'door') return [doorSection(item)];
   if (sel.kind === 'wall') return [wallSection(item)];
   if (sel.kind === 'link') return [linkSection(item)];
+  if (sel.kind === 'placement') return [placementSection(item)];
   return [];
 }
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Hydroponics tray</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"hydroponics","name":"Hydroponics tray","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["lab","mess-hall"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":3,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<polygon class="o" points="18,12 182,12 194,24 194,76 182,88 18,88 6,76 6,24"/><polygon class="s" points="30,36 33.5,45.1 43.3,45.7 35.7,51.9 38.2,61.3 30,56 21.8,61.3 24.3,51.9 16.7,45.7 26.5,45.1"/><polygon class="s" points="65,36 68.5,45.1 78.3,45.7 70.7,51.9 73.2,61.3 65,56 56.8,61.3 59.3,51.9 51.7,45.7 61.5,45.1"/><polygon class="s" points="100,36 103.5,45.1 113.3,45.7 105.7,51.9 108.2,61.3 100,56 91.8,61.3 94.3,51.9 86.7,45.7 96.5,45.1"/><polygon class="s" points="135,36 138.5,45.1 148.3,45.7 140.7,51.9 143.2,61.3 135,56 126.8,61.3 129.3,51.9 121.7,45.7 131.5,45.1"/><polygon class="s" points="170,36 173.5,45.1 183.3,45.7 175.7,51.9 178.2,61.3 170,56 161.8,61.3 164.3,51.9 156.7,45.7 166.5,45.1"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Tapestry</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"tapestry","name":"Tapestry","settings":["classic","fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["throne-room","great-hall","bedroom","temple"],"placement":"wall","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":2,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="s" x="10" y="2" width="180" height="14" rx="1"/><path class="t" d="M16 16L16 24M26 16L26 24M36 16L36 24M46 16L46 24M56 16L56 24M66 16L66 24M76 16L76 24M86 16L86 24M96 16L96 24M106 16L106 24M116 16L116 24M126 16L126 24M136 16L136 24M146 16L146 24M156 16L156 24M166 16L166 24M176 16L176 24"/>
+</svg>

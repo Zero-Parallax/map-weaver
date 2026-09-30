@@ -7,14 +7,17 @@ import { regionAt, sampleX, sampleY, STEP } from '../core/rooms.js';
 import { pointInRings, distToRings, distToSegment, snapPoint, polylineSegments, add, scale } from '../core/geom.js';
 import { drawLevel, levelPaths } from '../render/renderer.js';
 import { linksOnLevel, linkContains } from '../core/links.js';
+import { placementContains, snapCentre, rotatedFootprint } from '../assets/library.js';
 import { resolveStyle } from '../render/style.js';
 
 const HISTORY_LIMIT = 200;
 const AUTOSAVE_KEY = 'map-weaver.autosave';
 
 export class App {
-  constructor({ canvas, catalog, tools, onChange }) {
+  constructor({ canvas, catalog, assets, tools, onChange }) {
     this.canvas = canvas;
+    this.assets = assets;
+    assets.onImageReady = () => this.requestRender();
     this.ctx = canvas.getContext('2d');
     this.catalog = catalog;
     this.tools = tools;
@@ -22,6 +25,7 @@ export class App {
     this.opts = {
       mode: 'add', walled: true, radius: 0, roughness: 0.5, brush: 1, doorType: 'door', doorWidth: 1, roomType: null,
       linkType: 'stairs', linkSpan: 1, spiralSize: 2, edgeKind: 'wall',
+      asset: null, assetParams: null, assetRoom: null, assetSearch: '',
     };
     this.showBelow = true;
     this.view = { scale: 32, ox: 40, oy: 40 };
@@ -236,6 +240,14 @@ export class App {
       const d = level.doors[i];
       if (distToSegment(p, d.a, d.b) < tol) return { kind: 'door', id: d.id, item: d };
     }
+    const layerOrder = { overhead: 0, object: 1, floor: 2 };
+    const placed = level.placements
+      .map((pl, i) => ({ pl, i, r: this.assets.resolve(pl) }))
+      .filter((x) => x.r)
+      .sort((a, b) => layerOrder[a.r.meta.layer] - layerOrder[b.r.meta.layer] || b.i - a.i);
+    for (const { pl, r } of placed) {
+      if (placementContains(pl, r.footprint, p)) return { kind: 'placement', id: pl.id, item: pl };
+    }
     for (const { link } of linksOnLevel(this.map, level).reverse()) {
       if (linkContains(link, p)) return { kind: 'link', id: link.id, item: link };
     }
@@ -253,7 +265,7 @@ export class App {
   }
 
   findItem(level, hit) {
-    const list = { door: level.doors, wall: level.walls, shape: level.shapes, link: this.map.links }[hit.kind];
+    const list = { door: level.doors, wall: level.walls, shape: level.shapes, link: this.map.links, placement: level.placements }[hit.kind];
     return list?.find((x) => x.id === hit.id);
   }
 
@@ -274,6 +286,13 @@ export class App {
             d.a = [d.a[0] + dx, d.a[1] + dy];
             d.b = [d.b[0] + dx, d.b[1] + dy];
           }
+        }
+      } else if (hit.kind === 'placement') {
+        const pl = level.placements.find((x) => x.id === hit.id);
+        if (pl) {
+          pl.x += dx;
+          pl.y += dy;
+          pl.auto = false;
         }
       } else if (hit.kind === 'link') {
         const k = map.links.find((x) => x.id === hit.id);
@@ -296,13 +315,42 @@ export class App {
   }
 
   deleteItem(hit) {
-    const key = { door: 'doors', wall: 'walls', shape: 'shapes', link: 'links' }[hit.kind];
+    const key = { door: 'doors', wall: 'walls', shape: 'shapes', link: 'links', placement: 'placements' }[hit.kind];
     if (!key) return;
     this.commit('Delete', (map, level) => {
       const owner = key === 'links' ? map : level;
       owner[key] = owner[key].filter((x) => x.id !== hit.id);
     });
     if (this.selection?.id === hit.id) this.select(null);
+  }
+
+  /** Rotate the selected asset by a multiple of 90 degrees, keeping it on the grid. */
+  rotateSelection(by) {
+    if (this.selection?.kind !== 'placement') return;
+    this.commit('Rotate', (map, level) => {
+      const pl = level.placements.find((x) => x.id === this.selection.id);
+      const r = pl && this.assets.resolve(pl);
+      if (!r) return;
+      pl.rot = (((pl.rot + by) % 360) + 360) % 360;
+      [pl.x, pl.y] = snapCentre([pl.x, pl.y], r.footprint, pl.rot);
+      pl.auto = false;
+    });
+  }
+
+  /** Change a generator asset's size, keeping its top-left corner where it was. */
+  resizePlacement(id, params) {
+    this.commit('Resize asset', (map, level) => {
+      const pl = level.placements.find((x) => x.id === id);
+      const before = pl && this.assets.resolve(pl);
+      if (!before) return;
+      const f0 = rotatedFootprint(before.footprint, pl.rot);
+      const corner = [pl.x - f0.w / 2, pl.y - f0.h / 2];
+      pl.params = params;
+      const f1 = rotatedFootprint(this.assets.resolve(pl).footprint, pl.rot);
+      pl.x = corner[0] + f1.w / 2;
+      pl.y = corner[1] + f1.h / 2;
+      pl.auto = false;
+    });
   }
 
   deleteSelection() {
@@ -429,6 +477,8 @@ export class App {
       return true;
     }
     if (e.key === 'Delete' || e.key === 'Backspace') return this.deleteSelection(), true;
+    if (e.key === ']') return this.rotateSelection(90), true;
+    if (e.key === '[') return this.rotateSelection(-90), true;
     if (e.key === 'f') return this.fitView(), true;
     if (e.key === 'PageUp') return this.setLevel(this.levelIndex + 1), true;
     if (e.key === 'PageDown') return this.setLevel(this.levelIndex - 1), true;
@@ -477,6 +527,7 @@ export class App {
       links: linksOnLevel(this.map, this.level),
       below: below && { level: below, geo: this.geometry(below), links: linksOnLevel(this.map, below) },
       openMode: 'faded',
+      assets: this.assets,
       pxPerSquare: s,
     });
     if (below && this.showBelow) this.drawGhost(ctx, below);
@@ -610,6 +661,13 @@ export class App {
       ctx.lineWidth = 6 / s;
     } else if (hit.kind === 'link') {
       ctx.rect(item.x, item.y, item.w, item.h);
+    } else if (hit.kind === 'placement') {
+      const r = this.assets.resolve(item);
+      if (r) {
+        ctx.translate(item.x, item.y);
+        ctx.rotate((item.rot * Math.PI) / 180);
+        ctx.rect(-r.footprint.w / 2, -r.footprint.h / 2, r.footprint.w, r.footprint.h);
+      }
     } else if (hit.kind === 'door') {
       ctx.moveTo(...item.a);
       ctx.lineTo(...item.b);

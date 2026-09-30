@@ -30,6 +30,7 @@ Set `PORT` to use another port.
 | Stairs & lifts | S | Stairs (drag foot to top), spiral stairs, ladders, lifts, trapdoors |
 | Balcony edge | G | Click an edge of an open-to-below area: railing, full wall or open drop |
 | Room type | T | Click inside a room to tag it; right-click clears |
+| Assets | Q | Pick from the library and click to place. Right-click or `]` rotates |
 | Erase | E | Click a door, wall or shape to delete it |
 
 - **Alt** while drawing a shape: cut away floor instead of adding it.
@@ -42,6 +43,22 @@ Set `PORT` to use another port.
   Turn it off to extend the floor it touches instead.
 - Pan with the middle mouse button or Space + drag. Wheel zooms. **F** fits the map.
 - Ctrl+Z / Ctrl+Y undo and redo. Ctrl+S saves, Ctrl+O opens.
+
+## Assets
+
+SVG files under `assets/` (`common/` holds ones shared by several settings). Each file carries
+its own metadata as JSON inside `<metadata id="map-weaver-asset">`: settings, footprint in
+squares, room types, placement rule (wall, corner, centre, door, balcony, free), whether it
+blocks movement or vision, and which side faces the wall. Shapes use the classes `o s m k p h l t d`
+so they recolour to the map's palette. See `src/assets/meta.js` for every field.
+
+The starter sets are generated: edit `src/assets/starter.js` and run
+
+```
+node tools/generate-assets.js
+```
+
+To add your own, drop an SVG with that metadata block into `assets/` and reload.
 
 ## Tests
 

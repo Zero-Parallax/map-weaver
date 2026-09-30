@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" width="200" height="400">
+<title>Cargo container</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"container","name":"Cargo container","settings":["scifi"],"footprint":{"w":2,"h":4},"roomTypes":["cargo-bay"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"cargo","params":{"w":2,"h":4,"style":"container"},"sizes":{"w":[2,3],"h":[3,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<polygon class="o" points="18,6 182,6 194,18 194,382 182,394 18,394 6,382 6,18"/><path class="t" d="M14 30L186 30M14 54L186 54M14 78L186 78M14 102L186 102M14 126L186 126M14 150L186 150M14 174L186 174M14 198L186 198M14 222L186 222M14 246L186 246M14 270L186 270M14 294L186 294M14 318L186 318M14 342L186 342M14 366L186 366"/>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+<title>Lab bench</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"lab-bench","name":"Lab bench","settings":["scifi"],"footprint":{"w":3,"h":1},"roomTypes":["lab","med-bay"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":3,"tags":[],"generator":{"id":"counter","params":{"len":3,"kind":"lab"},"sizes":{"len":[2,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="o" x="4" y="4" width="292" height="56" rx="3"/><line class="t" x1="10" y1="48" x2="290" y2="48"/><circle class="s" cx="22" cy="28" r="9"/><circle class="o" cx="58" cy="28" r="9"/><circle class="s" cx="94" cy="28" r="9"/><circle class="s" cx="130" cy="28" r="9"/><circle class="s" cx="166" cy="28" r="9"/><circle class="o" cx="202" cy="28" r="9"/><circle class="o" cx="238" cy="28" r="9"/><circle class="o" cx="274" cy="28" r="9"/><line class="t" x1="12" y1="50" x2="288" y2="50"/>
+</svg>

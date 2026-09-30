@@ -264,7 +264,22 @@ export const OPEN_MODES = [
  *  openMode: how open-to-below areas are filled: 'transparent' | 'faded' | 'solid'
  *  pxPerSquare keeps hairlines visible when zoomed out.
  */
-export function drawLevel(ctx, { map, level, geo, style, links = [], below = null, openMode = 'faded', pxPerSquare = 64 }) {
+/** Draw a level's placed assets of one layer. Images still loading are skipped. */
+export function drawPlacements(ctx, placements, layer, assets, tokens) {
+  if (!assets) return;
+  for (const p of placements) {
+    const hit = assets.image(p, tokens);
+    if (!hit || hit.meta.layer !== layer) continue;
+    const { w, h } = hit.footprint;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if (p.rot) ctx.rotate((p.rot * Math.PI) / 180);
+    ctx.drawImage(hit.img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+}
+
+export function drawLevel(ctx, { map, level, geo, style, links = [], below = null, openMode = 'faded', assets = null, pxPerSquare = 64 }) {
   const { w, h } = map.size;
   const L = layers(geo, style, map);
   const hair = 1 / pxPerSquare;
@@ -296,7 +311,7 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
       ctx.fillRect(0, 0, w, h);
     } else {
       // The level below, washed with a mid tone so it reads as further away.
-      drawLevel(ctx, { map, level: below.level, geo: below.geo, style, links: below.links, openMode: 'solid', pxPerSquare });
+      drawLevel(ctx, { map, level: below.level, geo: below.geo, style, links: below.links, openMode: 'solid', assets, pxPerSquare });
       ctx.globalAlpha = 0.5;
       ctx.fillStyle = style.tokens.shade;
       ctx.fillRect(0, 0, w, h);
@@ -314,8 +329,10 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
     ctx.restore();
   }
 
-  // Links sit on the floor, under walls and doors.
+  // Rugs and decals, then links, then furniture; walls and doors go over them.
+  drawPlacements(ctx, level.placements, 'floor', assets, style.tokens);
   for (const { link, role } of links) drawLink(ctx, link, role, style);
+  drawPlacements(ctx, level.placements, 'object', assets, style.tokens);
 
   // Edges of open areas: drops dashed, railings thin with posts.
   ctx.save();
@@ -351,6 +368,7 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
   ctx.restore();
 
   for (const door of level.doors) drawDoor(ctx, door, style);
+  drawPlacements(ctx, level.placements, 'overhead', assets, style.tokens);
 }
 
 /** Paths other code (editor overlays) can reuse. */

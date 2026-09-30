@@ -41,6 +41,20 @@ Recomputed from the level when it changes:
    then flood-filled. Each room knows its full squares, which the decorator will use.
    Tags attach to whichever room contains their point, so they survive edits.
 
+## Assets (`src/assets/`)
+
+- `meta.js`: the metadata format, stored as JSON inside each SVG, and its defaults.
+- `svg.js`: drawing helpers and the shared style block. Colours come from CSS variables
+  (`--ink`, `--paper`, `--shade`, `--mid`), which the app sets to the map's palette.
+- `generators.js`: parametric generators (table with chairs, bench/pew, shelf, counter,
+  console, rug, dais, cargo, railing). A generator asset records `{id, params, sizes}` so the
+  decorator and the editor can remake it at another size.
+- `starter.js`: the starter sets, baked to files by `tools/generate-assets.js`.
+- `library.js`: browser side. Lists assets from `GET /api/assets`, caches recoloured images.
+
+A placement is `{id, asset, x, y (centre, squares), rot (degrees), params?, auto, room?}`.
+Placed assets draw by layer: floor (rugs) under links and furniture, overhead over walls.
+
 ## Rendering (`src/render/`)
 
 One Canvas 2D renderer draws paper, shading (solid, hatched band, cross-hatched band, line
@@ -50,7 +64,7 @@ hatching), grid, walls and doors. The editor and the PNG export share it.
 
 1. Core model, shape/wall/door editor, room tagging, save/load **(done)**
 2. Levels, links (stairs, ladders, lifts, trapdoors), balconies, faded level below **(done)**
-3. Asset format (metadata in the SVG), library, parametric generators, starter sets
+3. Asset format (metadata in the SVG), library, parametric generators, starter sets **(done)**
 4. Decorator: slots, keep-clear zones, seeded placement, reachability check
 5. Manual asset editing: move, rotate, delete, add
 6. PNG export at a chosen pixels-per-square

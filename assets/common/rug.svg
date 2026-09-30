@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+<title>Rug</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"rug","name":"Rug","settings":["classic","fantasy"],"footprint":{"w":2,"h":3},"roomTypes":["throne-room","bedroom","library","great-hall","temple"],"placement":"centre","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[],"generator":{"id":"rug","params":{"w":2,"h":3,"pattern":"border"},"sizes":{"w":[2,4],"h":[2,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="o" x="10" y="10" width="180" height="280" rx="2"/><rect class="t" x="24" y="24" width="152" height="252"/><path class="t" d="M18 2L18 10M18 290L18 298M28 2L28 10M28 290L28 298M38 2L38 10M38 290L38 298M48 2L48 10M48 290L48 298M58 2L58 10M58 290L58 298M68 2L68 10M68 290L68 298M78 2L78 10M78 290L78 298M88 2L88 10M88 290L88 298M98 2L98 10M98 290L98 298M108 2L108 10M108 290L108 298M118 2L118 10M118 290L118 298M128 2L128 10M128 290L128 298M138 2L138 10M138 290L138 298M148 2L148 10M148 290L148 298M158 2L158 10M158 290L158 298M168 2L168 10M168 290L168 298M178 2L178 10M178 290L178 298"/>
+</svg>

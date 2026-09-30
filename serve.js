@@ -5,9 +5,11 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readMeta, normalizeMeta } from './src/assets/meta.js';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const MAPS_DIR = path.join(ROOT, 'maps');
+const ASSETS_DIR = path.join(ROOT, 'assets');
 const PORT = Number(process.env.PORT) || 5173;
 const HOST = process.env.HOST || '127.0.0.1';
 const MAX_BODY = 50 * 1024 * 1024;
@@ -61,8 +63,39 @@ function mapFile(name) {
   return path.join(MAPS_DIR, clean + MAP_EXT);
 }
 
+// Every SVG under assets/, with the metadata read from inside the file.
+async function listAssets() {
+  const out = [];
+  async function walk(dir) {
+    let entries = [];
+    try {
+      entries = await fs.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      if (e.name.startsWith('.')) continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) await walk(full);
+      else if (e.name.toLowerCase().endsWith('.svg')) {
+        const rel = path.relative(ROOT, full).split(path.sep).join('/');
+        const raw = readMeta(await fs.readFile(full, 'utf8'));
+        if (!raw) {
+          out.push({ path: rel, errors: ['no Map Weaver metadata'] });
+          continue;
+        }
+        const { meta, errors } = normalizeMeta(raw);
+        out.push({ path: rel, meta, errors });
+      }
+    }
+  }
+  await walk(ASSETS_DIR);
+  return out;
+}
+
 async function handleApi(req, res, url) {
   const parts = url.pathname.split('/').filter(Boolean); // ['api', 'maps', name?]
+  if (parts[1] === 'assets' && parts.length === 2 && req.method === 'GET') return sendJson(res, 200, await listAssets());
   if (parts[1] !== 'maps') return sendJson(res, 404, { error: 'Unknown endpoint' });
 
   if (parts.length === 2 && req.method === 'GET') {

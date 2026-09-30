@@ -360,3 +360,41 @@ dialog menu {
   border-color: var(--accent);
   background: #1f3a52;
 }
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.asset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.asset img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 3px;
+}
+
+.asset.on {
+  border-color: var(--accent);
+  background: #1f3a52;
+}
+
+.asset-chosen {
+  margin-top: 8px;
+}
+
+.asset-chosen small {
+  color: var(--muted);
+}

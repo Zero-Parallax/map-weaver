@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+<title>Kitchen counter</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"kitchen-counter","name":"Kitchen counter","settings":["fantasy"],"footprint":{"w":3,"h":1},"roomTypes":["kitchen"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":2,"tags":[],"generator":{"id":"counter","params":{"len":3,"kind":"kitchen"},"sizes":{"len":[2,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="o" x="4" y="4" width="292" height="56" rx="3"/><line class="t" x1="10" y1="48" x2="290" y2="48"/><rect class="s" x="210" y="14" width="60" height="34" rx="8"/><circle class="k" cx="240" cy="31" r="5"/><rect class="o" x="20" y="16" width="34" height="26" rx="2"/><rect class="o" x="70" y="16" width="34" height="26" rx="2"/>
+</svg>
