@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Console</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"console","name":"Console","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["bridge","engine-room","lab","med-bay","airlock"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":4,"tags":[],"generator":{"id":"console","params":{"len":2},"sizes":{"len":[1,4]}}}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<metadata id="map-weaver-asset"><![CDATA[{"id":"console","name":"Console","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["bridge","engine-room","lab","med-bay","airlock","command-centre","security","server-room","cloning-lab"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":4,"tags":[],"generator":{"id":"console","params":{"len":2},"sizes":{"len":[1,4]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="o" points="18,4 182,4 196,18 196,48 182,62 18,62 4,48 4,18"/><polygon class="s" points="22,12 78,12 84,18 84,28 78,34 22,34 16,28 16,18"/><polygon class="s" points="122,12 178,12 184,18 184,28 178,34 122,34 116,28 116,18"/><path class="l" d="M20 46L25 46M36 46L41 46M52 46L57 46M68 46L73 46M84 46L89 46M100 46L105 46M116 46L121 46M132 46L137 46M148 46L153 46M164 46L169 46M180 46L185 46"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="20,4 180,4 196,20 196,50 180,66 20,66 4,50 4,20"/><polygon class="ko" points="20,10 80,10 86,16 86,34 80,40 20,40 14,34 14,16"/><path class="pl" d="M20.6 33.4L39.2 23.5L53.6 29.5L79.4 16.6"/><polygon class="ko" points="120,10 180,10 186,16 186,34 180,40 120,40 114,34 114,16"/><circle class="pl" cx="150" cy="25" r="8.4"/><path class="pl" d="M150 25L155.9 19.1"/><rect class="o" x="14" y="46" width="172" height="12" rx="4"/><circle class="k" cx="22.6" cy="52" r="3.5"/><circle class="k" cx="39.8" cy="52" r="3.5"/><circle class="k" cx="57" cy="52" r="3.5"/><circle class="k" cx="74.2" cy="52" r="3.5"/><circle class="k" cx="91.4" cy="52" r="3.5"/><circle class="k" cx="108.6" cy="52" r="3.5"/><circle class="k" cx="125.8" cy="52" r="3.5"/><circle class="k" cx="143" cy="52" r="3.5"/><circle class="k" cx="160.2" cy="52" r="3.5"/><circle class="k" cx="177.4" cy="52" r="3.5"/>
+</g>
 </svg>

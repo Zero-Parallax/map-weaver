@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" width="100" height="200">
+<title>Ore cart</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"ore-cart","name":"Ore cart","settings":["scifi"],"footprint":{"w":1,"h":2},"roomTypes":["mine"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":3,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<path class="l" d="M22 0L22 200M78 0L78 200"/><path class="t" d="M12 10L88 10M12 32L88 32M12 54L88 54M12 76L88 76M12 98L88 98M12 120L88 120M12 142L88 142M12 164L88 164M12 186L88 186"/><polygon class="ko" points="26,36 74,36 86,48 86,152 74,164 26,164 14,152 14,48"/><polygon class="o" points="46.5,60 41.7,69.9 29.8,70.7 22.6,60 31.1,51.5 41.4,50.7"/><polygon class="s" points="72.7,60 67.8,70.1 55.7,70.9 48.5,60 57,51.4 67.5,50.5"/><polygon class="o" points="46.8,92 41.9,102.2 29.6,103.1 22.3,92 30.9,83.2 41.5,82.4"/><polygon class="s" points="73,92 68,102.4 55.5,103.2 48.1,92 56.8,83.1 67.6,82.2"/><polygon class="o" points="47.2,124 42.1,134.5 29.4,135.4 21.9,124 30.8,114.9 41.7,114.1"/><polygon class="s" points="73.4,124 68.2,134.7 55.3,135.5 47.7,124 56.7,114.8 67.8,113.9"/>
+</g>
+</svg>

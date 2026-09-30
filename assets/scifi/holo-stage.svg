@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Holo stage</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"holo-stage","name":"Holo stage","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["cantina","market","command-centre"],"placement":"centre","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<circle class="s" cx="100" cy="100" r="90"/><circle class="ko" cx="100" cy="100" r="74"/><circle class="d" cx="100" cy="100" r="58"/><circle class="pl" cx="100" cy="100" r="40"/><ellipse class="hm" cx="100" cy="105.4" rx="27" ry="14.4"/><circle class="hm" cx="100" cy="100" r="11.7"/><ellipse class="hm" cx="73" cy="107.2" rx="6.3" ry="9.9"/><ellipse class="hm" cx="127" cy="107.2" rx="6.3" ry="9.9"/>
+</svg>

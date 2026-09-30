@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
 <title>Double bed</title>
 <metadata id="map-weaver-asset"><![CDATA[{"id":"double-bed","name":"Double bed","settings":["fantasy"],"footprint":{"w":2,"h":2},"roomTypes":["bedroom"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="o" x="10" y="6" width="180" height="188" rx="4"/><rect class="o" x="24" y="16" width="66" height="30" rx="8"/><rect class="o" x="110" y="16" width="66" height="30" rx="8"/><rect class="s" x="10" y="62" width="180" height="132" rx="4"/><line class="t" x1="10" y1="80" x2="190" y2="80"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<rect class="o" x="8" y="4" width="184" height="192" rx="6"/><rect class="ko" x="8" y="4" width="184" height="16" rx="4"/><rect class="o" x="22" y="26" width="70" height="32" rx="12"/><rect class="o" x="108" y="26" width="70" height="32" rx="12"/><rect class="s" x="8" y="70" width="184" height="126" rx="6"/><rect class="o" x="8" y="70" width="184" height="18" rx="4"/><polygon class="t" points="30,110 42,122 30,134 18,122"/><polygon class="t" points="66,110 78,122 66,134 54,122"/><polygon class="t" points="102,110 114,122 102,134 90,122"/><polygon class="t" points="138,110 150,122 138,134 126,122"/><polygon class="t" points="174,110 186,122 174,134 162,122"/>
+</g>
 </svg>

@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" width="200" height="400">
 <title>Cargo container</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"container","name":"Cargo container","settings":["scifi"],"footprint":{"w":2,"h":4},"roomTypes":["cargo-bay"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"cargo","params":{"w":2,"h":4,"style":"container"},"sizes":{"w":[2,3],"h":[3,5]}}}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<metadata id="map-weaver-asset"><![CDATA[{"id":"container","name":"Cargo container","settings":["scifi"],"footprint":{"w":2,"h":4},"roomTypes":["cargo-bay","hangar","landing-pad"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"cargo","params":{"w":2,"h":4,"style":"container"},"sizes":{"w":[2,3],"h":[3,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="o" points="18,6 182,6 194,18 194,382 182,394 18,394 6,382 6,18"/><path class="t" d="M14 30L186 30M14 54L186 54M14 78L186 78M14 102L186 102M14 126L186 126M14 150L186 150M14 174L186 174M14 198L186 198M14 222L186 222M14 246L186 246M14 270L186 270M14 294L186 294M14 318L186 318M14 342L186 342M14 366L186 366"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="16,4 184,4 196,16 196,384 184,396 16,396 4,384 4,16"/><path class="t" d="M14 22L186 22M14 38L186 38M14 54L186 54M14 70L186 70M14 86L186 86M14 102L186 102M14 118L186 118M14 134L186 134M14 150L186 150M14 166L186 166M14 182L186 182M14 198L186 198M14 214L186 214M14 230L186 230M14 246L186 246M14 262L186 262M14 278L186 278M14 294L186 294M14 310L186 310M14 326L186 326M14 342L186 342M14 358L186 358M14 374L186 374"/><rect class="ko" x="86" y="191" width="28" height="18" rx="3"/><path class="pl" d="M92 200L108 200"/>
+</g>
 </svg>

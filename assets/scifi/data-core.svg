@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Data core</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"data-core","name":"Data core","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["server-room","alien-ruins","command-centre"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="179.7,146 100,192 20.3,146 20.3,54 100,8 179.7,54"/><polygon class="ko" points="160.6,135 100,170 39.4,135 39.4,65 100,30 160.6,65"/><polygon class="pl" points="141.6,124 100,148 58.4,124 58.4,76 100,52 141.6,76"/><circle class="o" cx="100" cy="100" r="22"/><circle class="h" cx="70" cy="150" r="2.6"/><circle class="p" cx="80" cy="150" r="2.6"/><circle class="p" cx="90" cy="150" r="2.6"/><circle class="p" cx="100" cy="150" r="2.6"/><circle class="h" cx="110" cy="150" r="2.6"/><circle class="p" cx="120" cy="150" r="2.6"/><circle class="p" cx="130" cy="150" r="2.6"/>
+</g>
+</svg>

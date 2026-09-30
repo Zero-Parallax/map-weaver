@@ -6,6 +6,7 @@ import { ringsBBox, sub, norm, perp, add, scale, dist } from '../core/geom.js';
 import { rng, hash } from '../core/rng.js';
 import { drawLink } from './link-symbols.js';
 import { wallGroups, drawWallGroups } from './walls.js';
+import { BITMAP_PPS } from '../assets/library.js';
 
 function ringsPath(rings, path = new Path2D()) {
   for (const ring of rings) {
@@ -266,7 +267,7 @@ export const OPEN_MODES = [
  *  pxPerSquare keeps hairlines visible when zoomed out.
  */
 /** Draw a level's placed assets of one layer. Images still loading are skipped. */
-export function drawPlacements(ctx, placements, layer, assets, tokens) {
+export function drawPlacements(ctx, placements, layer, assets, tokens, pxPerSquare = 64) {
   if (!assets) return;
   for (const p of placements) {
     const hit = assets.image(p, tokens);
@@ -275,7 +276,9 @@ export function drawPlacements(ctx, placements, layer, assets, tokens) {
     ctx.save();
     ctx.translate(p.x, p.y);
     if (p.rot) ctx.rotate((p.rot * Math.PI) / 180);
-    ctx.drawImage(hit.img, -w / 2, -h / 2, w, h);
+    // The cached bitmap is sharp enough up to its own resolution; beyond that draw the SVG.
+    const source = hit.bitmap && pxPerSquare * (globalThis.devicePixelRatio || 1) <= BITMAP_PPS * 1.05 ? hit.bitmap : hit.img;
+    ctx.drawImage(source, -w / 2, -h / 2, w, h);
     ctx.restore();
   }
 }
@@ -331,9 +334,9 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
   }
 
   // Rugs and decals, then links, then furniture; walls and doors go over them.
-  drawPlacements(ctx, level.placements, 'floor', assets, style.tokens);
+  drawPlacements(ctx, level.placements, 'floor', assets, style.tokens, pxPerSquare);
   for (const { link, role } of links) drawLink(ctx, link, role, style);
-  drawPlacements(ctx, level.placements, 'object', assets, style.tokens);
+  drawPlacements(ctx, level.placements, 'object', assets, style.tokens, pxPerSquare);
 
   // Edges of open areas: drops dashed, railings thin with posts.
   ctx.save();
@@ -356,7 +359,7 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
   const walls = levelWalls(geo, level, style);
   drawWallGroups(ctx, walls, style, pxPerSquare);
   for (const door of level.doors) drawDoor(ctx, door, style, walls.doorWidth.get(door.id));
-  drawPlacements(ctx, level.placements, 'overhead', assets, style.tokens);
+  drawPlacements(ctx, level.placements, 'overhead', assets, style.tokens, pxPerSquare);
 }
 
 /** Wall groups for a level (cached until the geometry, room looks or style change). */

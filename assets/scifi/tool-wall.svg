@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Tool wall</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"tool-wall","name":"Tool wall","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["workshop","hangar","engine-room"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"parts"},"sizes":{"len":[1,4]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<rect class="s" x="4" y="4" width="192" height="48" rx="3"/><rect class="ko" x="4" y="4" width="192" height="8" rx="2"/><polygon class="o" points="17,14 31,14 36,19 36,39 31,44 17,44 12,39 12,19"/><line class="t" x1="18" y1="29" x2="30" y2="29"/><polygon class="o" points="47,14 61,14 66,19 66,39 61,44 47,44 42,39 42,19"/><line class="t" x1="48" y1="29" x2="60" y2="29"/><polygon class="o" points="77,14 91,14 96,19 96,39 91,44 77,44 72,39 72,19"/><line class="t" x1="78" y1="29" x2="90" y2="29"/><polygon class="o" points="107,14 121,14 126,19 126,39 121,44 107,44 102,39 102,19"/><line class="t" x1="108" y1="29" x2="120" y2="29"/><polygon class="m" points="137,14 151,14 156,19 156,39 151,44 137,44 132,39 132,19"/><line class="t" x1="138" y1="29" x2="150" y2="29"/><polygon class="o" points="167,14 181,14 186,19 186,39 181,44 167,44 162,39 162,19"/><line class="t" x1="168" y1="29" x2="180" y2="29"/><rect class="ko" x="97" y="4" width="6" height="48"/>
+</g>
+</svg>

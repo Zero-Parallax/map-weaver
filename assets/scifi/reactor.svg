@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
 <title>Reactor core</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"reactor","name":"Reactor core","settings":["scifi"],"footprint":{"w":3,"h":3},"roomTypes":["engine-room"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[]}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<metadata id="map-weaver-asset"><![CDATA[{"id":"reactor","name":"Reactor core","settings":["scifi"],"footprint":{"w":3,"h":3},"roomTypes":["engine-room","server-room"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="o" points="70,10 230,10 290,70 290,230 230,290 70,290 10,230 10,70"/><circle class="s" cx="150" cy="150" r="110"/><circle class="o" cx="150" cy="150" r="60"/><circle class="k" cx="150" cy="150" r="26"/><path class="l" d="M214 150L256 150M195.3 195.3L225 225M150 214L150 256M104.7 195.3L75 225M86 150L44 150M104.7 104.7L75 75M150 86L150 44M195.3 104.7L225 75"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="70,6 230,6 294,70 294,230 230,294 70,294 6,230 6,70"/><circle class="o" cx="150" cy="150" r="120"/><polygon class="k" points="270,150 265.9,181.1 250.5,176.9 254,150"/><polygon class="k" points="253.9,210 234.9,234.9 223.5,223.5 240.1,202"/><polygon class="k" points="210,253.9 181.1,265.9 176.9,250.5 202,240.1"/><polygon class="k" points="150,270 118.9,265.9 123.1,250.5 150,254"/><polygon class="k" points="90,253.9 65.1,234.9 76.5,223.5 98,240.1"/><polygon class="k" points="46.1,210 34.1,181.1 49.5,176.9 59.9,202"/><polygon class="k" points="30,150 34.1,118.9 49.5,123.1 46,150"/><polygon class="k" points="46.1,90 65.1,65.1 76.5,76.5 59.9,98"/><polygon class="k" points="90,46.1 118.9,34.1 123.1,49.5 98,59.9"/><polygon class="k" points="150,30 181.1,34.1 176.9,49.5 150,46"/><polygon class="k" points="210,46.1 234.9,65.1 223.5,76.5 202,59.9"/><polygon class="k" points="253.9,90 265.9,118.9 250.5,123.1 240.1,98"/><circle class="l" cx="150" cy="150" r="120"/><circle class="ko" cx="150" cy="150" r="96"/><circle class="pl" cx="150" cy="150" r="70"/><circle class="o" cx="150" cy="150" r="46"/><circle class="h" cx="150" cy="150" r="24"/><path class="pl" d="M224 150L242 150M202.3 202.3L215.1 215.1M150 224L150 242M97.7 202.3L84.9 215.1M76 150L58 150M97.7 97.7L84.9 84.9M150 76L150 58M202.3 97.7L215.1 84.9"/>
+</g>
 </svg>

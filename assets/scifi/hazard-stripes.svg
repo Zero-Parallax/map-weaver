@@ -1,14 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Hazard floor</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"hazard-stripes","name":"Hazard floor","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["airlock","cargo-bay","engine-room"],"placement":"door","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<metadata id="map-weaver-asset"><![CDATA[{"id":"hazard-stripes","name":"Hazard floor","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["airlock","cargo-bay","engine-room","hangar","landing-pad","workshop"],"placement":"door","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="o" x="4" y="20" width="192" height="60"/><path class="l" d="M4 64L20 80M4 40L44 80M8 20L68 80M32 20L92 80M56 20L116 80M80 20L140 80M104 20L164 80M128 20L188 80M152 20L196 64M176 20L196 40"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="o" x="4" y="22" width="192" height="56"/><path class="l" d="M4 33L15 22M4 55L37 22M4 77L59 22M25 78L81 22M47 78L103 22M69 78L125 22M91 78L147 22M113 78L169 22M135 78L191 22M157 78L196 39M179 78L196 61"/><rect class="l" x="4" y="22" width="192" height="56"/>
 </svg>

@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
 <title>Mess table</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"mess-table","name":"Mess table","settings":["scifi"],"footprint":{"w":4,"h":2},"roomTypes":["mess-hall","crew-quarters"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":3,"tags":[],"generator":{"id":"table","params":{"w":3,"h":1,"chairs":true},"sizes":{"w":[2,4],"h":[1,2]}}}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<metadata id="map-weaver-asset"><![CDATA[{"id":"mess-table","name":"Mess table","settings":["scifi"],"footprint":{"w":4,"h":2},"roomTypes":["mess-hall","crew-quarters","cantina","apartment"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":3,"tags":[],"generator":{"id":"table","params":{"w":3,"h":1,"chairs":true,"style":"metal"},"sizes":{"w":[2,4],"h":[1,2]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="o" x="82" y="10" width="36" height="36" rx="6"/><line class="l" x1="82" y1="10" x2="118" y2="10"/><rect class="o" x="82" y="154" width="36" height="36" rx="6"/><line class="l" x1="82" y1="190" x2="118" y2="190"/><rect class="o" x="182" y="10" width="36" height="36" rx="6"/><line class="l" x1="182" y1="10" x2="218" y2="10"/><rect class="o" x="182" y="154" width="36" height="36" rx="6"/><line class="l" x1="182" y1="190" x2="218" y2="190"/><rect class="o" x="282" y="10" width="36" height="36" rx="6"/><line class="l" x1="282" y1="10" x2="318" y2="10"/><rect class="o" x="282" y="154" width="36" height="36" rx="6"/><line class="l" x1="282" y1="190" x2="318" y2="190"/><rect class="o" x="10" y="82" width="36" height="36" rx="6"/><line class="l" x1="10" y1="82" x2="10" y2="118"/><rect class="o" x="354" y="82" width="36" height="36" rx="6"/><line class="l" x1="390" y1="82" x2="390" y2="118"/><rect class="o" x="56" y="56" width="288" height="88" rx="4"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<rect class="s" x="80" y="6" width="40" height="40" rx="12"/><rect class="ko" x="80" y="6" width="40" height="11" rx="5"/><rect class="s" x="80" y="154" width="40" height="40" rx="12"/><rect class="ko" x="80" y="183" width="40" height="11" rx="5"/><rect class="s" x="180" y="6" width="40" height="40" rx="12"/><rect class="ko" x="180" y="6" width="40" height="11" rx="5"/><rect class="s" x="180" y="154" width="40" height="40" rx="12"/><rect class="ko" x="180" y="183" width="40" height="11" rx="5"/><rect class="s" x="280" y="6" width="40" height="40" rx="12"/><rect class="ko" x="280" y="6" width="40" height="11" rx="5"/><rect class="s" x="280" y="154" width="40" height="40" rx="12"/><rect class="ko" x="280" y="183" width="40" height="11" rx="5"/><rect class="s" x="6" y="80" width="40" height="40" rx="12"/><rect class="ko" x="6" y="80" width="11" height="40" rx="5"/><rect class="s" x="354" y="80" width="40" height="40" rx="12"/><rect class="ko" x="383" y="80" width="11" height="40" rx="5"/><polygon class="s" points="72,56 328,56 344,72 344,128 328,144 72,144 56,128 56,72"/><polygon class="t" points="78,68 322,68 332,78 332,122 322,132 78,132 68,122 68,78"/><rect class="o" x="86" y="76" width="28" height="18" rx="4"/><rect class="o" x="186" y="76" width="28" height="18" rx="4"/><rect class="o" x="286" y="76" width="28" height="18" rx="4"/>
+</g>
 </svg>

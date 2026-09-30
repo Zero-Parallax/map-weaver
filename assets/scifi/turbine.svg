@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
 <title>Engine turbine</title>
 <metadata id="map-weaver-asset"><![CDATA[{"id":"turbine","name":"Engine turbine","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["engine-room"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":2,"tags":[]}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="o" points="38,8 162,8 192,38 192,162 162,192 38,192 8,162 8,38"/><circle class="s" cx="100" cy="100" r="74"/><path class="l" d="M120 100L161.4 133.6M117.3 110L136.4 159.8M110 117.3L101.7 170M100 120L66.4 161.4M90 117.3L40.2 136.4M82.7 110L30 101.7M80 100L38.6 66.4M82.7 90L63.6 40.2M90 82.7L98.3 30M100 80L133.6 38.6M110 82.7L159.8 63.6M117.3 90L170 98.3"/><circle class="k" cx="100" cy="100" r="18"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="40,6 160,6 194,40 194,160 160,194 40,194 6,160 6,40"/><circle class="ko" cx="100" cy="100" r="80"/><polygon class="o" points="118,100 171.2,110.8 164.8,131.3 117.6,103.6"/><polygon class="o" points="114.6,110.6 151.3,150.5 134,163.4 112.2,113.3"/><polygon class="o" points="105.6,117.1 111.8,171 90.2,171.3 102.1,117.9"/><polygon class="o" points="94.4,117.1 67.8,164.4 50.2,152 91.1,115.7"/><polygon class="o" points="85.4,110.6 36.1,133.1 29.1,112.8 83.6,107.5"/><polygon class="o" points="82,100 28.8,89.2 35.2,68.7 82.4,96.4"/><polygon class="o" points="85.4,89.4 48.7,49.5 66,36.6 87.8,86.7"/><polygon class="o" points="94.4,82.9 88.2,29 109.8,28.7 97.9,82.1"/><polygon class="o" points="105.6,82.9 132.2,35.6 149.8,48 108.9,84.3"/><polygon class="o" points="114.6,89.4 163.9,66.9 170.9,87.2 116.4,92.5"/><circle class="ko" cx="100" cy="100" r="20"/><circle class="p" cx="100" cy="100" r="8"/>
+</g>
 </svg>

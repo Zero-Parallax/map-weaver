@@ -113,6 +113,7 @@ export class AssetLibrary {
           new Promise((resolve) => {
             const url = URL.createObjectURL(new Blob([recolour(text, tokens)], { type: 'image/svg+xml' }));
             entry.img.onload = () => {
+              entry.bitmap = rasterize(entry.img, r.footprint);
               entry.ready = true;
               resolve();
               this.onImageReady();
@@ -123,7 +124,7 @@ export class AssetLibrary {
           }),
       );
     }
-    return entry.ready ? { img: entry.img, footprint: r.footprint, meta: r.meta } : null;
+    return entry.ready ? { img: entry.img, bitmap: entry.bitmap, footprint: r.footprint, meta: r.meta } : null;
   }
 
   /** Wait until every placement's image is ready (for export). */
@@ -139,6 +140,19 @@ export class AssetLibrary {
     await this.images.get(key).promise;
     return this.images.get(key).url;
   }
+}
+
+// Pixels per square of the cached bitmap drawn at editor zoom levels.
+export const BITMAP_PPS = 112;
+
+/** Draw an SVG image once into a canvas, so busy maps don't re-render SVG filters every frame. */
+function rasterize(img, footprint) {
+  if (typeof document === 'undefined') return null;
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(footprint.w * BITMAP_PPS));
+  c.height = Math.max(1, Math.round(footprint.h * BITMAP_PPS));
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  return c;
 }
 
 /** Footprint of a placement after rotation (90 and 270 swap width and height). */

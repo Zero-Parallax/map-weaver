@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<title>Grow tower</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"grow-tower","name":"Grow tower","settings":["scifi"],"footprint":{"w":1,"h":1},"roomTypes":["hydroponics-bay","apartment","market"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":6,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<circle class="ko" cx="50" cy="50" r="38"/><ellipse class="o" cx="85.2" cy="50.0" rx="30.7" ry="14.1" transform="rotate(0.0 85.2 50.0)"/><ellipse class="o" cx="74.9" cy="74.9" rx="30.7" ry="14.1" transform="rotate(45.0 74.9 74.9)"/><ellipse class="o" cx="50.0" cy="85.2" rx="30.7" ry="14.1" transform="rotate(90.0 50.0 85.2)"/><ellipse class="o" cx="25.1" cy="74.9" rx="30.7" ry="14.1" transform="rotate(135.0 25.1 74.9)"/><ellipse class="o" cx="14.8" cy="50.0" rx="30.7" ry="14.1" transform="rotate(180.0 14.8 50.0)"/><ellipse class="o" cx="25.1" cy="25.1" rx="30.7" ry="14.1" transform="rotate(225.0 25.1 25.1)"/><ellipse class="o" cx="50.0" cy="14.8" rx="30.7" ry="14.1" transform="rotate(270.0 50.0 14.8)"/><ellipse class="o" cx="74.9" cy="25.1" rx="30.7" ry="14.1" transform="rotate(315.0 74.9 25.1)"/><circle class="k" cx="50" cy="50" r="14.1"/><circle class="p" cx="50" cy="50" r="10"/>
+</g>
+</svg>

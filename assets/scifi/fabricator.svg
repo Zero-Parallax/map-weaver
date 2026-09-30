@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Fabricator</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"fabricator","name":"Fabricator","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["workshop","hangar","lab","cloning-lab"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="30,6 170,6 194,30 194,158 170,182 30,182 6,158 6,30"/><polygon class="ko" points="44,30 156,30 170,44 170,126 156,140 44,140 30,126 30,44"/><rect class="o" x="50" y="80" width="100" height="40" rx="6"/><line class="pl" x1="40" y1="60" x2="160" y2="60"/><rect class="o" x="92" y="50" width="16" height="26" rx="4"/><polygon class="ko" points="64.8,150 135.2,150 140,154.8 140,169.2 135.2,174 64.8,174 60,169.2 60,154.8"/><path class="pl" d="M65.3 157.3L93.1 157.3"/>
+</g>
+</svg>

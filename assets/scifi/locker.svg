@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Storage locker</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"locker","name":"Storage locker","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["crew-quarters","cargo-bay","airlock","armoury","engine-room"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":4,"tags":[]}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<metadata id="map-weaver-asset"><![CDATA[{"id":"locker","name":"Storage locker","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["crew-quarters","cargo-bay","airlock","armoury","engine-room","hangar","workshop"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":4,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="o" points="16,6 184,6 194,16 194,46 184,56 16,56 6,46 6,16"/><path class="l" d="M53 6L53 56M100 6L100 56M147 6L147 56"/><path class="t" d="M20 20L40 20M67 20L87 20M114 20L134 20M161 20L181 20"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="14,4 186,4 196,14 196,50 186,60 14,60 4,50 4,14"/><rect class="o" x="12" y="10" width="38" height="44" rx="4"/><polygon class="o" points="24,14 38,14 44,20 44,24 38,30 24,30 18,24 18,20"/><path class="l" d="M26 22L36 22"/><rect class="ko" x="38" y="38" width="6" height="10" rx="2"/><rect class="o" x="58" y="10" width="38" height="44" rx="4"/><polygon class="o" points="70,14 84,14 90,20 90,24 84,30 70,30 64,24 64,20"/><path class="l" d="M72 22L82 22"/><rect class="ko" x="84" y="38" width="6" height="10" rx="2"/><rect class="o" x="104" y="10" width="38" height="44" rx="4"/><polygon class="o" points="116,14 130,14 136,20 136,24 130,30 116,30 110,24 110,20"/><path class="l" d="M118 22L128 22"/><rect class="ko" x="130" y="38" width="6" height="10" rx="2"/><rect class="o" x="150" y="10" width="38" height="44" rx="4"/><polygon class="o" points="162,14 176,14 182,20 182,24 176,30 162,30 156,24 156,20"/><path class="l" d="M164 22L174 22"/><rect class="ko" x="176" y="38" width="6" height="10" rx="2"/>
+</g>
 </svg>

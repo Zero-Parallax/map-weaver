@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600">
+<title>Shuttle</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"shuttle","name":"Shuttle","settings":["scifi"],"footprint":{"w":4,"h":6},"roomTypes":["hangar","landing-pad"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="200,20 250,90 260,250 380,380 380,470 260,440 240,560 160,560 140,440 20,470 20,380 140,250 150,90"/><polygon class="ko" points="200,40 236,96 164,96"/><polygon class="o" points="200,110 240,250 230,420 170,420 160,250"/><path class="t" d="M170 300L230 300M170 340L230 340M170 380L230 380"/><rect class="ko" x="154" y="540" width="36" height="40" rx="6"/><rect class="ko" x="210" y="540" width="36" height="40" rx="6"/><rect class="ko" x="40" y="420" width="60" height="20" rx="4"/><rect class="ko" x="300" y="420" width="60" height="20" rx="4"/>
+</g>
+</svg>

@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
 <title>Well</title>
 <metadata id="map-weaver-asset"><![CDATA[{"id":"well","name":"Well","settings":["fantasy"],"footprint":{"w":2,"h":2},"roomTypes":["cellar","cave","great-hall"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<circle class="o" cx="100" cy="100" r="70"/><circle class="k" cx="100" cy="100" r="52"/><path class="l" d="M20 100L180 100"/><rect class="o" x="88" y="88" width="24" height="24" rx="2"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<circle class="s" cx="100" cy="100" r="74"/><path class="t" d="M156 100L174 100M151.7 121.4L168.4 128.3M139.6 139.6L152.3 152.3M121.4 151.7L128.3 168.4M100 156L100 174M78.6 151.7L71.7 168.4M60.4 139.6L47.7 152.3M48.3 121.4L31.6 128.3M44 100L26 100M48.3 78.6L31.6 71.7M60.4 60.4L47.7 47.7M78.6 48.3L71.7 31.6M100 44L100 26M121.4 48.3L128.3 31.6M139.6 60.4L152.3 47.7M151.7 78.6L168.4 71.7"/><circle class="m" cx="100" cy="100" r="56"/><circle class="pl" cx="100" cy="100" r="40"/><rect class="ko" x="14" y="92" width="172" height="16" rx="3"/><circle class="o" cx="100" cy="100" r="14"/>
+</g>
 </svg>

@@ -109,7 +109,8 @@ squares, room types, placement rule (wall, corner, centre, door, balcony, free),
 blocks movement or vision, and which side faces the wall. Shapes use the classes `o s m k p h l t d`
 so they recolour to the map's palette. See `src/assets/meta.js` for every field.
 
-The starter sets are generated: edit `src/assets/starter.js` and run
+The starter sets are generated: edit the drawings in `src/assets/starter/` (common, fantasy,
+sci-fi; shared pieces in `src/assets/motifs.js`) and run
 
 ```
 node tools/generate-assets.js

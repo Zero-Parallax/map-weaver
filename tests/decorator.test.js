@@ -1,4 +1,5 @@
 import test from 'node:test';
+import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 import { createMap, insertLevel } from '../src/core/model.js';
@@ -93,9 +94,9 @@ test('heavier density places more', () => {
   assert.ok(heavy > light, `light ${light}, heavy ${heavy}`);
 });
 
-test('every room type in every setting gets something and stays walkable between doors', () => {
+test('every room type in every setting gets something and stays walkable between doors', async () => {
   for (const setting of ['classic', 'fantasy', 'scifi']) {
-    const types = [...new Set(metas.filter((m) => m.settings.includes(setting)).flatMap((m) => m.roomTypes))].filter((t) => t !== '*');
+    const types = JSON.parse(await fs.readFile(new URL(`../settings/${setting}/setting.json`, import.meta.url), 'utf8')).roomTypes.map((t) => t.id);
     for (const type of types) {
       for (const reroll of [0, 1, 2]) {
         const s = setup({ setting, type, density: DENSITY.heavy });

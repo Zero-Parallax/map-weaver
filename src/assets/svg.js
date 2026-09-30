@@ -3,22 +3,32 @@
 // Colours are never hard-coded: every shape uses one of the classes below, whose colours come
 // from CSS variables (--ink, --paper, --shade, --mid). The fallbacks make the file look right
 // on its own; the app injects the map's palette when it draws the asset.
+//   o  paper, ink outline      s  shade, ink outline     m  mid, ink outline
+//   k  solid ink               ko ink with a rounded outline
+//   p  paper, no outline       h  shade, no outline      hm mid, no outline
+//   l  ink line                t  thin ink line          pl paper line (on ink)   d dashed
 
 import { writeMeta } from './meta.js';
 
 export const U = 100;
 
 export const STYLE = `
-.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}
 `.trim();
+
+// Soft ink shadow under furniture so it stands off the floor.
+const SHADOW = '<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>';
 
 const n = (v) => Math.round(v * 10) / 10;
 
@@ -103,7 +113,7 @@ export function assetSvg(meta, drawing) {
     `<title>${escapeXml(meta.name)}</title>`,
     writeMeta(meta),
     `<style>${STYLE}</style>`,
-    String(drawing),
+    ...(meta.layer === 'floor' ? [String(drawing)] : [SHADOW, `<g filter="url(#sh)">`, String(drawing), '</g>']),
     '</svg>',
     '',
   ].join('\n');

@@ -1,14 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Bookshelf</title>
 <metadata id="map-weaver-asset"><![CDATA[{"id":"bookshelf","name":"Bookshelf","settings":["classic","fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["library","bedroom","throne-room","shop"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":6,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"books"},"sizes":{"len":[1,4]}}}]]></metadata>
-<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
-.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
 .p{fill:var(--paper,#fff);stroke:none}
 .h{fill:var(--shade,#c6c6c6);stroke:none}
-.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
-.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="o" x="4" y="4" width="192" height="44" rx="2"/><path class="t" d="M26 10L26 34.2M36 10L36 29.5M48.6 10L48.6 39.7M70.3 10L70.3 28.8M78.3 10L78.3 30.7M90.2 10L90.2 30.1M98.7 10L98.7 31.6M110.5 10L110.5 32.7M117.5 10L117.5 30.3M128.2 10L128.2 36.3M143.1 10L143.1 36M151 10L151 30.9M158.9 10L158.9 28.3M171.7 10L171.7 40M183.7 10L183.7 31.2"/><line class="l" x1="100" y1="6" x2="100" y2="46"/>
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<rect class="s" x="4" y="4" width="192" height="48" rx="3"/><rect class="ko" x="4" y="4" width="192" height="8" rx="2"/><rect class="o" x="12" y="12" width="16" height="24.2" rx="1.5"/><rect class="m" x="29.5" y="12" width="11.6" height="34.9" rx="1.5"/><rect class="m" x="42.6" y="12" width="15.8" height="27.6" rx="1.5"/><rect class="ko" x="69.2" y="12" width="13.3" height="25.3" rx="1.5"/><rect class="s" x="84" y="12" width="8.5" height="24.8" rx="1.5"/><rect class="m" x="94" y="12" width="9.7" height="22" rx="1.5"/><rect class="s" x="131.8" y="12" width="8.3" height="29.6" rx="1.5"/><rect class="m" x="141.5" y="12" width="12.4" height="25.8" rx="1.5"/><rect class="m" x="155.4" y="12" width="7.2" height="33.3" rx="1.5"/><rect class="ko" x="164.1" y="12" width="14.5" height="34" rx="1.5"/><rect class="ko" x="180.2" y="12" width="7.8" height="28.7" rx="1.5"/><rect class="ko" x="97" y="4" width="6" height="48"/>
+</g>
 </svg>

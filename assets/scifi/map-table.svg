@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+<title>Tactical map table</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"map-table","name":"Tactical map table","settings":["scifi"],"footprint":{"w":2,"h":3},"roomTypes":["command-centre","security"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="s" points="36,6 164,6 194,36 194,264 164,294 36,294 6,264 6,36"/><polygon class="ko" points="40,20 160,20 180,40 180,260 160,280 40,280 20,260 20,40"/><path class="pl" d="M40 30L40 270M60 30L60 270M80 30L80 270M100 30L100 270M120 30L120 270M140 30L140 270M160 30L160 270M30 40L170 40M30 60L170 60M30 80L170 80M30 100L170 100M30 120L170 120M30 140L170 140M30 160L170 160M30 180L170 180M30 200L170 200M30 220L170 220M30 240L170 240M30 260L170 260"/><path class="l" d="M50 230L90 170L120 190L150 90"/><circle class="p" cx="150" cy="90" r="9"/><circle class="o" cx="90" cy="170" r="7"/>
+</g>
+</svg>
