@@ -8,6 +8,8 @@ import { pointInRings, distToRings, distToSegment, snapPoint, polylineSegments, 
 import { drawLevel, levelPaths } from '../render/renderer.js';
 import { linksOnLevel, linkContains } from '../core/links.js';
 import { placementContains, snapCentre, rotatedFootprint } from '../assets/library.js';
+import { decorateRoom } from '../decorator/decorate.js';
+import { newId } from '../core/model.js';
 import { resolveStyle } from '../render/style.js';
 
 const HISTORY_LIMIT = 200;
@@ -26,6 +28,7 @@ export class App {
       mode: 'add', walled: true, radius: 0, roughness: 0.5, brush: 1, doorType: 'door', doorWidth: 1, roomType: null,
       linkType: 'stairs', linkSpan: 1, spiralSize: 2, edgeKind: 'wall',
       asset: null, assetParams: null, assetRoom: null, assetSearch: '',
+      autoDecorate: true,
     };
     this.showBelow = true;
     this.view = { scale: 32, ox: 40, oy: 40 };
@@ -135,6 +138,57 @@ export class App {
       if (index < 0 || seen.has(index)) return false;
       seen.add(index);
       return true;
+    });
+    // Assets whose centre is no longer on the floor go too.
+    level.placements = level.placements.filter((p) => regionAt(geo.rooms, [p.x, p.y]) >= 0);
+  }
+
+  /**
+   * Decorate rooms on a level in place (call inside commit). Replaces each room's automatic
+   * pieces and keeps the ones placed by hand. reroll: bump the room's reroll count first.
+   */
+  decorateIn(map, level, tagIds, { reroll = false } = {}) {
+    const geo = computeLevelGeometry(level, map);
+    const metas = this.assets.forSetting(map.setting);
+    const links = linksOnLevel(map, level);
+    let placed = 0;
+    for (const id of tagIds) {
+      const tag = level.rooms.find((r) => r.id === id);
+      const index = geo.rooms.tagRegion.get(id);
+      if (!tag || index == null) continue;
+      if (reroll) tag.reroll = (tag.reroll || 0) + 1;
+      const inRoom = (p) => p.room === id || regionAt(geo.rooms, [p.x, p.y]) === index;
+      level.placements = level.placements.filter((p) => !(p.auto && inRoom(p)));
+      const existing = [];
+      for (const p of level.placements) {
+        const r = inRoom(p) && this.assets.resolve(p);
+        if (!r) continue;
+        const f = rotatedFootprint(r.footprint, p.rot);
+        existing.push({ meta: r.meta, footprint: f, x: Math.round(p.x - f.w / 2), y: Math.round(p.y - f.h / 2) });
+      }
+      const out = decorateRoom({
+        geo, region: geo.rooms.regions[index], tag, assets: metas, doors: level.doors, links, existing, mapSeed: map.seed,
+      });
+      for (const p of out.placements) level.placements.push({ id: newId('a'), ...p });
+      placed += out.placements.length;
+    }
+    return placed;
+  }
+
+  decorate(tagIds, { reroll = false } = {}) {
+    let placed = 0;
+    this.commit(reroll ? 'Reroll' : 'Decorate', (map, level) => {
+      placed = this.decorateIn(map, level, tagIds, { reroll });
+    });
+    this.status(`Placed ${placed} asset${placed === 1 ? '' : 's'}.`);
+  }
+
+  /** Remove the automatic pieces from rooms, keeping hand-placed ones. */
+  clearDecoration(tagIds) {
+    this.commit('Clear decoration', (map, level) => {
+      const geo = computeLevelGeometry(level, map);
+      const indexes = new Set(tagIds.map((id) => geo.rooms.tagRegion.get(id)));
+      level.placements = level.placements.filter((p) => !(p.auto && (tagIds.includes(p.room) || indexes.has(regionAt(geo.rooms, [p.x, p.y])))));
     });
   }
 
@@ -279,6 +333,12 @@ export class App {
         // Room tags and doors belonging to the shape travel with it.
         for (const t of level.rooms) {
           if (pointInRings(t.at, rings)) t.at = [t.at[0] + dx, t.at[1] + dy];
+        }
+        for (const pl of level.placements) {
+          if (pointInRings([pl.x, pl.y], rings)) {
+            pl.x += dx;
+            pl.y += dy;
+          }
         }
         for (const d of level.doors) {
           const mid = scale(add(d.a, d.b), 0.5);

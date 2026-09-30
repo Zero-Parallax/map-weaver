@@ -1,6 +1,6 @@
 // Doors, room tagging, selection and erasing.
 
-import { el, segmented, field, select } from '../dom.js';
+import { el, segmented, field, select, checkbox } from '../dom.js';
 import { newId, newSeed, DOOR_TYPES } from '../../core/model.js';
 import { nearestWall, snapDoor, doorsOverlap } from '../../core/doors.js';
 import { regionAt } from '../../core/rooms.js';
@@ -65,7 +65,9 @@ export const roomTool = {
   options: (app) => {
     const types = app.setting?.roomTypes || [];
     currentRoomType(app);
-    return el(
+    return el('div', {},
+      checkbox('Decorate rooms when tagged', app.opts.autoDecorate, (v) => app.setOpt('autoDecorate', v)),
+      el(
       'div',
       { class: 'room-types' },
       types.map((t, i) =>
@@ -76,7 +78,7 @@ export const roomTool = {
           t.name,
         ),
       ),
-    );
+    ));
   },
   move(app, ev) {
     app.hoverRegion = regionAt(app.geometry().rooms, ev.world);
@@ -95,7 +97,10 @@ export const roomTool = {
     }
     const type = currentRoomType(app);
     if (!type) return;
-    app.commit('Tag room', (map, level) => tagRegion(level, rooms, index, type, ev.world));
+    app.commit('Tag room', (map, level) => {
+      const tag = tagRegion(level, rooms, index, type, ev.world);
+      if (app.opts.autoDecorate) app.decorateIn(map, level, [tag.id]);
+    });
   },
   cancel(app) {
     if (app) app.hoverRegion = -1;
@@ -115,9 +120,11 @@ export function tagRegion(level, rooms, index, type, at) {
   const existing = region.tag && level.rooms.find((r) => r.id === region.tag.id);
   if (existing) {
     existing.type = type;
-  } else {
-    level.rooms.push({ id: newId('r'), type, at: at || region.labelAt, seed: newSeed(), reroll: 0 });
+    return existing;
   }
+  const tag = { id: newId('r'), type, at: at || region.labelAt, seed: newSeed(), reroll: 0 };
+  level.rooms.push(tag);
+  return tag;
 }
 
 // ---- select / move -------------------------------------------------------

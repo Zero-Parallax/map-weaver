@@ -44,6 +44,18 @@ Set `PORT` to use another port.
 - Pan with the middle mouse button or Space + drag. Wheel zooms. **F** fits the map.
 - Ctrl+Z / Ctrl+Y undo and redo. Ctrl+S saves, Ctrl+O opens.
 
+## Decorating
+
+Tag a room (Room type tool) and it is furnished straight away; untick "Decorate rooms when
+tagged" to do it by hand. Select a room to change its density (light by default), decorate
+again, **Reroll** for a new layout, or **Clear**. The Levels panel decorates or rerolls every
+room on the level. Pieces you place or move by hand are kept when a room is rerolled.
+
+The decorator follows each asset's placement rule, never overlaps pieces, keeps two squares
+clear in front of doors and a ring round stairs, ladders and lifts, leaves balcony edges to
+balcony pieces, and only accepts a piece if every entrance can still reach every other.
+Corridors (rooms 3 squares or narrower) only get pieces along their walls.
+
 ## Assets
 
 SVG files under `assets/` (`common/` holds ones shared by several settings). Each file carries

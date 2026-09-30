@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
 <title>Pew</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"pew","name":"Pew","settings":["classic","fantasy"],"footprint":{"w":3,"h":1},"roomTypes":["temple"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":8,"tags":[],"generator":{"id":"bench","params":{"len":3,"back":true},"sizes":{"len":[2,5]}}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"pew","name":"Pew","settings":["classic","fantasy"],"footprint":{"w":3,"h":1},"roomTypes":["temple"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":8,"tags":[],"facing":"focal","generator":{"id":"bench","params":{"len":3,"back":true},"sizes":{"len":[2,5]}}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}

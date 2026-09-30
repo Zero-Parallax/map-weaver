@@ -55,6 +55,22 @@ Recomputed from the level when it changes:
 A placement is `{id, asset, x, y (centre, squares), rot (degrees), params?, auto, room?}`.
 Placed assets draw by layer: floor (rugs) under links and furniture, overhead over walls.
 
+## Decorator (`src/decorator/decorate.js`)
+
+Pure function, no DOM: `decorateRoom({geo, region, tag, assets, doors, links, existing, mapSeed})`.
+
+1. **Analyse** the room's full squares: each side is inside, wall, door, balcony or open
+   (walls within half a square count, so curved and diagonal walls work). Keep-clear squares:
+   two deep inside each door, a ring round each link. Entrances = door and link squares.
+2. **Budget** of furniture squares from the room's density (light 0.25 by default).
+3. **Place** required pieces (min >= 1) first, then rugs and decals, then weighted picks.
+   Candidates per rule: wall/corner/balcony need the back (and a side) against that edge;
+   centre prefers the middle; door sits beside the clear zone; showpieces (throne, altar) go
+   far from the entrances, centred on their wall; `facing: "focal"` seats turn to face them.
+4. **Check** each blocking piece: entrances still connected and no square cut off.
+
+Seed = hash(map seed, room id, room seed, reroll count), so results repeat until rerolled.
+
 ## Rendering (`src/render/`)
 
 One Canvas 2D renderer draws paper, shading (solid, hatched band, cross-hatched band, line
@@ -65,7 +81,7 @@ hatching), grid, walls and doors. The editor and the PNG export share it.
 1. Core model, shape/wall/door editor, room tagging, save/load **(done)**
 2. Levels, links (stairs, ladders, lifts, trapdoors), balconies, faded level below **(done)**
 3. Asset format (metadata in the SVG), library, parametric generators, starter sets **(done)**
-4. Decorator: slots, keep-clear zones, seeded placement, reachability check
+4. Decorator: slots, keep-clear zones, seeded placement, reachability check **(done)**
 5. Manual asset editing: move, rotate, delete, add
 6. PNG export at a chosen pixels-per-square
 

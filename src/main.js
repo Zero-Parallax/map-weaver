@@ -9,6 +9,7 @@ import { linkTool, edgeTool } from './editor/tools/level-tools.js';
 import { assetTool, sizeFields } from './editor/tools/asset-tool.js';
 import { AssetLibrary } from './assets/library.js';
 import { regionAt } from './core/rooms.js';
+import { DENSITY, DEFAULT_DENSITY } from './decorator/decorate.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
@@ -247,22 +248,41 @@ function roomSection() {
   const region = rooms.regions[index];
   const types = [{ id: '', name: '— untagged —' }, ...(app.setting?.roomTypes || [])];
   if (region.tag && !types.some((t) => t.id === region.tag.type)) types.push({ id: region.tag.type, name: app.roomTypeName(region.tag.type) });
+  const tag = region.tag;
+  const density = tag?.density ?? DEFAULT_DENSITY;
+  const setDensity = (d) => app.commit('Room density', (map, level) => {
+    const t = level.rooms.find((r) => r.id === tag.id);
+    if (!t) return;
+    t.density = d;
+    app.decorateIn(map, level, [t.id]);
+  });
+  const preset = Object.entries(DENSITY).find(([, v]) => Math.abs(v - density) < 0.01)?.[0] || '';
   return section(
     'Room',
-    field('Type', select(types, region.tag?.type || '', (v) => {
+    field('Type', select(types, tag?.type || '', (v) => {
       if (!v) {
         app.commit('Clear room type', (map, level) => {
+          level.placements = level.placements.filter((p) => !(p.auto && p.room === tag?.id));
           level.rooms = level.rooms.filter((r) => rooms.tagRegion.get(r.id) !== index);
         });
       } else {
-        app.commit('Tag room', (map, level) => tagRegion(level, rooms, index, v, at));
+        app.commit('Tag room', (map, level) => {
+          const t = tagRegion(level, rooms, index, v, at);
+          if (app.opts.autoDecorate) app.decorateIn(map, level, [t.id]);
+        });
       }
     })),
     el('p', { class: 'hint' }, `${region.cells.length} full squares, about ${Math.round(region.area)} sq in all.`),
-    el('div', { class: 'actions' },
-      el('button', { disabled: true, title: 'Arrives with the decorator (build step 4)' }, 'Decorate'),
-      el('button', { disabled: true, title: 'Arrives with the decorator (build step 4)' }, 'Reroll'),
+    tag && field('Density',
+      el('div', {},
+        segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => setDensity(DENSITY[v])),
+        el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: density, onchange: (e) => setDensity(Number(e.target.value)) }))),
+    tag && el('div', { class: 'actions' },
+      el('button', { onclick: () => app.decorate([tag.id]), title: 'Replace this room\'s automatic pieces (same layout)' }, 'Decorate'),
+      el('button', { onclick: () => app.decorate([tag.id], { reroll: true }), title: 'A new random layout' }, 'Reroll'),
+      el('button', { onclick: () => app.clearDecoration([tag.id]), title: 'Remove automatic pieces; hand-placed ones stay' }, 'Clear'),
     ),
+    !tag && el('p', { class: 'hint' }, 'Give the room a type to decorate it.'),
   );
 }
 
@@ -356,6 +376,10 @@ function levelSection() {
       app.showBelow = v;
       app.requestRender();
     }),
+    el('div', { class: 'actions' },
+      el('button', { onclick: () => app.decorate(app.level.rooms.map((r) => r.id)), title: 'Decorate every tagged room on this level' }, 'Decorate all rooms'),
+      el('button', { onclick: () => app.decorate(app.level.rooms.map((r) => r.id), { reroll: true }) }, 'Reroll all'),
+    ),
     el('p', { class: 'hint' }, 'PageUp / PageDown switch levels.'),
   );
 }

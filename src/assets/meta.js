@@ -13,6 +13,7 @@
 //   layer:         floor (rugs, decals) | object | overhead
 //   weight:        how often the decorator picks it relative to others (default 1)
 //   min / max:     how many per room the decorator aims for (max 0 = no limit)
+//   facing:        optional; "focal" = seats that turn to face the room's showpiece (pews)
 //   tags:          free-form words for search
 //   generator:     {id, params} if made by a parametric generator (the app can remake it at
 //                  other sizes); sizes: allowed ranges the decorator may pick from

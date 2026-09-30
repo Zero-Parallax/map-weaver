@@ -212,7 +212,7 @@ A('campfire', 'Campfire', CF, [1, 1], { placement: 'centre', blocksMovement: fal
 
 G('dais', 'Dais', C, 'dais', { w: 3, h: 2 }, { placement: 'wall', layer: 'floor', blocksMovement: false, roomTypes: ['throne-room', 'temple'], max: 1 }, { w: [2, 5], h: [1, 3] });
 
-G('pew', 'Pew', CF, 'bench', { len: 3, back: true }, { placement: 'free', roomTypes: ['temple'], max: 8, weight: 3 }, { len: [2, 5] });
+G('pew', 'Pew', CF, 'bench', { len: 3, back: true }, { placement: 'free', facing: 'focal', roomTypes: ['temple'], max: 8, weight: 3 }, { len: [2, 5] });
 
 A('urn', 'Urn', C, [1, 1], { placement: 'balcony', roomTypes: ['*'], max: 4 }, (g) => {
   g.circle(50, 50, 26, 'o');
@@ -596,6 +596,7 @@ export function buildStarterAssets() {
       max: d.max ?? 0,
       tags: d.tags || [],
     };
+    if (d.facing) meta.facing = d.facing;
     if (d.generator) meta.generator = { ...d.generator, sizes: d.sizes || null };
     const folder = settings.length > 1 ? 'common' : settings[0];
     return { meta, drawing, folder };
