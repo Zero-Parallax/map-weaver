@@ -14,6 +14,17 @@ node serve.js
 Then open <http://127.0.0.1:5173/>. Maps are saved as JSON in the `maps/` folder.
 Set `PORT` to use another port.
 
+## Phones and tablets
+
+The editor works by touch: one finger draws and selects, two fingers pan and pinch-zoom. On a
+touch screen a bar along the bottom stands in for keys and right-click: undo, redo, Done
+(finish a polygon or chain of walls), cancel, turn 90°, delete, snapping (whole squares, half
+squares, off), fit, and ☰ for the options panel, which slides up from the bottom on small screens.
+
+Hosted as plain files (no `node serve.js`), the app runs in browser-only mode: **Save**
+downloads the map file, **Open** loads one, exports download, and importing your own PNG art is
+switched off. The starter assets come from `assets/index.json`.
+
 ## Drawing
 
 | Tool | Key | What it does |

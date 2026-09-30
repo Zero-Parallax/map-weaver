@@ -1,4 +1,5 @@
 // Talks to serve.js, and loads settings from the settings folder.
+// Without serve.js (the app hosted as plain files) there is no API: see hasServer().
 
 async function json(res) {
   const body = await res.json().catch(() => ({}));
@@ -6,17 +7,32 @@ async function json(res) {
   return body;
 }
 
+let serverAvailable = null;
+
+/** True when serve.js is behind the page; false when it is hosted as plain files. */
+export async function hasServer() {
+  if (serverAvailable === null) {
+    try {
+      const res = await fetch('api/maps');
+      serverAvailable = res.ok && (res.headers.get('content-type') || '').includes('json');
+    } catch {
+      serverAvailable = false;
+    }
+  }
+  return serverAvailable;
+}
+
 export async function listMaps() {
-  return json(await fetch('/api/maps'));
+  return json(await fetch('api/maps'));
 }
 
 export async function loadMapFile(name) {
-  return json(await fetch('/api/maps/' + encodeURIComponent(name)));
+  return json(await fetch('api/maps/' + encodeURIComponent(name)));
 }
 
 export async function saveMapFile(name, text) {
   return json(
-    await fetch('/api/maps/' + encodeURIComponent(name), {
+    await fetch('api/maps/' + encodeURIComponent(name), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: text,
@@ -26,7 +42,7 @@ export async function saveMapFile(name, text) {
 
 export async function saveExport(name, blob) {
   const type = name.endsWith('.json') ? 'application/json' : 'image/png';
-  return json(await fetch('/api/exports/' + encodeURIComponent(name), { method: 'PUT', headers: { 'Content-Type': type }, body: blob }));
+  return json(await fetch('api/exports/' + encodeURIComponent(name), { method: 'PUT', headers: { 'Content-Type': type }, body: blob }));
 }
 
 /** Settings catalog: {styles, settings: Map(id -> setting)}. */

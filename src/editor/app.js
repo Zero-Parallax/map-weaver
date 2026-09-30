@@ -296,7 +296,7 @@ export class App {
 
   hitTest(p) {
     const level = this.level;
-    const tol = Math.max(0.2, 8 / this.view.scale);
+    const tol = Math.max(0.2, this.reach / this.view.scale);
     for (let i = level.doors.length - 1; i >= 0; i--) {
       const d = level.doors[i];
       if (distToSegment(p, d.a, d.b) < tol) return { kind: 'door', id: d.id, item: d };
@@ -483,15 +483,17 @@ export class App {
     const sx = e.clientX - r.left;
     const sy = e.clientY - r.top;
     const world = this.toWorld(sx, sy);
-    const step = e.shiftKey ? 0.5 : 1;
+    const step = e.shiftKey || this.snapMode === 'half' ? 0.5 : 1;
+    const free = e.ctrlKey || e.metaKey || this.snapMode === 'free';
     return {
       screen: [sx, sy],
       world,
-      point: e.ctrlKey || e.metaKey ? world : snapPoint(world, step),
+      touch: e.pointerType === 'touch',
+      point: free ? world : snapPoint(world, step),
       button: e.button ?? 0,
       shift: e.shiftKey,
       alt: e.altKey,
-      ctrl: e.ctrlKey || e.metaKey,
+      ctrl: free,
     };
   }
 
@@ -499,19 +501,78 @@ export class App {
     const c = this.canvas;
     let pan = null;
     this.spaceDown = false;
+    // Touch: one finger uses the tool, two fingers pan and pinch-zoom. A first touch waits a
+    // moment so a second finger can turn it into a gesture before anything gets drawn.
+    const touches = new Map();
+    let pending = null; // first touch not yet handed to the tool
+    let gesture = null; // two-finger pan / zoom
+    let toolActive = false; // the tool has seen a pointerdown
+    let ignoreUntilClear = false; // after a gesture, ignore fingers until all are lifted
+
+    const startTool = (e) => {
+      toolActive = true;
+      this.tool.down?.(this, this.makeEvent(e));
+      this.requestRender();
+    };
+    const flushPending = () => {
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      const e = pending.e;
+      pending = null;
+      startTool(e);
+    };
+    const gestureState = () => {
+      const [a, b] = [...touches.values()];
+      return { mid: [(a.x + b.x) / 2, (a.y + b.y) / 2], d: Math.hypot(a.x - b.x, a.y - b.y) || 1 };
+    };
 
     c.addEventListener('contextmenu', (e) => e.preventDefault());
     c.addEventListener('pointerdown', (e) => {
       c.setPointerCapture(e.pointerId);
+      this.pointerType = e.pointerType;
+      if (e.pointerType === 'touch') {
+        touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (ignoreUntilClear) return;
+        if (touches.size === 2 && !toolActive) {
+          if (pending) clearTimeout(pending.timer);
+          pending = null;
+          const g = gestureState();
+          gesture = { ...g, view: { ...this.view } };
+          return;
+        }
+        if (touches.size === 1) {
+          const snapshot = { clientX: e.clientX, clientY: e.clientY, button: 0, pointerType: 'touch', shiftKey: false, altKey: false, ctrlKey: false, metaKey: false };
+          pending = { e: snapshot, x: e.clientX, y: e.clientY, timer: setTimeout(flushPending, 120) };
+        }
+        return;
+      }
       if (e.button === 1 || (e.button === 0 && this.spaceDown)) {
         pan = { x: e.clientX, y: e.clientY, ox: this.view.ox, oy: this.view.oy };
         c.classList.add('panning');
         return;
       }
-      this.tool.down?.(this, this.makeEvent(e));
-      this.requestRender();
+      startTool(e);
     });
     c.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'touch' && touches.has(e.pointerId)) {
+        touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (gesture && touches.size >= 2) {
+          const g = gestureState();
+          const r = c.getBoundingClientRect();
+          const v = gesture.view;
+          const s = Math.max(4, Math.min(240, v.scale * (g.d / gesture.d)));
+          // Keep the world point under the starting midpoint under the fingers' midpoint.
+          const wx = (gesture.mid[0] - r.left - v.ox) / v.scale;
+          const wy = (gesture.mid[1] - r.top - v.oy) / v.scale;
+          this.view = { scale: s, ox: g.mid[0] - r.left - wx * s, oy: g.mid[1] - r.top - wy * s };
+          this.onChange('view');
+          this.requestRender();
+          return;
+        }
+        if (ignoreUntilClear) return;
+        if (pending && Math.hypot(e.clientX - pending.x, e.clientY - pending.y) > 8) flushPending();
+        if (pending) return;
+      }
       if (pan) {
         this.view.ox = pan.ox + e.clientX - pan.x;
         this.view.oy = pan.oy + e.clientY - pan.y;
@@ -523,17 +584,44 @@ export class App {
       this.tool.move?.(this, ev);
       this.onChange('cursor');
     });
-    c.addEventListener('pointerup', (e) => {
+    const end = (e) => {
+      if (e.pointerType === 'touch') {
+        touches.delete(e.pointerId);
+        if (gesture) {
+          gesture = null;
+          ignoreUntilClear = touches.size > 0;
+          return;
+        }
+        if (ignoreUntilClear) {
+          if (!touches.size) ignoreUntilClear = false;
+          return;
+        }
+        if (pending) {
+          // A quick tap: hand the tool a press and a release in the same spot.
+          flushPending();
+        }
+        if (!toolActive) return;
+      }
       if (pan) {
         pan = null;
         c.classList.remove('panning');
         return;
       }
+      if (e.type === 'pointercancel') {
+        toolActive = false;
+        this.tool.cancel?.(this);
+        this.requestRender();
+        return;
+      }
+      toolActive = false;
       this.tool.up?.(this, this.makeEvent(e));
       this.requestRender();
-    });
+    };
+    c.addEventListener('pointerup', end);
+    c.addEventListener('pointercancel', end);
     c.addEventListener('dblclick', (e) => this.tool.dblclick?.(this, this.makeEvent(e)));
-    c.addEventListener('pointerleave', () => {
+    c.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'touch') return;
       this.hoverItem = null;
       this.hoverRegion = -1;
       this.requestRender();
@@ -548,6 +636,11 @@ export class App {
       { passive: false },
     );
     new ResizeObserver(() => this.requestRender()).observe(c);
+  }
+
+  /** Screen pixels a tap may miss by: bigger for fingers than for a mouse. */
+  get reach() {
+    return this.pointerType === 'touch' ? 22 : 9;
   }
 
   /** Keyboard shortcuts. Returns true when handled. */

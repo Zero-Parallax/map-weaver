@@ -2,7 +2,7 @@
 
 import { App } from './editor/app.js';
 import { el, field, select, segmented, checkbox } from './editor/dom.js';
-import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport } from './io/api.js';
+import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport, hasServer } from './io/api.js';
 import { renderLevelPng, exportSize, exportFileName, slug, MAX_SIDE } from './render/export.js';
 import { buildFoundryScene, COMPLEXITY } from './export/foundry.js';
 import { OPEN_MODES } from './render/renderer.js';
@@ -27,9 +27,12 @@ const TOOL_GROUPS = [
 const $ = (id) => document.getElementById(id);
 
 const catalog = await loadCatalog();
+// Without serve.js (hosted as plain files, e.g. on a phone) maps and exports are files you
+// download, and a map is opened by importing its file.
+const server = await hasServer();
 const assets = new AssetLibrary();
 try {
-  await assets.load();
+  await assets.load(server);
 } catch (err) {
   console.warn(err);
 }
@@ -37,11 +40,28 @@ let ready = false;
 // window.__app is a handle for debugging from the browser console.
 const app = (window.__app = new App({ canvas: $('canvas'), catalog, assets, tools: TOOL_GROUPS.flat(), onChange: (reason) => ready && update(reason) }));
 $('loading').remove();
+app.server = server;
+document.body.classList.toggle('no-server', !server);
 app.setTool('select');
 
 // ---- top bar ---------------------------------------------------------------
 
+/** Hand the browser a file to save. */
+function downloadBlob(blob, name) {
+  const a = el('a', { href: URL.createObjectURL(blob), download: name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
 async function save(asNew = false) {
+  if (!server) {
+    download();
+    app.dirty = false;
+    app.status('Map file downloaded. Use Open to load it again.');
+    return;
+  }
   let name = app.fileName;
   if (!name || asNew) {
     name = prompt('Save map as:', app.fileName || app.map.name);
@@ -63,6 +83,7 @@ function confirmDiscard() {
 }
 
 async function openDialog() {
+  if (!server) return importFile();
   if (!confirmDiscard()) return;
   const dialog = $('open-dialog');
   const list = $('map-list');
@@ -94,10 +115,7 @@ async function openDialog() {
 }
 
 function download() {
-  const blob = new Blob([app.serialize()], { type: 'application/json' });
-  const a = el('a', { href: URL.createObjectURL(blob), download: `${app.fileName || app.map.name}.map.json` });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  downloadBlob(new Blob([app.serialize()], { type: 'application/json' }), `${app.fileName || app.map.name}.map.json`);
 }
 
 function importFile() {
@@ -146,12 +164,8 @@ function exportDialog() {
           pxPerSquare: exportOpts.pps, openMode: exportOpts.openMode, outsideMode: exportOpts.outsideMode,
         });
         const name = exportFileName(app.map, i);
-        if (exportOpts.save) saved.push((await saveExport(name, blob)).path);
-        if (exportOpts.download) {
-          const a = el('a', { href: URL.createObjectURL(blob), download: name });
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-        }
+        if (server && exportOpts.save) saved.push((await saveExport(name, blob)).path);
+        if (!server || exportOpts.download) downloadBlob(blob, name);
       }
       status.textContent = saved.length ? `Saved: ${saved.join(', ')}` : 'Done.';
       app.status(saved.length ? `Exported to ${saved.length > 1 ? 'the exports folder' : saved[0]}` : 'Exported.');
@@ -176,8 +190,8 @@ function exportDialog() {
     field('Open to below areas', select(OPEN_MODES, exportOpts.openMode, (v) => (exportOpts.openMode = v)),
       'Transparent suits stacked levels in Foundry; faded shows the level below for printing.'),
     field('Outside the building', select([{ id: 'drawn', name: 'As drawn (rock / hatching)' }, { id: 'transparent', name: 'Transparent' }], exportOpts.outsideMode, (v) => (exportOpts.outsideMode = v))),
-    checkbox('Save to the exports folder', exportOpts.save, (v) => (exportOpts.save = v)),
-    checkbox('Download in the browser', exportOpts.download, (v) => (exportOpts.download = v)),
+    server && checkbox('Save to the exports folder', exportOpts.save, (v) => (exportOpts.save = v)),
+    server && checkbox('Download in the browser', exportOpts.download, (v) => (exportOpts.download = v)),
     sizeNote,
     status,
     el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, 'Close'), go),
@@ -224,20 +238,23 @@ function foundryDialog() {
           map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv), pxPerSquare: foundryOpts.pps,
           openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent',
         });
-        await saveExport(files[i], blob);
+        if (server) await saveExport(files[i], blob);
+        else downloadBlob(blob, files[i]);
       }
       const scene = buildFoundryScene(map, {
         geometry: (lv) => app.geometry(lv), imagePath: (i) => folder + files[i], pps: foundryOpts.pps,
         complexity: foundryOpts.complexity, assetWalls: foundryOpts.assetWalls, resolve: (pl) => assets.resolve(pl), flipOneWay: foundryOpts.flipOneWay,
       });
       const jsonName = `${slug(map.name)}.foundry-scene.json`;
-      await saveExport(jsonName, new Blob([JSON.stringify(scene, null, 1)], { type: 'application/json' }));
+      const sceneBlob = new Blob([JSON.stringify(scene, null, 1)], { type: 'application/json' });
+      if (server) await saveExport(jsonName, sceneBlob);
+      else downloadBlob(sceneBlob, jsonName);
       status.replaceChildren(
-        el('p', {}, `Done: ${scene.levels.length} levels, ${scene.walls.length} walls. Files are in the exports folder.`),
+        el('p', {}, `Done: ${scene.levels.length} levels, ${scene.walls.length} walls. ${server ? 'Files are in the exports folder.' : 'The files were downloaded.'}`),
         el('ol', {},
           el('li', {}, 'Copy ', el('strong', {}, files.join(', ')), ' into your Foundry Data folder at ', el('code', {}, folder)),
           el('li', {}, 'In Foundry, create a scene, right-click it in the Scenes sidebar and choose Import Data.'),
-          el('li', {}, 'Pick ', el('code', {}, `exports/${jsonName}`), '.')),
+          el('li', {}, 'Pick ', el('code', {}, server ? `exports/${jsonName}` : jsonName), '.')),
       );
     } catch (err) {
       status.textContent = `Export failed: ${err.message}`;
@@ -268,14 +285,16 @@ function foundryDialog() {
 }
 
 $('file-buttons').append(
-  el('button', { onclick: () => confirmDiscard() && app.newMap(app.map.setting), title: 'New map' }, 'New'),
-  el('button', { onclick: openDialog, title: 'Open (Ctrl+O)' }, 'Open'),
-  el('button', { onclick: () => save(), title: 'Save (Ctrl+S)' }, 'Save'),
-  el('button', { onclick: () => save(true) }, 'Save as'),
-  el('button', { onclick: download, title: 'Download the map file' }, 'Download'),
-  el('button', { onclick: importFile, title: 'Load a map file from disk' }, 'Import'),
-  el('button', { onclick: () => exportDialog(), title: 'Export levels as PNG images (Ctrl+E)' }, 'Export PNG'),
-  el('button', { onclick: () => foundryDialog(), title: 'Export a Foundry VTT v14 scene with levels and walls' }, 'Foundry'),
+  ...[
+    el('button', { onclick: () => confirmDiscard() && app.newMap(app.map.setting), title: 'New map' }, 'New'),
+    el('button', { onclick: openDialog, title: 'Open (Ctrl+O)' }, 'Open'),
+    el('button', { onclick: () => save(), title: server ? 'Save (Ctrl+S)' : 'Download the map file (Ctrl+S)' }, 'Save'),
+    server && el('button', { onclick: () => save(true) }, 'Save as'),
+    server && el('button', { onclick: download, title: 'Download the map file' }, 'Download'),
+    server && el('button', { onclick: importFile, title: 'Load a map file from disk' }, 'Import'),
+    el('button', { onclick: () => exportDialog(), title: 'Export levels as PNG images (Ctrl+E)' }, 'Export PNG'),
+    el('button', { onclick: () => foundryDialog(), title: 'Export a Foundry VTT v14 scene with levels and walls' }, 'Foundry'),
+  ].filter(Boolean),
 );
 const undoBtn = el('button', { onclick: () => app.undo(), title: 'Undo (Ctrl+Z)' }, 'Undo');
 const redoBtn = el('button', { onclick: () => app.redo(), title: 'Redo (Ctrl+Y)' }, 'Redo');
@@ -292,6 +311,37 @@ TOOL_GROUPS.forEach((group, i) => {
     $('toolbar').append(b);
   }
 });
+
+// ---- touch action bar ------------------------------------------------------
+// On phones and tablets there are no keys or right-click: these buttons stand in for them.
+
+const SNAP_MODES = [
+  { id: 'grid', name: '⌗1', title: 'Snapping: whole squares' },
+  { id: 'half', name: '⌗½', title: 'Snapping: half squares' },
+  { id: 'free', name: '⌗✕', title: 'Snapping: off' },
+];
+app.snapMode = 'grid';
+const rotateBy = (deg) => (app.tool.id === 'asset' ? assetTool.rotate(app, deg) : app.rotateSelection(deg));
+const actions = {
+  undo: el('button', { type: 'button', onclick: () => app.undo(), title: 'Undo' }, '↶'),
+  redo: el('button', { type: 'button', onclick: () => app.redo(), title: 'Redo' }, '↷'),
+  done: el('button', { type: 'button', onclick: () => (app.tool.finish ? app.tool.finish(app) : app.tool.cancel?.(app)), title: 'Finish (polygon, chain of walls)' }, 'Done'),
+  cancel: el('button', { type: 'button', onclick: () => {
+    app.tool.cancel?.(app);
+    app.select(null);
+  }, title: 'Cancel / deselect' }, '✕'),
+  left: el('button', { type: 'button', onclick: () => rotateBy(-90), title: 'Turn left 90°' }, '⟲'),
+  right: el('button', { type: 'button', onclick: () => rotateBy(90), title: 'Turn right 90°' }, '⟳'),
+  del: el('button', { type: 'button', onclick: () => app.deleteSelection(), title: 'Delete selection' }, '🗑'),
+  snap: el('button', { type: 'button', onclick: () => {
+    const i = SNAP_MODES.findIndex((m) => m.id === app.snapMode);
+    app.snapMode = SNAP_MODES[(i + 1) % SNAP_MODES.length].id;
+    update('snap');
+  }, title: SNAP_MODES[0].title }, SNAP_MODES[0].name),
+  fit: el('button', { type: 'button', onclick: () => app.fitView(), title: 'Fit map' }, '⤢'),
+  panel: el('button', { type: 'button', onclick: () => document.body.classList.toggle('panel-open'), title: 'Tool options and properties' }, '☰'),
+};
+$('stage').append(el('div', { class: 'action-bar' }, Object.values(actions)));
 
 // ---- side panel ------------------------------------------------------------
 
@@ -549,7 +599,9 @@ function renderPanel() {
   panelTimer = null;
   const panel = $('panel');
   const scroll = panel.scrollTop;
-  panel.replaceChildren(toolSection(), ...selectionSections().filter(Boolean), levelSection(), mapSection());
+  panel.replaceChildren(
+    el('div', { class: 'panel-close' }, el('button', { type: 'button', onclick: () => document.body.classList.remove('panel-open') }, 'Close ✕')),
+    toolSection(), ...selectionSections().filter(Boolean), levelSection(), mapSection());
   panel.scrollTop = scroll;
 }
 
@@ -562,11 +614,24 @@ function update(reason) {
     $('status-zoom').textContent = `${Math.round(app.view.scale)} px/sq`;
     return;
   }
+  if (reason === 'snap') {
+    const mode = SNAP_MODES.find((m) => m.id === app.snapMode);
+    actions.snap.textContent = mode.name;
+    actions.snap.title = mode.title;
+    return;
+  }
   if (reason === 'status') {
     $('status-message').textContent = app.statusMessage || '';
     return;
   }
   for (const [id, b] of toolButtons) b.classList.toggle('on', id === app.tool?.id);
+  const placementSelected = app.selection?.kind === 'placement';
+  actions.undo.disabled = !app.undoStack.length;
+  actions.redo.disabled = !app.redoStack.length;
+  actions.del.disabled = !app.selection;
+  actions.left.disabled = actions.right.disabled = !(placementSelected || app.tool?.id === 'asset');
+  actions.done.hidden = !['poly', 'wall', 'arc'].includes(app.tool?.id);
+  actions.snap.textContent = SNAP_MODES.find((m) => m.id === app.snapMode).name;
   undoBtn.disabled = !app.undoStack.length;
   redoBtn.disabled = !app.redoStack.length;
   $('doc-title').textContent = `${app.fileName || app.map.name}${app.dirty ? ' •' : ''} — ${app.setting?.name || app.map.setting} — ${app.level.name}`;

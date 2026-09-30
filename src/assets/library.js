@@ -31,8 +31,10 @@ export class AssetLibrary {
     for (const k of [...this.images.keys()]) if (k.split('|')[0] === id || k.startsWith(id + ':')) this.images.delete(k);
   }
 
-  async load() {
-    const res = await fetch('/api/assets');
+  async load(server = true) {
+    // The server lists every file in assets/; without it, use the starter index.
+    let res = server ? await fetch('api/assets').catch(() => null) : null;
+    if (!res?.ok || !(res.headers.get('content-type') || '').includes('json')) res = await fetch('assets/index.json');
     if (!res.ok) throw new Error('Could not list assets');
     this.assets.clear();
     this.invalid = [];
@@ -92,7 +94,7 @@ export class AssetLibrary {
       // PNG art is drawn as it is.
       entry = { img: new Image(), ready: false };
       this.images.set(key, entry);
-      entry.url = `/${this.assets.get(r.meta.id).path}?v=${this.version}`;
+      entry.url = `${this.assets.get(r.meta.id).path}?v=${this.version}`;
       entry.promise = new Promise((resolve) => {
         entry.img.onload = () => {
           entry.ready = true;

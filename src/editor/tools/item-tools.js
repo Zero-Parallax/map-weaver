@@ -138,7 +138,7 @@ export const selectTool = {
   down(app, ev) {
     if (ev.button !== 0) return;
     const handle = app.rotationHandle();
-    if (handle && dist(handle.point, ev.world) < 10 / app.view.scale) {
+    if (handle && dist(handle.point, ev.world) < (app.reach + 2) / app.view.scale) {
       this.turn = { pl: handle.pl, rot: handle.pl.rot };
       return;
     }

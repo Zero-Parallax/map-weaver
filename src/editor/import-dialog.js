@@ -142,11 +142,11 @@ export function openImportDialog({ app, assets, catalog, edit = null, onSaved })
       for (const it of items) {
         const file = edit ? edit.path.split('/').pop() : `${it.meta.id.replace(/^user\./, '')}.png`;
         const out = writePngMeta(it.bytes, it.meta);
-        const res = await fetch(`/api/assets/imported/${encodeURIComponent(file)}`, { method: 'PUT', headers: { 'Content-Type': 'image/png' }, body: out });
+        const res = await fetch(`api/assets/imported/${encodeURIComponent(file)}`, { method: 'PUT', headers: { 'Content-Type': 'image/png' }, body: out });
         const body = await res.json();
         if (!res.ok) throw new Error(`${it.meta.name}: ${body.error}`);
       }
-      await assets.load();
+      await assets.load(true);
       for (const it of items) assets.forget(it.meta.id);
       onSaved?.(items.map((it) => it.meta.id));
       dialog.close();
@@ -182,7 +182,7 @@ export function openImportDialog({ app, assets, catalog, edit = null, onSaved })
   dialog.showModal();
 
   if (edit) {
-    fetch('/' + edit.path).then((r) => r.arrayBuffer()).then((buf) => {
+    fetch(edit.path).then((r) => r.arrayBuffer()).then((buf) => {
       const bytes = new Uint8Array(buf);
       const item = { bytes, size: pngSize(bytes), meta: structuredClone(edit.meta), url: URL.createObjectURL(new Blob([bytes], { type: 'image/png' })) };
       items.push(item);

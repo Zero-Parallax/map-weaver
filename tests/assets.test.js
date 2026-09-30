@@ -107,3 +107,15 @@ test('PNG metadata round trip, replacing rather than stacking', () => {
   assert.deepEqual(pngSize(twice), { width: 1, height: 1 });
   assert.equal(Buffer.from(twice.subarray(-8, -4)).toString('latin1'), 'IEND');
 });
+
+test('assets/index.json lists every starter asset (for hosting without the server)', async () => {
+  const index = JSON.parse(await fs.readFile(new URL('../assets/index.json', import.meta.url), 'utf8'));
+  const starter = buildStarterAssets();
+  assert.equal(index.length, starter.length);
+  for (const { meta, folder } of starter) {
+    const entry = index.find((e) => e.meta.id === meta.id);
+    assert.ok(entry, meta.id);
+    assert.equal(entry.path, `assets/${folder}/${meta.id}.svg`);
+    assert.deepEqual(entry.meta, normalizeMeta(meta).meta);
+  }
+});

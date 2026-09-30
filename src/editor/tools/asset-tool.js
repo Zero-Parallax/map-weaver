@@ -86,7 +86,9 @@ export const assetTool = {
       'div',
       {},
       el('div', { class: 'actions', style: { marginTop: 0, marginBottom: '8px' } },
-        el('button', { type: 'button', onclick: () => importArt(null), title: 'Add your own PNG art to the library' }, 'Import PNG art…')),
+        app.server
+          ? el('button', { type: 'button', onclick: () => importArt(null), title: 'Add your own PNG art to the library' }, 'Import PNG art…')
+          : el('p', { class: 'hint' }, 'Importing your own art needs the app running on your PC (node serve.js).')),
       el('div', { class: 'row' },
         search,
         select([{ id: '', name: 'All rooms' }, ...types], o.assetRoom || '', (v) => app.setOpt('assetRoom', v || null))),
@@ -100,7 +102,7 @@ export const assetTool = {
             el('button', { type: 'button', class: 'danger', onclick: async () => {
               if (!confirm(`Delete "${chosen.name}" from the library? Pieces already on maps will disappear.`)) return;
               const file = app.assets.entry(chosen.id).path.split('/').pop();
-              await fetch(`/api/assets/imported/${encodeURIComponent(file)}`, { method: 'DELETE' });
+              await fetch(`api/assets/imported/${encodeURIComponent(file)}`, { method: 'DELETE' });
               await app.assets.load();
               app.assets.forget(chosen.id);
               app.setOpt('asset', null);

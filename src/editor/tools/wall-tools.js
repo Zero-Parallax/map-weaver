@@ -52,8 +52,12 @@ export const wallTool = {
     app.requestRender();
   },
   onKey(app, e) {
-    if (e.key === 'Enter') return this.cancel(app), true;
+    if (e.key === 'Enter') return this.finish(app), true;
     return false;
+  },
+  /** End the chain of walls. */
+  finish(app) {
+    this.cancel(app);
   },
   cancel(app) {
     this.last = null;
@@ -92,16 +96,23 @@ export const arcTool = {
       this.sweep = 0;
       this.stage = 2;
     } else {
-      const sweep = Math.max(-Math.PI * 2, Math.min(Math.PI * 2, this.snappedSweep(ev)));
-      const { centre, r, start } = this;
-      this.cancel(app);
-      if (Math.abs(sweep) > 0.01) {
-        app.commit('Add arc wall', (map, level) => {
-          level.walls.push({ id: newId('w'), kind: 'arc', c: centre, r, start, sweep });
-        });
-      }
+      // The end is taken on release, so a finger can press, slide round and lift.
+      this.move(app, ev);
+      this.armed = true;
     }
     app.requestRender();
+  },
+  up(app, ev) {
+    if (this.stage !== 2 || !this.armed) return;
+    this.move(app, ev);
+    const sweep = Math.max(-Math.PI * 2, Math.min(Math.PI * 2, this.snappedSweep(ev)));
+    const { centre, r, start } = this;
+    this.cancel(app);
+    if (Math.abs(sweep) > 0.01) {
+      app.commit('Add arc wall', (map, level) => {
+        level.walls.push({ id: newId('w'), kind: 'arc', c: centre, r, start, sweep });
+      });
+    }
   },
   move(app, ev) {
     this.hover = ev.point;
@@ -122,6 +133,7 @@ export const arcTool = {
   },
   cancel(app) {
     this.stage = 0;
+    this.armed = false;
     app?.requestRender();
   },
   overlay(app, ctx) {
