@@ -39,7 +39,7 @@ export const assetTool = {
   id: 'asset',
   label: 'Assets',
   key: 'q',
-  hint: 'Pick an asset, then click to place it. Right-click or ] rotates, [ rotates back.',
+  hint: 'Pick an asset, then click to place it. Right-click or ] turns 90°, [ turns back; Shift+[ ] turn 15°.',
   rot: 0,
   options(app) {
     const o = app.opts;
@@ -95,7 +95,9 @@ export const assetTool = {
     const p = { asset: meta.id, x: 0, y: 0, rot: this.rot };
     if (app.opts.assetParams) p.params = app.opts.assetParams;
     const r = app.assets.resolve(p);
-    [p.x, p.y] = snapCentre(world, r.footprint, this.rot);
+    // Quarter turns snap to squares; angled pieces snap their centre to half squares.
+    if (this.rot % 90 === 0) [p.x, p.y] = snapCentre(world, r.footprint, this.rot);
+    else [p.x, p.y] = [Math.round(world[0] * 2) / 2, Math.round(world[1] * 2) / 2];
     return p;
   },
   move(app, ev) {
@@ -116,6 +118,8 @@ export const assetTool = {
   onKey(app, e) {
     if (e.key === ']') return this.rotate(app, 90), true;
     if (e.key === '[') return this.rotate(app, -90), true;
+    if (e.key === '}') return this.rotate(app, 15), true;
+    if (e.key === '{') return this.rotate(app, -15), true;
     return false;
   },
   cancel() {

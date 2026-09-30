@@ -163,8 +163,15 @@ export class App {
       for (const p of level.placements) {
         const r = inRoom(p) && this.assets.resolve(p);
         if (!r) continue;
-        const f = rotatedFootprint(r.footprint, p.rot);
-        existing.push({ meta: r.meta, footprint: f, x: Math.round(p.x - f.w / 2), y: Math.round(p.y - f.h / 2) });
+        // Squares covered by the (possibly angled) piece's bounding box.
+        const a = (p.rot * Math.PI) / 180;
+        const bw = Math.abs(r.footprint.w * Math.cos(a)) + Math.abs(r.footprint.h * Math.sin(a));
+        const bh = Math.abs(r.footprint.w * Math.sin(a)) + Math.abs(r.footprint.h * Math.cos(a));
+        const x0 = Math.floor(p.x - bw / 2 + 1e-6);
+        const y0 = Math.floor(p.y - bh / 2 + 1e-6);
+        const x1 = Math.ceil(p.x + bw / 2 - 1e-6);
+        const y1 = Math.ceil(p.y + bh / 2 - 1e-6);
+        existing.push({ meta: r.meta, footprint: { w: x1 - x0, h: y1 - y0 }, x: x0, y: y0 });
       }
       const out = decorateRoom({
         geo, region: geo.rooms.regions[index], tag, assets: metas, doors: level.doors, links, existing, mapSeed: map.seed,
@@ -384,17 +391,44 @@ export class App {
     if (this.selection?.id === hit.id) this.select(null);
   }
 
-  /** Rotate the selected asset by a multiple of 90 degrees, keeping it on the grid. */
+  /** Rotate the selected asset by `by` degrees. Quarter turns stay on the grid. */
   rotateSelection(by) {
     if (this.selection?.kind !== 'placement') return;
+    const pl = this.level.placements.find((x) => x.id === this.selection.id);
+    if (pl) this.setRotation(pl.id, pl.rot + by);
+  }
+
+  /** Set an asset's angle (degrees, any value; the UI uses 15 degree steps). */
+  setRotation(id, deg) {
     this.commit('Rotate', (map, level) => {
-      const pl = level.placements.find((x) => x.id === this.selection.id);
+      const pl = level.placements.find((x) => x.id === id);
       const r = pl && this.assets.resolve(pl);
       if (!r) return;
-      pl.rot = (((pl.rot + by) % 360) + 360) % 360;
-      [pl.x, pl.y] = snapCentre([pl.x, pl.y], r.footprint, pl.rot);
+      pl.rot = Math.round(((deg % 360) + 360) % 360 * 100) / 100;
+      if (pl.rot % 90 === 0) [pl.x, pl.y] = snapCentre([pl.x, pl.y], r.footprint, pl.rot);
       pl.auto = false;
     });
+  }
+
+  /** Copy the selected asset one square down and right, and select the copy. */
+  duplicateSelection() {
+    if (this.selection?.kind !== 'placement') return;
+    const copy = { ...this.level.placements.find((x) => x.id === this.selection.id), id: newId('a'), auto: false };
+    copy.x += 1;
+    copy.y += 1;
+    this.commit('Duplicate', (map, level) => level.placements.push(copy));
+    this.select({ kind: 'placement', id: copy.id, item: copy });
+  }
+
+  /** Where the rotation handle of a selected asset sits, or null. */
+  rotationHandle() {
+    if (this.selection?.kind !== 'placement') return null;
+    const pl = this.level.placements.find((x) => x.id === this.selection.id);
+    const r = pl && this.assets.resolve(pl);
+    if (!r) return null;
+    const a = (pl.rot * Math.PI) / 180;
+    const d = r.footprint.h / 2 + 18 / this.view.scale;
+    return { pl, point: [pl.x + Math.sin(a) * d, pl.y - Math.cos(a) * d] };
   }
 
   /** Change a generator asset's size, keeping its top-left corner where it was. */
@@ -539,6 +573,9 @@ export class App {
     if (e.key === 'Delete' || e.key === 'Backspace') return this.deleteSelection(), true;
     if (e.key === ']') return this.rotateSelection(90), true;
     if (e.key === '[') return this.rotateSelection(-90), true;
+    if (e.key === '}') return this.rotateSelection(15), true;
+    if (e.key === '{') return this.rotateSelection(-15), true;
+    if (e.key.toLowerCase() === 'd' && e.shiftKey) return this.duplicateSelection(), true;
     if (e.key === 'f') return this.fitView(), true;
     if (e.key === 'PageUp') return this.setLevel(this.levelIndex + 1), true;
     if (e.key === 'PageDown') return this.setLevel(this.levelIndex - 1), true;
@@ -600,6 +637,22 @@ export class App {
     this.drawRoomOverlays(ctx, geo, style);
     if (this.hoverItem && this.hoverItem.id !== this.selection?.id) this.drawItemOutline(ctx, this.hoverItem, 0, 0, 'rgba(42,157,244,0.6)');
     if (this.selection) this.drawItemOutline(ctx, this.selection, 0, 0, '#ff9f1c');
+    const handle = this.tool.id === 'select' && this.rotationHandle();
+    if (handle) {
+      ctx.save();
+      ctx.strokeStyle = '#ff9f1c';
+      ctx.fillStyle = '#fff';
+      ctx.lineWidth = 2 / s;
+      ctx.beginPath();
+      ctx.moveTo(handle.pl.x, handle.pl.y);
+      ctx.lineTo(...handle.point);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(handle.point[0], handle.point[1], 6 / s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
     this.tool.overlay?.(this, ctx);
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -696,7 +749,7 @@ export class App {
     ctx.restore();
   }
 
-  drawItemOutline(ctx, hit, dx, dy, color) {
+  drawItemOutline(ctx, hit, dx, dy, color, rotOverride = null) {
     const item = this.findItem(this.level, hit);
     if (!item) return;
     const s = this.view.scale;
@@ -725,7 +778,7 @@ export class App {
       const r = this.assets.resolve(item);
       if (r) {
         ctx.translate(item.x, item.y);
-        ctx.rotate((item.rot * Math.PI) / 180);
+        ctx.rotate(((rotOverride ?? item.rot) * Math.PI) / 180);
         ctx.rect(-r.footprint.w / 2, -r.footprint.h / 2, r.footprint.w, r.footprint.h);
       }
     } else if (hit.kind === 'door') {

@@ -82,7 +82,7 @@ hatching), grid, walls and doors. The editor and the PNG export share it.
 2. Levels, links (stairs, ladders, lifts, trapdoors), balconies, faded level below **(done)**
 3. Asset format (metadata in the SVG), library, parametric generators, starter sets **(done)**
 4. Decorator: slots, keep-clear zones, seeded placement, reachability check **(done)**
-5. Manual asset editing: move, rotate, delete, add
+5. Manual asset editing: move, rotate (90° and 15° steps), resize, duplicate, delete, add **(done)**
 6. PNG export at a chosen pixels-per-square
 
 Phase 2: Foundry VTT export (walls, doors, one-way balcony walls, levels) and PNG asset import.

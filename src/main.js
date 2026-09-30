@@ -223,11 +223,16 @@ function placementSection(pl) {
   if (!meta) return section('Asset', el('p', { class: 'hint' }, `Missing asset "${pl.asset}".`));
   return section(
     meta.name,
-    el('p', { class: 'hint' }, `${pl.auto ? 'Placed by the decorator. ' : ''}Drag to move; [ and ] rotate.`),
+    el('p', { class: 'hint' }, `${pl.auto ? 'Placed by the decorator; moving or turning it keeps it on reroll. ' : 'Placed by hand; kept on reroll. '}[ ] turn 90°, Shift+[ ] turn 15°, Shift+D duplicates.`),
+    field('Angle', el('div', { class: 'row' },
+      el('button', { style: { flex: 'none' }, onclick: () => app.rotateSelection(-15) }, '−15°'),
+      el('input', { type: 'number', step: 15, value: pl.rot, onchange: (e) => app.setRotation(pl.id, Number(e.target.value) || 0) }),
+      el('button', { style: { flex: 'none' }, onclick: () => app.rotateSelection(15) }, '+15°'))),
     sizeFields(meta, pl.params || {}, (params) => app.resizePlacement(pl.id, params)),
     el('div', { class: 'actions' },
-      el('button', { onclick: () => app.rotateSelection(-90) }, '⟲ Rotate'),
-      el('button', { onclick: () => app.rotateSelection(90) }, 'Rotate ⟳'),
+      el('button', { onclick: () => app.rotateSelection(-90) }, '⟲ 90°'),
+      el('button', { onclick: () => app.rotateSelection(90) }, '90° ⟳'),
+      el('button', { onclick: () => app.duplicateSelection() }, 'Duplicate'),
       el('button', { class: 'danger', onclick: () => app.deleteSelection() }, 'Delete')),
   );
 }

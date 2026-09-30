@@ -30,7 +30,7 @@ Set `PORT` to use another port.
 | Stairs & lifts | S | Stairs (drag foot to top), spiral stairs, ladders, lifts, trapdoors |
 | Balcony edge | G | Click an edge of an open-to-below area: railing, full wall or open drop |
 | Room type | T | Click inside a room to tag it; right-click clears |
-| Assets | Q | Pick from the library and click to place. Right-click or `]` rotates |
+| Assets | Q | Pick from the library and click to place. Right-click or `]` turns 90°, Shift+`[` `]` 15° |
 | Erase | E | Click a door, wall or shape to delete it |
 
 - **Alt** while drawing a shape: cut away floor instead of adding it.
@@ -42,6 +42,9 @@ Set `PORT` to use another port.
 - **Separate room** (panel): the shape gets its own walls, even where it touches other floor.
   Turn it off to extend the floor it touches instead.
 - Pan with the middle mouse button or Space + drag. Wheel zooms. **F** fits the map.
+- Selected asset: drag to move, drag its round handle to turn it (15° steps, Ctrl for free),
+  `[` `]` turn 90°, Shift+`[` `]` turn 15°, Shift+D duplicates, Delete removes. The panel has an
+  angle box and size fields for resizable pieces (tables, shelves, rugs...).
 - Ctrl+Z / Ctrl+Y undo and redo. Ctrl+S saves, Ctrl+O opens.
 
 ## Decorating

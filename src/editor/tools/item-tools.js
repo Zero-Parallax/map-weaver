@@ -133,15 +133,27 @@ export const selectTool = {
   id: 'select',
   label: 'Select',
   key: 'v',
-  hint: 'Click to select a room, wall or door; drag to move it. Delete removes it. Middle-drag or Space-drag pans.',
+  hint: 'Click to select a room, wall, door or asset; drag to move it. Drag the round handle to turn an asset (15° steps, Ctrl: free). Delete removes it. Middle-drag or Space-drag pans.',
   options: null,
   down(app, ev) {
     if (ev.button !== 0) return;
+    const handle = app.rotationHandle();
+    if (handle && dist(handle.point, ev.world) < 10 / app.view.scale) {
+      this.turn = { pl: handle.pl, rot: handle.pl.rot };
+      return;
+    }
     const hit = app.hitTest(ev.world);
     app.select(hit ? { ...hit, at: ev.world } : null);
     this.drag = hit ? { from: ev.point, to: ev.point, world: ev.world, hit } : null;
   },
   move(app, ev) {
+    if (this.turn) {
+      const { pl } = this.turn;
+      const deg = (Math.atan2(ev.world[0] - pl.x, -(ev.world[1] - pl.y)) * 180) / Math.PI;
+      this.turn.rot = ev.ctrl ? Math.round(deg) : Math.round(deg / 15) * 15;
+      app.requestRender();
+      return;
+    }
     if (this.drag) {
       this.drag.to = ev.point;
       this.drag.world = ev.world;
@@ -152,6 +164,12 @@ export const selectTool = {
     app.requestRender();
   },
   up(app, ev) {
+    if (this.turn) {
+      const { pl, rot } = this.turn;
+      this.turn = null;
+      if (rot !== pl.rot) app.setRotation(pl.id, rot);
+      return;
+    }
     const drag = this.drag;
     this.drag = null;
     if (!drag) return;
@@ -172,8 +190,14 @@ export const selectTool = {
   },
   cancel() {
     this.drag = null;
+    this.turn = null;
   },
   overlay(app, ctx) {
+    if (this.turn) {
+      app.drawItemOutline(ctx, { kind: 'placement', id: this.turn.pl.id }, 0, 0, '#2a9df4', this.turn.rot);
+      app.drawLabel(ctx, [this.turn.pl.x, this.turn.pl.y], `${((this.turn.rot % 360) + 360) % 360}°`);
+      return;
+    }
     if (!this.drag) return;
     const [dx, dy] = sub(this.drag.to, this.drag.from);
     if (dx || dy) app.drawItemOutline(ctx, this.drag.hit, dx, dy, '#2a9df4');
