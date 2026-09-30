@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Goods shelf</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"goods-shelf","name":"Goods shelf","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["shop","cellar","kitchen"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":4,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"goods"},"sizes":{"len":[1,4]}}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"goods-shelf","name":"Goods shelf","settings":["classic","fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["shop","cellar","kitchen","storeroom"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":2,"min":0,"max":4,"tags":[],"generator":{"id":"shelf","params":{"len":2,"kind":"goods"},"sizes":{"len":[1,4]}}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}

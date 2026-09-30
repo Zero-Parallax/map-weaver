@@ -319,7 +319,11 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
 
   const density = tag.density ?? DEFAULT_DENSITY;
   const usable = [...room.cells.keys()].filter((k) => !room.blocked.has(k) && !room.keepClear.has(k)).length;
-  let budget = Math.round(usable * (0.05 + density * 0.3)); // squares of furniture to place
+  // Share of the free floor to furnish: light ~14%, medium ~29%, heavy ~52%, full ~71%.
+  let budget = Math.round(usable * (0.04 + 0.32 * density + 0.35 * density * density));
+  // Per-room limits grow with density; one-of-a-kind pieces (max 1) stay unique.
+  const capOf = (m) => (!m.max || m.max === 1 ? m.max : Math.max(m.max, Math.round(m.max * (0.5 + density * 1.6))));
+  const underCap = (m) => !capOf(m) || (counts.get(m.id) || 0) < capOf(m);
   const pool = assets.filter((m) => suitsRoom(m, tag.type));
   const counts = new Map();
   const placements = [];
@@ -332,6 +336,11 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
       const required = (counts.get(meta.id) || 0) < (meta.min || 0);
       if (meta.layer === 'object' && !required && fp.w * fp.h > Math.max(budget, 1)) continue;
       let spots = candidates(room, meta, fp, occupied, centre);
+      // Once the corners are taken, corner clutter (barrels, crates, sacks) lines the walls
+      // in busier rooms.
+      if (!spots.length && meta.placement === 'corner' && density >= 0.4) {
+        spots = candidates(room, { ...meta, placement: 'wall' }, fp, occupied, centre);
+      }
       if (!spots.length) continue;
       const ranked = meta.placement === 'centre' || isFocal(meta) || (meta.facing === 'focal' && room.focal);
       if (ranked) spots.sort((a, b) => a.score - b.score).splice(Math.max(isFocal(meta) ? 2 : 3, Math.ceil(spots.length * (isFocal(meta) ? 0.03 : 0.1))));
@@ -364,12 +373,13 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   const required = pool.filter((m) => m.min > 0).sort((a, b) => b.footprint.w * b.footprint.h - a.footprint.w * a.footprint.h);
   for (const m of required) for (let i = 0; i < m.min; i++) if (!place(m)) report.skipped.push(m.id);
   const floorPool = pool.filter((m) => m.layer === 'floor');
-  for (const m of floorPool) if (random() < 0.35 + density * 0.5 && (!m.max || (counts.get(m.id) || 0) < m.max)) place(m);
+  for (const m of floorPool) if (random() < 0.35 + density * 0.5 && underCap(m)) place(m);
 
   let failures = 0;
   const main = pool.filter((m) => m.layer !== 'floor');
-  while (budget > 0 && failures < 12 && main.length) {
-    const open = main.filter((m) => !m.max || (counts.get(m.id) || 0) < m.max);
+  const patience = Math.round(12 + 25 * density);
+  while (budget > 0 && failures < patience && main.length) {
+    const open = main.filter(underCap);
     if (!open.length) break;
     // Walls and corners fill first; centre pieces are rarer in light rooms.
     const weightOf = (m) => m.weight * (m.placement === 'centre' ? 0.6 + density : 1) * (m.roomTypes.includes('*') ? 0.4 : 1);

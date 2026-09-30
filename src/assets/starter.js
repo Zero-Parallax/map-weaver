@@ -43,7 +43,7 @@ A('sacks', 'Sacks', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 
   g.lines([[30, 16, 42, 16], [60, 36, 72, 36]], 'l');
 });
 
-G('crate', 'Crate', CF, 'cargo', { w: 1, h: 1, style: 'crate' }, { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'shop', 'smithy'], max: 4, weight: 2 });
+G('crate', 'Crate', CF, 'cargo', { w: 1, h: 1, style: 'crate' }, { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'shop', 'smithy'], max: 4, weight: 2 }, { w: [1, 2], h: [1, 2] });
 
 A('bed', 'Bed', CF, [1, 2], { placement: 'wall', roomTypes: ['barracks', 'bedroom', 'prison'], max: 6, weight: 2 }, (g) => {
   g.rect(10, 6, 80, 188, 'o', 4);
@@ -330,7 +330,7 @@ A('workbench', 'Workbench', F, [2, 1], { placement: 'wall', roomTypes: ['smithy'
 
 G('display-counter', 'Display counter', F, 'counter', { len: 3, kind: 'shop' }, { placement: 'centre', roomTypes: ['shop'], min: 1, max: 2 }, { len: [2, 5] });
 
-G('goods-shelf', 'Goods shelf', F, 'shelf', { len: 2, kind: 'goods' }, { placement: 'wall', roomTypes: ['shop', 'cellar', 'kitchen'], max: 4, weight: 2 }, { len: [1, 4] });
+G('goods-shelf', 'Goods shelf', CF, 'shelf', { len: 2, kind: 'goods' }, { placement: 'wall', roomTypes: ['shop', 'cellar', 'kitchen', 'storeroom'], max: 4, weight: 2 }, { len: [1, 4] });
 
 G('wine-rack', 'Wine rack', F, 'shelf', { len: 2, kind: 'bottles' }, { placement: 'wall', roomTypes: ['cellar', 'tavern'], max: 3 }, { len: [1, 4] });
 
