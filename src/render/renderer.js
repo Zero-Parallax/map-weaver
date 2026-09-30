@@ -5,6 +5,7 @@ import { offset } from '../core/clip.js';
 import { ringsBBox, sub, norm, perp, add, scale, dist } from '../core/geom.js';
 import { rng, hash } from '../core/rng.js';
 import { drawLink } from './link-symbols.js';
+import { wallGroups, drawWallGroups } from './walls.js';
 
 function ringsPath(rings, path = new Path2D()) {
   for (const ring of rings) {
@@ -149,8 +150,8 @@ function quad(ctx, centre, u, n, halfLen, halfDepth) {
   ctx.closePath();
 }
 
-export function drawDoor(ctx, door, style) {
-  const t = style.wallWidth;
+export function drawDoor(ctx, door, style, wallWidth = style.wallWidth) {
+  const t = wallWidth;
   const len = dist(door.a, door.b);
   if (len < 1e-6) return;
   const u = norm(sub(door.b, door.a));
@@ -351,24 +352,21 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
   for (const p of L.posts) ctx.fillRect(p[0] - post / 2, p[1] - post / 2, post, post);
   ctx.restore();
 
-  // Walls.
-  ctx.save();
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = style.ink;
-  ctx.lineWidth = style.wallWidth;
-  ctx.stroke(L.walls);
-  ctx.stroke(L.edgeWalls);
-  if (style.wallStyle === 'double') {
-    ctx.strokeStyle = style.paper;
-    ctx.lineWidth = style.wallWidth * 0.38;
-    ctx.stroke(L.walls);
-    ctx.stroke(L.edgeWalls);
-  }
-  ctx.restore();
-
-  for (const door of level.doors) drawDoor(ctx, door, style);
+  // Walls, each in its room's look.
+  const walls = levelWalls(geo, level, style);
+  drawWallGroups(ctx, walls, style, pxPerSquare);
+  for (const door of level.doors) drawDoor(ctx, door, style, walls.doorWidth.get(door.id));
   drawPlacements(ctx, level.placements, 'overhead', assets, style.tokens);
+}
+
+/** Wall groups for a level (cached until the geometry, room looks or style change). */
+export function levelWalls(geo, level, style) {
+  const key = style.key + '|' + JSON.stringify(level.wallStyles || []);
+  if (geo.cache.wallsKey !== key) {
+    geo.cache.wallsKey = key;
+    geo.cache.walls = wallGroups(geo, level, style.wall);
+  }
+  return geo.cache.walls;
 }
 
 /** Paths other code (editor overlays) can reuse. */

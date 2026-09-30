@@ -9,9 +9,12 @@
 //
 // Walls come from:
 //  1. The structure boundary.
-//  2. Outlines of shapes added as "separate room" (walled). A later shape covering part of an
-//     earlier outline removes that part, so extending a room merges it, and drawing a walled
-//     room next to another leaves a single shared wall.
+//  2. Outlines of walled shapes. Each add shape joins rooms in one of three ways:
+//       merge   (walled false)                 no walls of its own; opens into what it touches
+//       on top  (walled true)                  own walls; earlier walls inside it are removed
+//       overlap (walled true, overlap true)    own walls; earlier walls inside it are kept, so
+//                                              where two rooms cross becomes a third space
+//     Drawing a walled room next to another leaves a single shared wall.
 //  3. Walls drawn by hand (lines and arcs).
 // Only parts of 2 and 3 strictly inside the floor are kept.
 //
@@ -29,7 +32,7 @@ const ringCache = new Map();
 const CORNER_COS = Math.cos((35 * Math.PI) / 180);
 
 export function cachedShapeRings(shape) {
-  const key = JSON.stringify(shape, (k, v) => (k === 'id' || k === 'walled' || k === 'op' ? undefined : v));
+  const key = JSON.stringify(shape, (k, v) => (k === 'id' || k === 'walled' || k === 'op' || k === 'overlap' ? undefined : v));
   let rings = ringCache.get(key);
   if (!rings) {
     if (ringCache.size > 4000) ringCache.clear();
@@ -73,7 +76,8 @@ export function computeInnerWalls(level, shapeRings, floor) {
   level.shapes.forEach((s, i) => {
     const rings = shapeRings[i];
     if (!rings.length) return;
-    if (inner.length) {
+    const keepEarlier = s.op === 'add' && s.walled && s.overlap;
+    if (inner.length && !keepEarlier) {
       inner = classifySegments(inner, rings)
         .filter((p) => p.where === 'outside')
         .map((p) => [p.a, p.b]);

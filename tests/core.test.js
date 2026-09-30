@@ -202,3 +202,56 @@ test('removing a level drops links that no longer span two levels', () => {
   assert.equal(m.links[0].type, 'lift');
   assert.deepEqual(m.levels.map((l) => l.elevation), [0, 2]);
 });
+
+test('join modes: merge, on top and overlap', () => {
+  const a = { kind: 'rect', x: 0, y: 0, w: 6, h: 6 };
+  const b = { kind: 'rect', x: 4, y: 2, w: 6, h: 2 };
+  const regions = (bExtra) => computeLevelGeometry(level([a, { ...b, ...bExtra }]), map).rooms.regions.length;
+  assert.equal(regions({ walled: false }), 1); // merge: one big room
+  assert.equal(regions({ walled: true }), 2); // on top: B cuts its own room out of A
+  assert.equal(regions({ walled: true, overlap: true }), 3); // overlap: A, B and where they cross
+  // A room inside a room, either way.
+  const inner = { kind: 'rect', x: 2, y: 2, w: 2, h: 2 };
+  assert.equal(computeLevelGeometry(level([a, inner]), map).rooms.regions.length, 2);
+});
+
+import { wallGroups } from '../src/render/walls.js';
+
+test('walls take their room look; a shared wall takes the thicker', () => {
+  const lv = level([
+    { kind: 'rect', x: 0, y: 0, w: 5, h: 5 },
+    { kind: 'rect', x: 5, y: 0, w: 5, h: 5 },
+  ]);
+  lv.wallStyles = [
+    { at: [2, 2], texture: 'stone', width: 0.3 },
+    { at: [7, 2], texture: 'wood', width: 0.1 },
+  ];
+  const geo = computeLevelGeometry(lv, map);
+  lv.doors = [{ id: 'd', a: [5, 2], b: [5, 3], type: 'door' }];
+  const { groups, doorWidth } = wallGroups(geo, lv, { texture: 'solid', width: 0.14 });
+  const byTexture = Object.fromEntries(groups.map((g) => [g.texture, g]));
+  assert.ok(byTexture.stone && byTexture.wood);
+  assert.equal(byTexture.solid, undefined);
+  // The shared wall at x = 5 is stone (the thicker).
+  const shared = byTexture.stone.segments.some(([a, b]) => a[0] === 5 && b[0] === 5);
+  assert.ok(shared);
+  assert.ok(!byTexture.wood.segments.some(([a, b]) => a[0] === 5 && b[0] === 5));
+  assert.equal(doorWidth.get('d'), 0.3);
+  // Without room looks everything uses the default.
+  lv.wallStyles = [];
+  assert.deepEqual(wallGroups(geo, lv, { texture: 'solid', width: 0.14 }).groups.map((g) => g.texture), ['solid']);
+});
+
+test('a long outer wall is split where the room beside it changes', () => {
+  const lv = level([
+    { kind: 'rect', x: 0, y: 0, w: 5, h: 5 },
+    { kind: 'rect', x: 5, y: 0, w: 5, h: 5 },
+  ]);
+  lv.wallStyles = [{ at: [2, 2], texture: 'stone', width: 0.3 }];
+  const geo = computeLevelGeometry(lv, map);
+  const { groups } = wallGroups(geo, lv, { texture: 'solid', width: 0.14 });
+  const stone = groups.find((g) => g.texture === 'stone');
+  const topStone = stone.segments.filter(([a, b]) => a[1] === 0 && b[1] === 0);
+  const maxX = Math.max(...topStone.flat().map((p) => p[0]));
+  assert.ok(Math.abs(maxX - 5) < 0.51, `stone top edge ends near x = 5, got ${maxX}`);
+});

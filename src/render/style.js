@@ -32,9 +32,14 @@ export function resolveStyle(map, catalog) {
     },
     shading: map.style.shading,
     gridMode: map.style.grid,
+    // The setting's wall width; railings, posts and symbols are sized from it.
     wallWidth: walls.width ?? 0.14,
-    wallStyle: walls.style ?? 'line',
+    // Default look for walls of rooms without their own (map style, else the setting's).
+    wall: {
+      texture: map.style.wallTexture || (walls.style === 'double' ? 'double' : 'solid'),
+      width: map.style.wallWidth ?? walls.width ?? 0.14,
+    },
     band: walls.band ?? 0.7,
-    key: [palette.id, map.style.shading, map.style.grid, setting?.id].join('|'),
+    key: [palette.id, map.style.shading, map.style.grid, setting?.id, map.style.wallTexture, map.style.wallWidth].join('|'),
   };
 }

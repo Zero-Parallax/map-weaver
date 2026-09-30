@@ -6,6 +6,7 @@ import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport, hasServer 
 import { renderLevelPng, exportSize, exportFileName, slug, MAX_SIDE } from './render/export.js';
 import { buildFoundryScene, COMPLEXITY } from './export/foundry.js';
 import { OPEN_MODES } from './render/renderer.js';
+import { WALL_TEXTURES, WALL_WIDTHS } from './render/walls.js';
 import { loadMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
 import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
 import { linkTool, edgeTool } from './editor/tools/level-tools.js';
@@ -15,7 +16,7 @@ import { ask, askText, notice } from './editor/ask.js';
 import { regionAt } from './core/rooms.js';
 import { DENSITY, DEFAULT_DENSITY } from './decorator/decorate.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
-import { rectTool, circleTool, polyTool, caveTool, brushTool } from './editor/tools/shape-tools.js';
+import { rectTool, circleTool, polyTool, caveTool, brushTool, joinControl } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
 
 const TOOL_GROUPS = [
@@ -384,7 +385,11 @@ function shapeSection(shape) {
     `Shape: ${kindName}`,
     field('Mode', segmented([{ id: 'add', name: 'Floor' }, { id: 'subtract', name: 'Cut away' }, { id: 'void', name: 'Open to below' }], shape.op, (v) => edit('Change mode', (s) => (s.op = v)))),
     shape.op === 'add' && shape.kind !== 'cells' &&
-      checkbox('Separate room (own walls)', !!shape.walled, (v) => edit('Toggle walls', (s) => (s.walled = v))),
+      field('Rooms', joinControl(shape.walled ? (shape.overlap ? 'overlap' : 'top') : 'merge', (v) => edit('Change room joining', (s) => {
+        s.walled = v !== 'merge';
+        if (v === 'overlap') s.overlap = true;
+        else delete s.overlap;
+      }))),
     (shape.kind === 'rect' || shape.kind === 'poly') &&
       field('Corner rounding', select(radii, String(shape.radius || 0), (v) => edit('Round corners', (s) => (s.radius = Number(v))))),
     shape.kind === 'cave' &&
@@ -502,6 +507,7 @@ function roomSection() {
       }
     })),
     el('p', { class: 'hint' }, `${region.cells.length} full squares, about ${Math.round(region.area)} sq in all.`),
+    wallLookField(region, index, rooms, at),
     tag && field('Density',
       el('div', {},
         segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => setDensity(DENSITY[v])),
@@ -513,6 +519,40 @@ function roomSection() {
     ),
     !tag && el('p', { class: 'hint' }, 'Give the room a type to decorate it.'),
   );
+}
+
+/** Thickness presets plus a fine slider. */
+function widthControl(value, onChange) {
+  const preset = WALL_WIDTHS.find((w) => Math.abs(w.id - value) < 1e-6)?.id ?? null;
+  return el('div', {},
+    segmented(WALL_WIDTHS, preset, onChange),
+    el('input', { type: 'range', min: 0.04, max: 0.5, step: 0.01, value, onchange: (e) => onChange(Number(e.target.value)) }));
+}
+
+/** Per-room wall look: texture and thickness, or the map's default. */
+function wallLookField(region, index, rooms, at) {
+  const lv = app.level;
+  const own = (lv.wallStyles || []).find((w) => regionAt(rooms, w.at) === index);
+  const def = app.style.wall;
+  const set = (patch) => app.commit('Room walls', (map, level) => {
+    level.wallStyles ??= [];
+    const list = level.wallStyles;
+    let w = list.find((x) => regionAt(rooms, x.at) === index);
+    if (patch === null) {
+      level.wallStyles = list.filter((x) => x !== w);
+      return;
+    }
+    if (!w) {
+      w = { at: region.labelAt || at, texture: def.texture, width: def.width };
+      list.push(w);
+    }
+    Object.assign(w, patch);
+  });
+  const textures = [{ id: '', name: `Map default (${WALL_TEXTURES.find((t) => t.id === def.texture)?.name})` }, ...WALL_TEXTURES];
+  return field('Walls', el('div', { class: 'wall-look' },
+    select(textures, own?.texture || '', (v) => (v ? set({ texture: v }) : set(null))),
+    own && widthControl(own.width ?? def.width, (v) => set({ width: v })),
+    el('small', {}, own ? 'A wall shared with another room takes the thicker look.' : 'Pick a texture to give this room its own walls.')));
 }
 
 function selectionSections() {
@@ -551,6 +591,8 @@ function mapSection() {
     field('Palette', select(catalog.styles.palettes, m.style.palette, (v) => styleEdit('Palette', 'palette', v))),
     field('Shading', select(catalog.styles.shadings, m.style.shading, (v) => styleEdit('Shading', 'shading', v))),
     field('Grid', select(catalog.styles.grids, m.style.grid, (v) => styleEdit('Grid', 'grid', v))),
+    field('Wall texture', select(WALL_TEXTURES, app.style.wall.texture, (v) => styleEdit('Wall texture', 'wallTexture', v)), 'Rooms can override this.'),
+    field('Wall thickness', widthControl(app.style.wall.width, (v) => styleEdit('Wall thickness', 'wallWidth', v))),
     field('Size (squares)', el('div', { class: 'row' }, w, el('span', { style: { flex: 'none' } }, '×'), h,
       el('button', {
         style: { flex: 'none' },

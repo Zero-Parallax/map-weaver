@@ -25,16 +25,24 @@ function modeOptions(app, { walled = true, radius = false, extra = [] } = {}) {
         (v) => app.setOpt('mode', v),
       ),
     ),
-    walled &&
-      checkbox(
-        'Separate room (own walls)',
-        o.walled,
-        (v) => app.setOpt('walled', v),
-        'On: the shape gets walls all round, even where it touches other floor. Off: it extends the floor it touches.',
-      ),
+    walled && o.mode === 'add' && field('Rooms', joinControl(o.walled ? (o.overlap ? 'overlap' : 'top') : 'merge', (v) => {
+      app.opts.overlap = v === 'overlap';
+      app.setOpt('walled', v !== 'merge');
+    })),
     radius && field('Corner rounding', select(RADII, String(o.radius), (v) => app.setOpt('radius', Number(v)))),
     ...extra,
   );
+}
+
+export const JOIN_MODES = [
+  { id: 'merge', name: 'Merge', title: 'No walls of its own: joins the floor it touches into one room' },
+  { id: 'top', name: 'On top', title: 'Its own walls; walls of earlier rooms inside it are removed' },
+  { id: 'overlap', name: 'Overlap', title: 'Its own walls and earlier rooms keep theirs: where they cross becomes its own space' },
+];
+
+/** Merge / On top / Overlap picker. */
+export function joinControl(value, onChange) {
+  return segmented(JOIN_MODES, value, onChange);
 }
 
 function opFor(app, ev) {
@@ -70,8 +78,9 @@ function strokePreview(ctx, app, rings, op) {
 
 function addShape(app, shape, op) {
   const walled = op === 'add' && app.opts.walled && shape.kind !== 'cells';
+  const overlap = walled && app.opts.overlap ? { overlap: true } : {};
   app.commit({ add: 'Add floor', subtract: 'Cut floor', void: 'Open to below' }[op], (map, level) => {
-    level.shapes.push({ id: newId('s'), op, walled, ...shape });
+    level.shapes.push({ id: newId('s'), op, walled, ...overlap, ...shape });
   });
 }
 

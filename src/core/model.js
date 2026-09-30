@@ -10,6 +10,7 @@
 //   doors[]   openings placed on any wall: {a, b, type}
 //   edges[]   overrides for the edges of open-to-below areas: {at, kind: railing | wall | drop}
 //   rooms[]   room tags: {at: point inside the room, type, seed, reroll}
+//   wallStyles[]  per-room wall looks: {at: point inside the room, texture, width}
 //   placements[]  decorated assets (step 3+)
 
 export const FORMAT = 'map-weaver/map';
@@ -60,6 +61,7 @@ export function createLevel(name = 'Ground floor', elevation = 0) {
     doors: [],
     edges: [],
     rooms: [],
+    wallStyles: [],
     placements: [],
   };
 }
@@ -134,7 +136,7 @@ export function loadMap(data) {
     lv.name ??= 'Level';
     lv.elevation ??= 0;
     lv.height ??= 2;
-    for (const key of ['shapes', 'walls', 'doors', 'edges', 'rooms', 'placements']) {
+    for (const key of ['shapes', 'walls', 'doors', 'edges', 'rooms', 'wallStyles', 'placements']) {
       if (!Array.isArray(lv[key])) lv[key] = [];
     }
     lv.shapes = lv.shapes.filter((s) => SHAPE_KINDS.includes(s.kind));

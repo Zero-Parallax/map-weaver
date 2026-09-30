@@ -50,8 +50,14 @@ switched off. The starter assets come from `assets/index.json`.
   the level below shows through, faded. Stairs cut their own opening in the level above.
 - **Levels**: add, rename and delete in the panel; PageUp / PageDown switch. The level below
   shows as pink outlines for lining things up.
-- **Separate room** (panel): the shape gets its own walls, even where it touches other floor.
-  Turn it off to extend the floor it touches instead.
+- **Rooms** (panel, for added floor): how a new shape joins what is already there.
+  **Merge** opens it into the floor it touches, making one larger room. **On top** gives it its
+  own walls, removing walls of earlier rooms inside it (also how you draw a room inside a room).
+  **Overlap** gives it its own walls and keeps the earlier ones, so where two rooms cross
+  becomes a third space. Change it later on any selected shape.
+- **Walls**: the Map panel sets the default texture (solid, double line, stone blocks, brick,
+  wooden planks, rough, dashed) and thickness. Select a room to give it its own; a wall shared
+  by two rooms takes the thicker look.
 - Pan with the middle mouse button or Space + drag. Wheel zooms. **F** fits the map.
 - Selected asset: drag to move, drag its round handle to turn it (15° steps, Ctrl for free),
   `[` `]` turn 90°, Shift+`[` `]` turn 15°, Shift+D duplicates, Delete removes. The panel has an

@@ -635,3 +635,9 @@ dialog menu {
 .ask-dialog p {
   margin: 0 0 12px;
 }
+
+.wall-look {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

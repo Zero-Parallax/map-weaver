@@ -139,6 +139,13 @@ export class App {
       seen.add(index);
       return true;
     });
+    const styled = new Set();
+    level.wallStyles = (level.wallStyles || []).filter((w) => {
+      const index = regionAt(geo.rooms, w.at);
+      if (index < 0 || styled.has(index)) return false;
+      styled.add(index);
+      return true;
+    });
     // Assets whose centre is no longer on the floor go too.
     level.placements = level.placements.filter((p) => regionAt(geo.rooms, [p.x, p.y]) >= 0);
   }
@@ -338,7 +345,7 @@ export class App {
         const rings = cachedShapeRings(level.shapes[index]);
         level.shapes[index] = translateShape(level.shapes[index], dx, dy);
         // Room tags and doors belonging to the shape travel with it.
-        for (const t of level.rooms) {
+        for (const t of [...level.rooms, ...(level.wallStyles || [])]) {
           if (pointInRings(t.at, rings)) t.at = [t.at[0] + dx, t.at[1] + dy];
         }
         for (const pl of level.placements) {

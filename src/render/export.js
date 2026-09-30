@@ -1,6 +1,7 @@
 // PNG export: draws a level with the same renderer as the editor, without editor overlays.
 
-import { drawLevel, drawDoor, levelPaths } from './renderer.js';
+import { drawLevel, drawDoor, levelPaths, levelWalls } from './renderer.js';
+import { drawWallGroups } from './walls.js';
 import { linksOnLevel } from '../core/links.js';
 
 // Browsers refuse canvases much bigger than this.
@@ -59,19 +60,9 @@ export async function renderLevelPng({ map, levelIndex, style, assets, geometry,
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fill(L.rock, 'evenodd');
     ctx.restore();
-    ctx.save();
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = style.ink;
-    ctx.lineWidth = style.wallWidth;
-    ctx.stroke(L.walls);
-    if (style.wallStyle === 'double') {
-      ctx.strokeStyle = style.paper;
-      ctx.lineWidth = style.wallWidth * 0.38;
-      ctx.stroke(L.walls);
-    }
-    ctx.restore();
-    for (const door of level.doors) drawDoor(ctx, door, style);
+    const walls = levelWalls(geo, level, style);
+    drawWallGroups(ctx, walls, style, pxPerSquare);
+    for (const door of level.doors) drawDoor(ctx, door, style, walls.doorWidth.get(door.id));
   }
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNG encoding failed'))), 'image/png'));
 }
