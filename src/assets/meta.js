@@ -17,6 +17,9 @@
 //   clutter:       small decal (cracks, stains, papers) scattered after the furniture by the
 //                  room's clutter amount, not part of the furnishing
 //   gmOnly:        hidden from players (traps): left out of the player PNG export
+//   cover:         half | three-quarters | full | none. Default: full if it blocks vision,
+//                  half if it blocks movement, else none. Used by combat-ready rooms.
+//   light:         {bright, dim (squares), color, animation}: a light source (Foundry export)
 //   tags:          free-form words for search
 //   generator:     {id, params} if made by a parametric generator (the app can remake it at
 //                  other sizes); sizes: allowed ranges the decorator may pick from
@@ -47,6 +50,7 @@ export const ASSET_ALIASES = {
   bucket: 'barrel',
 };
 export const LAYERS = ['floor', 'object', 'overhead'];
+export const COVER = ['none', 'half', 'three-quarters', 'full'];
 export const SIDES = ['n', 'e', 's', 'w'];
 
 const META_RE = /<metadata[^>]*id="map-weaver-asset"[^>]*>\s*(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?\s*<\/metadata>/;
@@ -89,6 +93,7 @@ export function normalizeMeta(raw) {
   meta.tags ??= [];
   meta.clutter = !!meta.clutter;
   meta.gmOnly = !!meta.gmOnly;
+  if (!COVER.includes(meta.cover)) meta.cover = meta.blocksVision ? 'full' : meta.blocksMovement && meta.layer === 'object' ? 'half' : 'none';
   return { meta, errors };
 }
 

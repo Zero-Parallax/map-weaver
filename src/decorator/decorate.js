@@ -414,9 +414,86 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
       noRoom.add(pick.id);
     }
   }
+  if (tag.combat) addCover();
   placements.push(...scatterClutter({ room, tag, assets, occupied, mapSeed }));
   return { placements, report };
+
+  /**
+   * Combat-ready rooms: free-standing cover spread over the open floor, until nearly every
+   * open square is within two squares of something to hide behind. Each piece keeps a clear
+   * square all round it, so lanes stay open, and the room stays fully walkable.
+   */
+  function addCover() {
+    const coverSquares = new Set();
+    const isCover = (m) => m.cover && m.cover !== 'none' && m.blocksMovement;
+    for (const p of placements) {
+      const m = assets.find((a) => a.id === p.asset);
+      if (!m || !isCover(m)) continue;
+      const fp = footprintOf(m, p.params);
+      const quarter = (p.rot / 90) % 2 === 1;
+      const w = quarter ? fp.h : fp.w;
+      const h = quarter ? fp.w : fp.h;
+      for (const [i, j] of rectCells(Math.round(p.x - w / 2), Math.round(p.y - h / 2), w, h)) coverSquares.add(key(i, j));
+    }
+    for (const e of existing) if (isCover(e.meta)) for (const [i, j] of rectCells(e.x, e.y, e.footprint.w, e.footprint.h)) coverSquares.add(key(i, j));
+    const open = () => [...room.cells.keys()].filter((k) => !blocking.has(k) && !room.blocked.has(k));
+    const near = (k) => {
+      const [x, y] = k.split(',').map(Number);
+      for (let j = y - 2; j <= y + 2; j++) for (let i = x - 2; i <= x + 2; i++) if (coverSquares.has(key(i, j))) return true;
+      return false;
+    };
+    const kinds = pool.filter((m) => isCover(m) && ['free', 'centre', 'corner'].includes(m.placement) && !isFocal(m) && m.footprint.w * m.footprint.h <= 4);
+    for (const id of GENERIC_COVER) {
+      const m = assets.find((a) => a.id === id);
+      if (m && !kinds.includes(m)) kinds.push(m);
+    }
+    if (!kinds.length) return;
+    const limit = Math.ceil(open().length / 10);
+    const rejected = new Set(); // spots that would cut the room off
+    for (let added = 0, tries = 0; added < limit && tries < limit * 4; tries++) {
+      const uncovered = open().filter((k) => !near(k));
+      if (uncovered.length <= open().length * 0.12) break;
+      const uncoveredSet = new Set(uncovered);
+      let best = null;
+      for (const meta of kinds) {
+        const fp = footprintOf(meta, null);
+        for (const rot of fp.w === fp.h ? [0] : [0, 90]) {
+          const w = rot ? fp.h : fp.w;
+          const h = rot ? fp.w : fp.h;
+          for (const c of room.cells.values()) {
+            if (rejected.has(`${meta.id}|${c.x},${c.y},${rot}`)) continue;
+            const squares = rectCells(c.x, c.y, w, h).map(([i, j]) => key(i, j));
+            if (squares.some((k) => !room.cells.has(k) || occupied.object.has(k) || room.keepClear.has(k) || room.blocked.has(k) || room.balconyCells.has(k))) continue;
+            // A clear ring: no other piece and no wall right next to it.
+            const ring = rectCells(c.x - 1, c.y - 1, w + 2, h + 2).map(([i, j]) => key(i, j)).filter((k) => !squares.includes(k));
+            if (ring.some((k) => !room.cells.has(k) || blocking.has(k))) continue;
+            let gain = 0;
+            for (let j = c.y - 2; j < c.y + h + 2; j++) for (let i = c.x - 2; i < c.x + w + 2; i++) if (uncoveredSet.has(key(i, j))) gain++;
+            const score = gain + random() * 0.5 + (meta.cover === 'full' ? 0.3 : 0);
+            if (gain >= 3 && (!best || score > best.score)) best = { meta, rot, w, h, x: c.x, y: c.y, squares, score };
+          }
+        }
+      }
+      if (!best) break;
+      const trial = new Set([...blocking, ...best.squares]);
+      if (!entrancesConnected(room, trial) || !noIslands(room, trial)) {
+        rejected.add(`${best.meta.id}|${best.x},${best.y},${best.rot}`);
+        continue;
+      }
+      added++;
+      for (const k of best.squares) {
+        blocking.add(k);
+        occupied.object.add(k);
+        coverSquares.add(k);
+      }
+      counts.set(best.meta.id, (counts.get(best.meta.id) || 0) + 1);
+      placements.push({ asset: best.meta.id, x: best.x + best.w / 2, y: best.y + best.h / 2, rot: best.rot, auto: true, room: tag.id });
+    }
+  }
 }
+
+/** Cover any room may use when its own pieces can't provide enough. */
+const GENERIC_COVER = ['crate', 'barrel', 'cargo-crate', 'fuel-drum'];
 
 // ---- clutter ---------------------------------------------------------------
 

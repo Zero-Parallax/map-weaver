@@ -172,3 +172,37 @@ test('clutter follows the room\'s amount and leaves the furniture alone', () => 
   assert.ok(clutterOf(heavy) > clutterOf(none), `heavy ${clutterOf(heavy)} vs light ${clutterOf(none)}`);
   assert.equal(furniture(off), furniture(heavy));
 });
+
+test('combat-ready rooms spread cover over the open floor and stay walkable', () => {
+  const coverOf = (p) => {
+    const m = metas.find((x) => x.id === p.asset);
+    return m.cover !== 'none' && m.blocksMovement;
+  };
+  for (const [setting, type] of [['classic', 'chamber'], ['fantasy', 'bedroom'], ['scifi', 'lab']]) {
+    const plain = setup({ setting, type, w: 14, h: 12 });
+    const combat = setup({ setting, type, w: 14, h: 12 });
+    combat.tag.combat = true;
+    const a = run(plain);
+    const b = run(combat);
+    const pieces = (r) => r.placements.filter(coverOf).length;
+    assert.ok(pieces(b) > pieces(a), `${setting} ${type}: ${pieces(b)} cover pieces vs ${pieces(a)}`);
+    // Most open squares are within two squares of cover.
+    const blocked = new Set();
+    const cover = new Set();
+    for (const p of b.placements) {
+      const m = metas.find((x) => x.id === p.asset);
+      if (!m.blocksMovement || m.clutter) continue;
+      for (const k of squaresOf(p).squares) {
+        blocked.add(k);
+        if (coverOf(p)) cover.add(k);
+      }
+    }
+    const open = [...b.room.cells.keys()].filter((k) => !blocked.has(k));
+    const near = open.filter((k) => {
+      const [x, y] = k.split(',').map(Number);
+      for (let j = y - 2; j <= y + 2; j++) for (let i = x - 2; i <= x + 2; i++) if (cover.has(`${i},${j}`)) return true;
+      return false;
+    });
+    assert.ok(near.length >= open.length * 0.75, `${setting}: ${near.length}/${open.length} squares near cover`);
+  }
+});

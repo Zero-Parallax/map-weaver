@@ -18,6 +18,14 @@ import { resolveStyle } from '../render/style.js';
 const HISTORY_LIMIT = 200;
 const AUTOSAVE_KEY = 'map-weaver.autosave';
 
+// Tactical overlay colours: cover by level, and difficult terrain.
+const TACTICAL = {
+  full: { name: 'Full cover (blocks sight)', color: 'rgba(214,48,49,0.35)', edge: '#d63031', mark: 'F' },
+  'three-quarters': { name: 'Three-quarters cover', color: 'rgba(230,126,34,0.35)', edge: '#e67e22', mark: '¾' },
+  half: { name: 'Half cover', color: 'rgba(241,196,15,0.35)', edge: '#c9a000', mark: '½' },
+  difficult: { name: 'Difficult terrain', color: 'rgba(142,94,60,0.35)', edge: '#8e5e3c', mark: '≈' },
+};
+
 export class App {
   constructor({ canvas, catalog, assets, tools, onChange }) {
     this.canvas = canvas;
@@ -45,6 +53,7 @@ export class App {
     this.fileName = null;
     this.dirty = false;
     this.showLabels = true;
+    this.showTactical = false;
     this.newMap();
     this.tool = tools[0];
     this.bindInput();
@@ -262,7 +271,7 @@ export class App {
    * Replace this level with a generated layout: rooms, corridors, room types, doors and
    * decoration. The map grows if it is too small for the rooms asked for.
    */
-  generateLevel({ styleId, count = 8, seed = newSeed() }) {
+  generateLevel({ styleId, count = 8, seed = newSeed(), combat = false }) {
     const style = (this.setting?.generator || []).find((g) => g.id === styleId);
     if (!style) return;
     let grew = false;
@@ -273,6 +282,7 @@ export class App {
       grew = size.w !== map.size.w || size.h !== map.size.h;
       map.size = size;
       const out = generateLayout({ style, map, count, seed, doorType: this.setting?.doors?.type });
+      if (combat) for (const r of out.rooms) if (r.type !== style.corridor?.type) r.combat = true;
       Object.assign(level, { shapes: out.shapes, walls: [], doors: out.doors, edges: [], rooms: out.rooms, wallStyles: [], placements: [] });
       this.decorateIn(map, level, level.rooms.map((r) => r.id), { doors: true });
     });
@@ -828,6 +838,7 @@ export class App {
     ctx.strokeRect(0, 0, this.map.size.w, this.map.size.h);
 
     this.drawRoomOverlays(ctx, geo, style);
+    if (this.showTactical) this.drawTactical(ctx);
     if (this.hoverItem && this.hoverItem.id !== this.selection?.id) this.drawItemOutline(ctx, this.hoverItem, 0, 0, 'rgba(42,157,244,0.6)');
     if (this.selection) this.drawItemOutline(ctx, this.selection, 0, 0, '#ff9f1c');
     const handle = this.tool.id === 'select' && this.rotationHandle();
@@ -850,6 +861,7 @@ export class App {
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (this.showLabels) this.drawRoomLabels(ctx, geo);
+    if (this.showTactical) this.drawTacticalLegend(ctx);
   }
 
   // The level below as faint outlines, for lining things up.
@@ -910,6 +922,55 @@ export class App {
       ctx.globalAlpha = alpha;
       ctx.fillStyle = index === selRegion ? '#ff9f1c' : '#2a9df4';
       ctx.fill(this.regionPath(geo, index));
+    }
+    ctx.restore();
+  }
+
+  /** Cover and difficult terrain, square by square: what a combat looks like on this map. */
+  drawTactical(ctx) {
+    const s = this.view.scale;
+    ctx.save();
+    for (const p of this.level.placements) {
+      const r = this.assets.resolve(p);
+      if (!r) continue;
+      const fill = TACTICAL[r.meta.tags?.includes('difficult terrain') ? 'difficult' : r.meta.blocksMovement ? r.meta.cover : 'none'];
+      if (!fill) continue;
+      const f = rotatedFootprint(r.footprint, p.rot || 0);
+      const x0 = Math.round(p.x - f.w / 2);
+      const y0 = Math.round(p.y - f.h / 2);
+      ctx.fillStyle = fill.color;
+      ctx.fillRect(x0, y0, f.w, f.h);
+      ctx.strokeStyle = fill.edge;
+      ctx.lineWidth = 2 / s;
+      ctx.strokeRect(x0 + 1 / s, y0 + 1 / s, f.w - 2 / s, f.h - 2 / s);
+      if (fill.mark && s >= 18) {
+        ctx.fillStyle = fill.edge;
+        ctx.font = `bold ${Math.min(0.45, f.h * 0.45)}px system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fill.mark, p.x, p.y);
+      }
+    }
+    ctx.restore();
+  }
+
+  drawTacticalLegend(ctx) {
+    const rows = Object.values(TACTICAL);
+    ctx.save();
+    ctx.font = '600 12px system-ui, sans-serif';
+    ctx.textBaseline = 'middle';
+    const x = 12;
+    let y = this.canvas.clientHeight - 14 - rows.length * 18;
+    ctx.fillStyle = 'rgba(31,33,37,0.9)';
+    ctx.beginPath();
+    ctx.roundRect(x - 6, y - 12, 190, rows.length * 18 + 8, 8);
+    ctx.fill();
+    for (const r of rows) {
+      ctx.fillStyle = r.edge;
+      ctx.fillRect(x, y - 6, 12, 12);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(r.name, x + 20, y);
+      y += 18;
     }
     ctx.restore();
   }

@@ -552,6 +552,12 @@ function roomSection() {
       el('div', {},
         segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => setDensity(DENSITY[v])),
         el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: density, onchange: (e) => setDensity(Number(e.target.value)) }))),
+    tag && checkbox('Combat ready: spread cover over the floor, keep lanes open', !!tag.combat, (v) => app.commit('Combat ready', (map, level) => {
+      const t = level.rooms.find((r) => r.id === tag.id);
+      if (!t) return;
+      t.combat = v || undefined;
+      app.decorateIn(map, level, [t.id]);
+    })),
     tag && field('Clutter',
       segmented([{ id: 'none', name: 'None' }, { id: 'light', name: 'Light' }, { id: 'heavy', name: 'Heavy' }], clutterPreset, (v) => setClutter(CLUTTER[v])),
       'Cracks, stains, papers, cobwebs: small floor details.'),
@@ -650,6 +656,10 @@ function mapSection() {
       app.showLabels = v;
       app.requestRender();
     }),
+    checkbox('Tactical overlay: cover and difficult terrain', app.showTactical, (v) => {
+      app.showTactical = v;
+      app.requestRender();
+    }),
   );
 }
 
@@ -719,6 +729,7 @@ function generateSection() {
         },
       }),
       count)),
+    checkbox('Combat-ready rooms (cover spread over the floor)', !!app.opts.genCombat, (v) => (app.opts.genCombat = v)),
     el('div', { class: 'actions' },
       el('button', {
         class: 'primary',
@@ -726,7 +737,7 @@ function generateSection() {
         onclick: async () => {
           const empty = !app.level.shapes.length;
           if (!empty && app.generatedRev !== app.rev && !(await ask('Replace everything on this level with a generated layout? (Undo brings it back.)', { ok: 'Generate', danger: true }))) return;
-          app.generateLevel({ styleId: app.opts.genStyle, count: app.opts.genRooms });
+          app.generateLevel({ styleId: app.opts.genStyle, count: app.opts.genRooms, combat: app.opts.genCombat });
         },
       }, app.generatedRev === app.rev ? 'Generate another' : 'Generate level')),
     el('p', { class: 'hint' }, 'Every click gives a new layout. Edit it like any map afterwards.'),
