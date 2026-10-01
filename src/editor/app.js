@@ -4,11 +4,12 @@ import { createMap, loadMap, saveMap } from '../core/model.js';
 import { computeLevelGeometry, cachedShapeRings, wallPolyline } from '../core/level-geometry.js';
 import { translateShape } from '../core/shapes.js';
 import { regionAt, sampleX, sampleY, STEP } from '../core/rooms.js';
-import { pointInRings, distToRings, distToSegment, snapPoint, polylineSegments, add, scale } from '../core/geom.js';
+import { pointInRings, distToRings, distToSegment, snapPoint, polylineSegments, add, sub, scale, norm, perp } from '../core/geom.js';
 import { drawLevel, levelPaths } from '../render/renderer.js';
 import { linksOnLevel, linkContains } from '../core/links.js';
 import { placementContains, snapCentre, rotatedFootprint } from '../assets/library.js';
 import { decorateRoom } from '../decorator/decorate.js';
+import { planDoors } from '../core/auto-doors.js';
 import { newId } from '../core/model.js';
 import { resolveStyle } from '../render/style.js';
 
@@ -28,7 +29,7 @@ export class App {
       mode: 'add', walled: true, radius: 0, roughness: 0.5, brush: 1, doorType: 'door', doorWidth: 1, roomType: null,
       linkType: 'stairs', linkSpan: 1, spiralSize: 2, edgeKind: 'wall',
       asset: null, assetParams: null, assetRoom: null, assetSearch: '',
-      autoDecorate: true,
+      autoDecorate: true, autoDoors: true,
     };
     this.showBelow = true;
     this.view = { scale: 32, ox: 40, oy: 40 };
@@ -154,16 +155,18 @@ export class App {
    * Decorate rooms on a level in place (call inside commit). Replaces each room's automatic
    * pieces and keeps the ones placed by hand. reroll: bump the room's reroll count first.
    */
-  decorateIn(map, level, tagIds, { reroll = false } = {}) {
+  decorateIn(map, level, tagIds, { reroll = false, doors = this.opts.autoDoors } = {}) {
+    // Rooms tagged before get their doors the first time they are decorated.
+    const blockers = doors ? this.addDoorsIn(map, level, tagIds) : [];
     const geo = computeLevelGeometry(level, map);
     const metas = this.assets.forSetting(map.setting);
     const links = linksOnLevel(map, level);
     let placed = 0;
-    for (const id of tagIds) {
+    for (const id of [...tagIds, ...blockers.filter((b) => !tagIds.includes(b))]) {
       const tag = level.rooms.find((r) => r.id === id);
       const index = geo.rooms.tagRegion.get(id);
       if (!tag || index == null) continue;
-      if (reroll) tag.reroll = (tag.reroll || 0) + 1;
+      if (reroll && tagIds.includes(id)) tag.reroll = (tag.reroll || 0) + 1;
       const inRoom = (p) => p.room === id || regionAt(geo.rooms, [p.x, p.y]) === index;
       level.placements = level.placements.filter((p) => !(p.auto && inRoom(p)));
       const existing = [];
@@ -187,6 +190,70 @@ export class App {
       placed += out.placements.length;
     }
     return placed;
+  }
+
+  /**
+   * Add doors joining rooms to their neighbours (call inside commit). Each room is done once,
+   * unless force. Returns ids of other rooms whose automatic pieces now stand in a doorway.
+   * redecorating: the target rooms' own automatic pieces are about to be replaced.
+   */
+  addDoorsIn(map, level, tagIds, { force = false, redecorating = !force } = {}) {
+    const tags = tagIds.map((id) => level.rooms.find((r) => r.id === id)).filter((t) => t && (force || !t.autoDoors));
+    if (!tags.length) return [];
+    const geo = computeLevelGeometry(level, map);
+    const targets = tags.map((t) => geo.rooms.tagRegion.get(t.id)).filter((i) => i != null);
+    for (const t of tags) t.autoDoors = true;
+    const cfg = this.setting?.doors || {};
+    const hubs = new Set(cfg.hubs || []);
+    const byRoom = cfg.byRoom || {};
+    const replaced = (p) => redecorating && p.auto && targets.includes(regionAt(geo.rooms, [p.x, p.y]));
+    const solid = level.placements.filter((p) => this.assets.get(p.asset)?.blocksMovement && !replaced(p));
+    const covers = (list, pt) => list.some((p) => {
+      const r = this.assets.resolve(p);
+      return r && placementContains(p, r.footprint, pt);
+    });
+    const planned = planDoors({
+      geo,
+      doors: level.doors,
+      targets,
+      type: (a, b) => byRoom[a.tag?.type] || byRoom[b.tag?.type] || cfg.type || 'door',
+      hub: (r) => hubs.has(r.tag?.type),
+      blocked: (pt) => covers(solid, pt),
+    });
+    const blockers = new Set();
+    for (const { a, b, type } of planned) {
+      level.doors.push({ id: newId('d'), type, a, b });
+      // Automatic pieces now in a doorway: their rooms are redecorated around the door.
+      const n = perp(norm(sub(b, a)));
+      const c = scale(add(a, b), 0.5);
+      for (const pt of [add(c, scale(n, 0.5)), add(c, scale(n, -0.5))]) {
+        const index = regionAt(geo.rooms, pt);
+        const tag = geo.rooms.regions[index]?.tag;
+        if (!tag || (redecorating && targets.includes(index))) continue;
+        if (covers(level.placements.filter((p) => p.auto && regionAt(geo.rooms, [p.x, p.y]) === index), pt)) blockers.add(tag.id);
+      }
+    }
+    this.lastDoorCount = planned.length;
+    return [...blockers];
+  }
+
+  /** Add doors for rooms now (the Add doors buttons). */
+  addDoors(tagIds) {
+    this.lastDoorCount = 0;
+    this.commit('Add doors', (map, level) => {
+      const blockers = this.addDoorsIn(map, level, tagIds, { force: true });
+      if (blockers.length) this.decorateIn(map, level, blockers, { doors: false });
+    });
+    const n = this.lastDoorCount;
+    this.status(n ? `Added ${n} door${n === 1 ? '' : 's'}.` : 'No new doors needed: the neighbouring rooms are already joined.');
+  }
+
+  /** After tagging rooms: doors and decoration, as the room tool's options say. */
+  tagged(map, level, tagIds) {
+    if (this.opts.autoDecorate) return this.decorateIn(map, level, tagIds);
+    if (!this.opts.autoDoors) return 0;
+    const blockers = this.addDoorsIn(map, level, tagIds, { redecorating: false });
+    return blockers.length ? this.decorateIn(map, level, blockers, { doors: false }) : 0;
   }
 
   decorate(tagIds, { reroll = false } = {}) {

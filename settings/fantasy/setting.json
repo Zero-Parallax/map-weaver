@@ -4,6 +4,7 @@
   "description": "Towns, taverns and keeps.",
   "defaults": { "palette": "sepia", "shading": "hatch", "grid": "floor" },
   "walls": { "width": 0.14, "style": "line", "band": 0.7 },
+  "doors": { "type": "door", "hubs": ["great-hall", "tavern", "cave"], "byRoom": {} },
   "roomTypes": [
     { "id": "tavern", "name": "Tavern" },
     { "id": "bedroom", "name": "Bedroom" },

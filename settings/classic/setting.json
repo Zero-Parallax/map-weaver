@@ -4,6 +4,7 @@
   "description": "Old-school dungeon crawl in the style of early module maps.",
   "defaults": { "palette": "blue-white", "shading": "solid", "grid": "floor" },
   "walls": { "width": 0.12, "style": "line", "band": 0.7 },
+  "doors": { "type": "door", "hubs": ["corridor", "cave", "temple"], "byRoom": { "prison": "portcullis" } },
   "roomTypes": [
     { "id": "corridor", "name": "Corridor" },
     { "id": "chamber", "name": "Chamber" },

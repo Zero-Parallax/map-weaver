@@ -12,6 +12,21 @@
     "style": "double",
     "band": 0.6
   },
+  "doors": {
+    "type": "sliding",
+    "hubs": [
+      "corridor",
+      "command-centre",
+      "market",
+      "cantina",
+      "hangar",
+      "mess-hall"
+    ],
+    "byRoom": {
+      "detention": "locked",
+      "armoury": "locked"
+    }
+  },
   "roomTypes": [
     {
       "id": "bridge",

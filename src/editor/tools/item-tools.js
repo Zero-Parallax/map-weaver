@@ -67,6 +67,7 @@ export const roomTool = {
     currentRoomType(app);
     return el('div', {},
       checkbox('Decorate rooms when tagged', app.opts.autoDecorate, (v) => app.setOpt('autoDecorate', v)),
+      checkbox('Add doors to neighbouring rooms', app.opts.autoDoors, (v) => app.setOpt('autoDoors', v)),
       el(
       'div',
       { class: 'room-types' },
@@ -99,7 +100,7 @@ export const roomTool = {
     if (!type) return;
     app.commit('Tag room', (map, level) => {
       const tag = tagRegion(level, rooms, index, type, ev.world);
-      if (app.opts.autoDecorate) app.decorateIn(map, level, [tag.id]);
+      app.tagged(map, level, [tag.id]);
     });
   },
   cancel(app) {

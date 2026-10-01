@@ -502,7 +502,7 @@ function roomSection() {
       } else {
         app.commit('Tag room', (map, level) => {
           const t = tagRegion(level, rooms, index, v, at);
-          if (app.opts.autoDecorate) app.decorateIn(map, level, [t.id]);
+          app.tagged(map, level, [t.id]);
         });
       }
     })),
@@ -516,6 +516,7 @@ function roomSection() {
       el('button', { onclick: () => app.decorate([tag.id]), title: 'Replace this room\'s automatic pieces (same layout)' }, 'Decorate'),
       el('button', { onclick: () => app.decorate([tag.id], { reroll: true }), title: 'A new random layout' }, 'Reroll'),
       el('button', { onclick: () => app.clearDecoration([tag.id]), title: 'Remove automatic pieces; hand-placed ones stay' }, 'Clear'),
+      el('button', { onclick: () => app.addDoors([tag.id]), title: 'Door into each neighbouring room that can\'t be reached yet' }, 'Add doors'),
     ),
     !tag && el('p', { class: 'hint' }, 'Give the room a type to decorate it.'),
   );
@@ -651,6 +652,7 @@ function levelSection() {
     el('div', { class: 'actions' },
       el('button', { onclick: () => app.decorate(app.level.rooms.map((r) => r.id)), title: 'Decorate every tagged room on this level' }, 'Decorate all rooms'),
       el('button', { onclick: () => app.decorate(app.level.rooms.map((r) => r.id), { reroll: true }) }, 'Reroll all'),
+      el('button', { onclick: () => app.addDoors(app.level.rooms.map((r) => r.id)), title: 'Join every tagged room to its neighbours' }, 'Add doors'),
     ),
     el('p', { class: 'hint' }, 'PageUp / PageDown switch levels.'),
   );

@@ -40,6 +40,12 @@ Recomputed from the level when it changes:
 4. **Rooms** (`rooms.js`): floor sampled at 4x4 points per square, links crossing a wall blocked,
    then flood-filled. Each room knows its full squares, which the decorator will use.
    Tags attach to whichever room contains their point, so they survive edits.
+5. **Automatic doors** (`auto-doors.js`): every wall stretch two rooms share is sampled for
+   door spans and how much wall carries on past each end. Rooms are joined by a spanning tree
+   over the whole level (existing doors count, windows don't; hubs from the setting's
+   `doors.hubs` and corridor-shaped spaces first), emitting only the doors that touch the
+   target rooms, so tagging order doesn't change the result. Tags remember `autoDoors` so
+   each room is done once. Settings give `doors: {type, hubs, byRoom}`.
 
 ## Assets (`src/assets/`)
 

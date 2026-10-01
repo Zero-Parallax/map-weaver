@@ -101,6 +101,18 @@ clear in front of doors and a ring round stairs, ladders and lifts, leaves balco
 balcony pieces, and only accepts a piece if every entrance can still reach every other.
 Corridors (rooms 3 squares or narrower) only get pieces along their walls.
 
+### Automatic doors
+
+Tagging or decorating a room also gives it doors into its neighbours (untick "Add doors to
+neighbouring rooms" in the Room type tool to stop this). Rooms are joined like a tree: each
+pair of rooms that can't already reach each other gets one door, so there are no needless
+extra doors. Corridors and halls (and any long, narrow space, tagged or not) are joined
+first, so rooms open onto them rather than into each other. A door goes where the shared wall
+has the most room either side, away from other doors and furniture. Each room gets its doors
+once: delete one you don't want and it stays deleted. **Add doors** (Room section, or the
+Levels panel for every room) runs it again on demand. The door type comes from the setting
+(sliding doors in sci-fi; portcullises for prisons, locked doors for detention and armouries).
+
 ## Assets
 
 SVG files under `assets/` (`common/` holds ones shared by several settings). Each file carries
