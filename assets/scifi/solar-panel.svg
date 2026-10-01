@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Solar panel</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"solar-panel","name":"Solar panel","settings":["scifi"],"footprint":{"w":2,"h":1},"roomTypes":["colony-yard","wasteland"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":4,"tags":[],"cover":"half"}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<polygon class="k" points="14,10 186,10 194,18 194,82 186,90 14,90 6,82 6,18"/><path class="pl" d="M30 14L30 86M54 14L54 86M78 14L78 86M102 14L102 86M126 14L126 86M150 14L150 86M174 14L174 86M10 50L190 50"/>
+</g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+<title>Stone bridge</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"stone-bridge","name":"Stone bridge","settings":["classic","fantasy"],"footprint":{"w":4,"h":2},"roomTypes":["by-hand"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":["bridge"],"generator":{"id":"bridge","params":{"len":4,"width":2,"style":"stone"},"sizes":{"len":[2,10],"width":[1,4]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="o" x="0" y="10" width="400" height="180" rx="8"/><path class="t" d="M50 22L50 178M100 22L100 178M150 22L150 178M200 22L200 178M250 22L250 178M300 22L300 178M350 22L350 178"/><rect class="s" x="0" y="0" width="400" height="18" rx="5"/><rect class="s" x="0" y="182" width="400" height="18" rx="5"/><path class="t" d="M0 0L0 18M0 182L0 200"/><path class="t" d="M50 0L50 18M50 182L50 200"/><path class="t" d="M100 0L100 18M100 182L100 200"/><path class="t" d="M150 0L150 18M150 182L150 200"/><path class="t" d="M200 0L200 18M200 182L200 200"/><path class="t" d="M250 0L250 18M250 182L250 200"/><path class="t" d="M300 0L300 18M300 182L300 200"/><path class="t" d="M350 0L350 18M350 182L350 200"/>
+</svg>

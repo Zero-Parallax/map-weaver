@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<title>Spore pods</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"spore-pods","name":"Spore pods","settings":["scifi"],"footprint":{"w":1,"h":1},"roomTypes":["jungle","wasteland","alien-ruins"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":false,"blocksVision":false,"weight":2,"min":0,"max":4,"tags":["difficult terrain"],"cover":"half"}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<circle class="m" cx="36" cy="40" r="18"/><circle class="p" cx="30.6" cy="34.6" r="6.3"/><circle class="m" cx="66" cy="36" r="13"/><circle class="p" cx="62.1" cy="32.1" r="4.6"/><circle class="m" cx="60" cy="66" r="20"/><circle class="p" cx="54" cy="60" r="7"/><circle class="m" cx="28" cy="70" r="11"/><circle class="p" cx="24.7" cy="66.7" r="3.9"/>
+</g>
+</svg>

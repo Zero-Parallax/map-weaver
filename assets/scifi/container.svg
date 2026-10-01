@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 400" width="200" height="400">
 <title>Cargo container</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"container","name":"Cargo container","settings":["scifi"],"footprint":{"w":2,"h":4},"roomTypes":["cargo-bay","hangar","landing-pad"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"cargo","params":{"w":2,"h":4,"style":"container"},"sizes":{"w":[2,3],"h":[3,5]}}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"container","name":"Cargo container","settings":["scifi"],"footprint":{"w":2,"h":4},"roomTypes":["cargo-bay","hangar","landing-pad","colony-yard"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":3,"tags":[],"generator":{"id":"cargo","params":{"w":2,"h":4,"style":"container"},"sizes":{"w":[2,3],"h":[3,5]}}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}

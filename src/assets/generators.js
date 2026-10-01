@@ -264,6 +264,69 @@ function railing({ len = 3, style = 'posts' }) {
   return { footprint: { w: len, h: 1 }, drawing: g };
 }
 
+/**
+ * Bridge spanning `len` squares (along x), `width` wide. style: wood (planks and rails),
+ * stone (arched slabs with parapets) or metal (grated gantry with handrails).
+ */
+function bridge({ len = 4, width = 2, style = 'wood' }) {
+  const g = new Drawing();
+  const W = len * U;
+  const H = width * U;
+  if (style === 'stone') {
+    g.rect(0, 10, W, H - 20, 'o', 8);
+    const joints = [];
+    for (let x = 50; x < W; x += 50) joints.push([x, 22, x, H - 22]);
+    g.lines(joints, 't');
+    g.rect(0, 0, W, 18, 's', 5);
+    g.rect(0, H - 18, W, 18, 's', 5);
+    for (let x = 0; x < W; x += 50) g.lines([[x, 0, x, 18], [x, H - 18, x, H]], 't');
+  } else if (style === 'metal') {
+    g.chamfer(0, 8, W, H - 16, 10, 's');
+    const grid = [];
+    for (let x = 20; x < W; x += 20) grid.push([x, 18, x, H - 18]);
+    g.lines(grid, 't');
+    g.rect(0, 2, W, 10, 'ko', 3);
+    g.rect(0, H - 12, W, 10, 'ko', 3);
+    for (let x = 30; x < W; x += 100) g.circle(x, 7, 5, 'p');
+  } else {
+    g.rect(0, 12, W, H - 24, 'o', 4);
+    const boards = [];
+    for (let x = 25; x < W; x += 25) boards.push([x, 14, x, H - 14]);
+    g.lines(boards, 't');
+    g.rect(0, 4, W, 12, 's', 4);
+    g.rect(0, H - 16, W, 12, 's', 4);
+    for (let x = 0; x <= len; x++) {
+      const px = Math.min(W - 16, Math.max(0, x * U - 8));
+      g.rect(px, 0, 16, 20, 'ko', 3);
+      g.rect(px, H - 20, 16, 20, 'ko', 3);
+    }
+  }
+  return { footprint: { w: len, h: width }, drawing: g };
+}
+
+/** A straight fence `len` squares long. style: wood (rails), iron (spiked) or barrier (sci-fi). */
+function fence({ len = 3, style = 'wood' }) {
+  const g = new Drawing();
+  const W = len * U;
+  if (style === 'barrier') {
+    for (let x = 0; x < len; x++) {
+      g.chamfer(x * U + 4, 34, U - 8, 32, 8, 's');
+      g.lines([[x * U + 20, 42, x * U + 36, 58], [x * U + 44, 42, x * U + 60, 58], [x * U + 68, 42, x * U + 84, 58]], 'l');
+    }
+  } else if (style === 'iron') {
+    g.line(0, 50, W, 50, 'l');
+    const bars = [];
+    for (let x = 10; x < W; x += 20) bars.push([x, 38, x, 62]);
+    g.lines(bars, 't');
+    for (let x = 0; x <= len; x++) g.rect(Math.min(W - 14, Math.max(0, x * U - 7)), 40, 14, 20, 'ko', 2);
+  } else {
+    g.rect(0, 40, W, 8, 'o', 2);
+    g.rect(0, 54, W, 8, 'o', 2);
+    for (let x = 0; x <= len; x++) g.rect(Math.min(W - 14, Math.max(0, x * U - 7)), 34, 14, 32, 's', 3);
+  }
+  return { footprint: { w: len, h: 1 }, drawing: g };
+}
+
 /** Registry: id -> {name, params (defaults and allowed ranges), make(params)}. */
 export const GENERATORS = {
   table: { name: 'Table', params: { w: [1, 4], h: [1, 3] }, make: table },
@@ -275,6 +338,8 @@ export const GENERATORS = {
   dais: { name: 'Dais', params: { w: [2, 6], h: [1, 4] }, make: dais },
   cargo: { name: 'Cargo', params: { w: [1, 4], h: [1, 4] }, make: cargo },
   railing: { name: 'Railing', params: { len: [1, 8] }, make: railing },
+  bridge: { name: 'Bridge', params: { len: [2, 12], width: [1, 4] }, make: bridge },
+  fence: { name: 'Fence', params: { len: [1, 8] }, make: fence },
 };
 
 export function runGenerator(id, params) {

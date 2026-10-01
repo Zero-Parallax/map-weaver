@@ -19,7 +19,7 @@ for (const setting of settings) {
         const level = { ...map.levels[0], ...out };
         const geo = computeLevelGeometry(level, map);
         const rooms = geo.rooms.regions.filter((r) => r.area >= 2);
-        assert.ok(rooms.length >= 5, `seed ${seed}: only ${rooms.length} rooms`);
+        assert.ok(rooms.length >= (style.layout === 'outdoor' ? 1 : 5), `seed ${seed}: only ${rooms.length} rooms`);
         for (const r of rooms) assert.ok(r.tag, `seed ${seed}: untagged space of ${r.area} sq`);
         for (const t of out.rooms) assert.ok(types.has(t.type), `unknown room type ${t.type}`);
         const doors = planDoors({ geo, doors: out.doors, targets: rooms.map((r) => r.index) });
@@ -35,4 +35,23 @@ test('the same seed gives the same layout', () => {
   const strip = (o) => JSON.stringify(o.shapes.map(({ id, ...s }) => s));
   assert.equal(strip(generateLayout({ style, map, seed: 9 })), strip(generateLayout({ style, map, seed: 9 })));
   assert.notEqual(strip(generateLayout({ style, map, seed: 9 })), strip(generateLayout({ style, map, seed: 10 })));
+});
+
+test('outdoor styles: ground, terrain, a bridge where the road crosses the river', () => {
+  const fantasy = settings.find((s) => s.id === 'fantasy');
+  const style = { ...fantasy.generator.find((g) => g.id === 'forest-road'), road: 1, river: 1 };
+  let bridges = 0;
+  for (const seed of [1, 2, 3, 4, 5, 6]) {
+    const map = createMap({ setting: 'fantasy', size: { w: 40, h: 30 } });
+    const out = generateLayout({ style, map, count: 4, seed });
+    assert.equal(out.ground, 'grass');
+    assert.ok(out.terrain.some((t) => t.kind === 'water'));
+    assert.ok(out.terrain.some((t) => t.kind === 'road'));
+    bridges += out.placements.filter((p) => p.asset === 'wooden-bridge').length;
+    const level = { ...map.levels[0], ...out };
+    const geo = computeLevelGeometry(level, map);
+    assert.equal(geo.outerSegments.length, 0, 'no wall along the map edge');
+    assert.ok(out.rooms.some((r) => r.type === 'forest'));
+  }
+  assert.ok(bridges >= 5, `${bridges} bridges in 6 maps`);
 });

@@ -16,7 +16,13 @@
     { "id": "library", "name": "Library" },
     { "id": "temple", "name": "Temple" },
     { "id": "cellar", "name": "Cellar" },
-    { "id": "cave", "name": "Cave" }
+    { "id": "cave", "name": "Cave" },
+    { "id": "forest", "name": "Forest", "outdoor": true },
+    { "id": "clearing", "name": "Clearing", "outdoor": true },
+    { "id": "camp", "name": "Campsite", "outdoor": true },
+    { "id": "graveyard", "name": "Graveyard", "outdoor": true },
+    { "id": "farmyard", "name": "Farmyard", "outdoor": true },
+    { "id": "garden", "name": "Garden", "outdoor": true }
   ],
   "generator": [
     {"id":"inn","name":"Inn or house","layout":"building","corridor":{"type":"corridor"},"rooms":[
@@ -48,6 +54,10 @@
       {"type":"cave","weight":6},
       {"type":"temple","max":1},
       {"type":"cellar","max":1}
-    ]}
+    ]},
+    {"id":"forest-road","name":"Forest road","layout":"outdoor","ground":"grass","region":{"type":"forest","density":0.5},"road":0.9,"river":0.6,"bridge":"wooden-bridge","pools":{"water":0.4,"mud":0.3},"camp":0.4},
+    {"id":"village","name":"Village","layout":"outdoor","ground":"grass","region":{"type":"farmyard","density":0.35},"road":1,"river":0.5,"bridge":"stone-bridge","pools":{"water":0.3},"buildings":{"min":2,"max":6,"rooms":[{"type":"tavern","max":1},{"type":"shop","max":1},{"type":"smithy","max":1},{"type":"bedroom","weight":3},{"type":"kitchen","max":1}]}},
+    {"id":"camp","name":"Riverside camp","layout":"outdoor","ground":"grass","region":{"type":"clearing","density":0.35},"road":0.4,"river":1,"bridge":"wooden-bridge","pools":{"mud":0.4},"camp":1},
+    {"id":"graveyard","name":"Graveyard","layout":"outdoor","ground":"grass","region":{"type":"graveyard","density":0.55},"road":0.8,"roadKind":"paving","pools":{"mud":0.4},"buildings":{"min":1,"max":1,"rooms":[{"type":"temple"}]}}
   ]
 }

@@ -93,10 +93,10 @@ export default function define({ A, G }) {
     }
   });
 
-  G('cargo-crate', 'Cargo crate', S, 'cargo', { w: 1, h: 1, style: 'container' }, { placement: 'corner', roomTypes: ['cargo-bay', 'engine-room', 'airlock', 'corridor', 'hangar', 'market', 'landing-pad', 'workshop'], max: 8, weight: 3 }, { w: [1, 2], h: [1, 2] });
-  G('container', 'Cargo container', S, 'cargo', { w: 2, h: 4, style: 'container' }, { placement: 'free', blocksVision: true, roomTypes: ['cargo-bay', 'hangar', 'landing-pad'], max: 3 }, { w: [2, 3], h: [3, 5] });
+  G('cargo-crate', 'Cargo crate', S, 'cargo', { w: 1, h: 1, style: 'container' }, { placement: 'corner', roomTypes: ['cargo-bay', 'engine-room', 'airlock', 'corridor', 'hangar', 'market', 'landing-pad', 'workshop', 'colony-yard', 'crash-site'], max: 8, weight: 3 }, { w: [1, 2], h: [1, 2] });
+  G('container', 'Cargo container', S, 'cargo', { w: 2, h: 4, style: 'container' }, { placement: 'free', blocksVision: true, roomTypes: ['cargo-bay', 'hangar', 'landing-pad', 'colony-yard'], max: 3 }, { w: [2, 3], h: [3, 5] });
 
-  A('fuel-drum', 'Fuel drum', S, [1, 1], { placement: 'corner', roomTypes: ['engine-room', 'cargo-bay', 'hangar', 'landing-pad', 'mine'], max: 4 }, (g) => {
+  A('fuel-drum', 'Fuel drum', S, [1, 1], { placement: 'corner', roomTypes: ['engine-room', 'cargo-bay', 'hangar', 'landing-pad', 'mine', 'colony-yard', 'crash-site'], max: 4 }, (g) => {
     g.circle(50, 50, 38, 's');
     g.circle(50, 50, 30, 'o');
     g.poly([[50, 28], [72, 66], [28, 66]], 'ko');
@@ -538,7 +538,7 @@ export default function define({ A, G }) {
     g.path('M36 36L52 52L46 70M60 30L64 46', 'l');
   });
 
-  A('crystal-cluster', 'Crystal cluster', S, [1, 1], { light: { bright: 0, dim: 3, color: '#8fd9ff', animation: 'pulse' }, placement: 'free', roomTypes: ['alien-ruins', 'mine'], max: 5, weight: 2 }, (g) => {
+  A('crystal-cluster', 'Crystal cluster', S, [1, 1], { light: { bright: 0, dim: 3, color: '#8fd9ff', animation: 'pulse' }, placement: 'free', roomTypes: ['alien-ruins', 'mine', 'wasteland', 'jungle'], max: 5, weight: 2 }, (g) => {
     for (const [x, y, r, a] of [[40, 40, 26, 0.2], [66, 58, 22, 1.1], [34, 70, 16, 2.2], [68, 28, 14, 0.8]]) {
       g.poly([[x + Math.cos(a) * r, y + Math.sin(a) * r], [x + Math.cos(a + 1.9) * r * 0.5, y + Math.sin(a + 1.9) * r * 0.5], [x - Math.cos(a) * r * 0.6, y - Math.sin(a) * r * 0.6], [x + Math.cos(a - 1.9) * r * 0.5, y + Math.sin(a - 1.9) * r * 0.5]], 'o');
       g.line(x + Math.cos(a) * r, y + Math.sin(a) * r, x - Math.cos(a) * r * 0.6, y - Math.sin(a) * r * 0.6, 't');

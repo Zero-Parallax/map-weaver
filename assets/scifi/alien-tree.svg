@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Alien tree</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"alien-tree","name":"Alien tree","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["jungle","colony-yard","crash-site"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":4,"min":0,"max":3,"tags":[],"cover":"three-quarters"}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<circle class="s" cx="100" cy="100" r="50"/><g transform="rotate(11.5 160.8 112.3)"><ellipse class="o" cx="160.8" cy="112.3" rx="32" ry="16"/><line class="t" x1="134.8" y1="112.3" x2="186.8" y2="112.3"/></g><g transform="rotate(62.9 128.3 155.2)"><ellipse class="o" cx="128.3" cy="155.2" rx="32" ry="16"/><line class="t" x1="102.3" y1="155.2" x2="154.3" y2="155.2"/></g><g transform="rotate(114.3 74.5 156.5)"><ellipse class="o" cx="74.5" cy="156.5" rx="32" ry="16"/><line class="t" x1="48.5" y1="156.5" x2="100.5" y2="156.5"/></g><g transform="rotate(165.7 39.9 115.3)"><ellipse class="o" cx="39.9" cy="115.3" rx="32" ry="16"/><line class="t" x1="13.9" y1="115.3" x2="65.9" y2="115.3"/></g><g transform="rotate(217.2 50.6 62.5)"><ellipse class="o" cx="50.6" cy="62.5" rx="32" ry="16"/><line class="t" x1="24.6" y1="62.5" x2="76.6" y2="62.5"/></g><g transform="rotate(268.6 98.5 38.0)"><ellipse class="o" cx="98.5" cy="38" rx="32" ry="16"/><line class="t" x1="72.5" y1="38" x2="124.5" y2="38"/></g><g transform="rotate(320.0 147.5 60.2)"><ellipse class="o" cx="147.5" cy="60.2" rx="32" ry="16"/><line class="t" x1="121.5" y1="60.2" x2="173.5" y2="60.2"/></g><circle class="m" cx="100" cy="100" r="30"/><circle class="p" cx="90" cy="92" r="6"/><circle class="p" cx="110" cy="96" r="6"/><circle class="p" cx="100" cy="112" r="6"/>
+</g>
+</svg>

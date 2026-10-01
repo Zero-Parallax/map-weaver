@@ -53,7 +53,7 @@ export function caveRing(points, roughness = 0.5, seed = 1) {
 }
 
 /** Chaikin corner cutting for an open polyline (ends stay put). */
-function chaikinOpen(points, iterations) {
+export function chaikinOpen(points, iterations) {
   let pts = points;
   for (let k = 0; k < iterations; k++) {
     const next = [pts[0]];

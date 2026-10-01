@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+<title>Iron railings</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"iron-fence","name":"Iron railings","settings":["classic","fantasy"],"footprint":{"w":3,"h":1},"roomTypes":["graveyard","garden"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":3,"tags":[],"cover":"half","generator":{"id":"fence","params":{"len":3,"style":"iron"},"sizes":{"len":[2,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<line class="l" x1="0" y1="50" x2="300" y2="50"/><path class="t" d="M10 38L10 62M30 38L30 62M50 38L50 62M70 38L70 62M90 38L90 62M110 38L110 62M130 38L130 62M150 38L150 62M170 38L170 62M190 38L190 62M210 38L210 62M230 38L230 62M250 38L250 62M270 38L270 62M290 38L290 62"/><rect class="ko" x="0" y="40" width="14" height="20" rx="2"/><rect class="ko" x="93" y="40" width="14" height="20" rx="2"/><rect class="ko" x="193" y="40" width="14" height="20" rx="2"/><rect class="ko" x="286" y="40" width="14" height="20" rx="2"/>
+</g>
+</svg>

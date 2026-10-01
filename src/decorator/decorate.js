@@ -341,7 +341,9 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     return capsLifted ? cap * 2 : cap;
   };
   const underCap = (m) => !capOf(m) || (counts.get(m.id) || 0) < capOf(m);
-  const pool = assets.filter((m) => suitsRoom(m, tag.type) && !m.clutter);
+  // Outdoors, "any room" pieces (torches, floor cracks) are indoor things: leave them out.
+  const fits = (m) => suitsRoom(m, tag.type) && !(outdoor && m.roomTypes.includes('*'));
+  const pool = assets.filter((m) => fits(m) && !m.clutter);
   const counts = new Map();
   const placements = [];
   const report = { placed: 0, skipped: [] };
@@ -431,7 +433,7 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     }
   }
   if (tag.combat) addCover();
-  placements.push(...scatterClutter({ room, tag, assets, occupied, mapSeed }));
+  placements.push(...scatterClutter({ room, tag, assets: assets.filter(fits), occupied, mapSeed }));
   return { placements, report };
 
   /**

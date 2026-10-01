@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Oak tree</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"oak","name":"Oak tree","settings":["classic","fantasy"],"footprint":{"w":2,"h":2},"roomTypes":["forest","clearing","camp","graveyard","farmyard","garden"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":4,"min":0,"max":3,"tags":[],"cover":"three-quarters"}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<circle class="s" cx="126" cy="140.5" r="35.5"/><circle class="s" cx="93.4" cy="151.4" r="35.5"/><circle class="s" cx="68.7" cy="128.9" r="35.5"/><circle class="s" cx="53.8" cy="102.2" r="35.5"/><circle class="s" cx="60.3" cy="69.7" r="35.5"/><circle class="s" cx="91" cy="60.3" r="35.5"/><circle class="s" cx="120.4" cy="60.5" r="35.5"/><circle class="s" cx="144.4" cy="81.4" r="35.5"/><circle class="s" cx="149.5" cy="115.4" r="35.5"/><circle class="s" cx="100" cy="100" r="45.9"/><circle class="o" cx="80" cy="118.1" r="24"/><circle class="o" cx="63.8" cy="105.4" r="24"/><circle class="o" cx="59.3" cy="83.5" r="24"/><circle class="o" cx="76.1" cy="69.6" r="24"/><circle class="o" cx="94.4" cy="62.1" r="24"/><circle class="o" cx="114.8" cy="68.9" r="24"/><circle class="o" cx="126.8" cy="88.7" r="24"/><circle class="o" cx="115.7" cy="108.3" r="24"/><circle class="o" cx="100.3" cy="122.1" r="24"/><circle class="o" cx="92" cy="92" r="31"/><path class="t" d="M100 100L143.9 113.6M100 100L110.2 144.9M100 100L66.3 131.3M100 100L56.1 86.4M100 100L89.8 55.1M100 100L133.7 68.7"/><circle class="ko" cx="100" cy="100" r="12"/>
+</g>
+</svg>

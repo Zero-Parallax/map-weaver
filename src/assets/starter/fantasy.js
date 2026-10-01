@@ -152,7 +152,7 @@ export default function define({ A, G }) {
     g.circle(50, 50, 10, 'ko');
   });
 
-  A('well', 'Well', F, [2, 2], { placement: 'centre', roomTypes: ['cellar', 'cave', 'great-hall'], max: 1 }, (g) => {
+  A('well', 'Well', F, [2, 2], { placement: 'centre', roomTypes: ['cellar', 'cave', 'great-hall', 'farmyard', 'clearing'], max: 1 }, (g) => {
     g.circle(100, 100, 74, 's');
     const blocks = [];
     for (let i = 0; i < 16; i++) {

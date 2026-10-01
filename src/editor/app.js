@@ -278,14 +278,16 @@ export class App {
     if (!style) return;
     let grew = false;
     this.commit('Generate layout', (map, level) => {
-      const side = Math.ceil(Math.sqrt(count * (style.layout === 'building' ? 40 : 75) * 4 / 3));
+      const side = style.layout === 'outdoor' ? 40 : Math.ceil(Math.sqrt(count * (style.layout === 'building' ? 40 : 75) * 4 / 3));
       const size = { w: Math.max(map.size.w, side), h: Math.max(map.size.h, Math.round((side * 3) / 4)) };
       if (style.layout === 'ship') size.w = Math.max(size.w, 14 + Math.ceil((count - 2) / 2) * 6);
       grew = size.w !== map.size.w || size.h !== map.size.h;
       map.size = size;
       const out = generateLayout({ style, map, count, seed, doorType: this.setting?.doors?.type });
       if (combat) for (const r of out.rooms) if (r.type !== style.corridor?.type) r.combat = true;
-      Object.assign(level, { shapes: out.shapes, walls: [], doors: out.doors, edges: [], rooms: out.rooms, wallStyles: [], placements: [] });
+      Object.assign(level, { shapes: out.shapes, walls: [], doors: out.doors, edges: [], rooms: out.rooms, wallStyles: [], placements: out.placements, terrain: out.terrain });
+      if (out.ground) level.ground = out.ground;
+      else delete level.ground;
       this.decorateIn(map, level, level.rooms.map((r) => r.id), { doors: true });
     });
     this.generatedRev = this.rev;

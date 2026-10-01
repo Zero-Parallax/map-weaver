@@ -30,7 +30,7 @@ export default function define({ A }) {
     g.path('M34 42L28 60', 't');
   });
 
-  A('puddle', 'Puddle', ALL, [1, 1], opts(['cave', 'cellar', 'crypt', 'prison', 'corridor', 'mine', 'hangar', 'landing-pad', 'hydroponics-bay', 'kitchen', 'engine-room', 'alien-ruins']), (g) => {
+  A('puddle', 'Puddle', ALL, [1, 1], opts(['cave', 'cellar', 'crypt', 'prison', 'corridor', 'mine', 'hangar', 'landing-pad', 'hydroponics-bay', 'kitchen', 'engine-room', 'alien-ruins', 'forest', 'farmyard', 'jungle', 'clearing']), (g) => {
     splat(g, 48, 52, 28, 'h');
     g.ellipse(40, 46, 10, 5, 'pl');
     g.ellipse(60, 60, 6, 3, 'pl');
@@ -54,13 +54,13 @@ export default function define({ A }) {
     g.lines(segs.map(([a, b, c, d]) => [a + 3, b + 3, (a + c) / 2 + 3, (b + d) / 2 + 3]), 't');
   });
 
-  A('scorch', 'Scorch mark', ALL, [1, 1], opts(['smithy', 'engine-room', 'armoury', 'hangar', 'workshop', 'alien-ruins', 'kitchen', 'temple', 'landing-pad']), (g) => {
+  A('scorch', 'Scorch mark', ALL, [1, 1], opts(['smithy', 'engine-room', 'armoury', 'hangar', 'workshop', 'alien-ruins', 'kitchen', 'temple', 'landing-pad', 'crash-site', 'camp']), (g) => {
     g.star(50, 50, 36, 18, 9, 'h');
     splat(g, 50, 50, 16, 'hm');
     g.circle(50, 50, 6, 'k');
   });
 
-  A('pebbles', 'Pebbles', ALL, [1, 1], opts(['cave', 'mine', 'alien-ruins', 'crypt']), (g) => {
+  A('pebbles', 'Pebbles', ALL, [1, 1], opts(['cave', 'mine', 'alien-ruins', 'crypt', 'wasteland', 'clearing']), (g) => {
     for (const [x, y, r, s] of [[28, 34, 9, 1], [56, 26, 6, 2], [70, 52, 10, 3], [40, 64, 7, 4], [64, 78, 5, 5], [22, 70, 5, 6]]) g.poly(stoneShape(x, y, r, s), s % 2 ? 's' : 'o');
   });
 
@@ -91,7 +91,7 @@ export default function define({ A }) {
     g.ellipse(44, 44, 9, 5, 'pl');
   });
 
-  A('debris', 'Debris', S, [1, 1], opts(['alien-ruins', 'mine', 'cargo-bay', 'hangar', 'corridor', 'engine-room'], { tags: ['difficult terrain'] }), (g) => {
+  A('debris', 'Debris', S, [1, 1], opts(['alien-ruins', 'mine', 'cargo-bay', 'hangar', 'corridor', 'engine-room', 'crash-site', 'wasteland'], { tags: ['difficult terrain'] }), (g) => {
     g.poly([[14, 22], [46, 16], [52, 40], [20, 48]], 's');
     g.poly([[56, 50], [86, 58], [78, 84], [50, 76]], 'o');
     g.poly([[24, 62], [40, 58], [42, 72]], 'm');

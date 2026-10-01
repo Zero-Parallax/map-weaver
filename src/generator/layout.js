@@ -5,6 +5,8 @@
 //   building  a footprint split into rooms, with a hallway down the middle when big enough
 //   ship      a spine corridor with compartments either side, engines aft, bridge forward
 //   caves     rough chambers joined by rough tunnels
+//   outdoor   open ground with a river (water, lava or a chasm), a road with a bridge where
+//             they cross, ponds and pools, a campsite and small buildings
 //
 // Returns {shapes, rooms} for a level: shapes in drawing order and room tags. Corridors are
 // 'path' shapes joined Behind, so the rooms they reach keep their walls (doors go there).
@@ -15,7 +17,8 @@ import { rng, hash } from '../core/rng.js';
 import { newId } from '../core/model.js';
 import { computeLevelGeometry } from '../core/level-geometry.js';
 import { strokePath } from '../core/clip.js';
-import { lerp, dist } from '../core/geom.js';
+import { lerp, dist, projectOnSegment, segmentsIntersect, sub, norm } from '../core/geom.js';
+import { chaikinOpen } from '../core/shapes.js';
 
 export const LAYOUTS = ['rooms', 'building', 'ship', 'caves'];
 
@@ -376,22 +379,167 @@ function cavesLayout(style, n, size, t) {
   return { shapes, tags, corridors };
 }
 
-const BUILDERS = { rooms: roomsLayout, building: buildingLayout, ship: shipLayout, caves: cavesLayout };
+// ---- outdoor ------------------------------------------------------------------------------
+
+const distToLine = (p, pts) => {
+  let best = Infinity;
+  for (let i = 1; i < pts.length; i++) best = Math.min(best, projectOnSegment(p, pts[i - 1], pts[i]).dist);
+  return best;
+};
+
+/** A wandering line across the map: horizontal (along x) or vertical. */
+function wander(size, horizontal, t, sway) {
+  const along = horizontal ? size.w : size.h;
+  const across = horizontal ? size.h : size.w;
+  let off = across * (0.3 + t.random() * 0.4);
+  const pts = [];
+  const steps = Math.max(3, Math.round(along / 8));
+  for (let i = 0; i <= steps; i++) {
+    const a = -2 + ((along + 4) * i) / steps;
+    off = Math.max(4, Math.min(across - 4, off + (t.random() - 0.5) * sway * 2));
+    pts.push(horizontal ? [+a.toFixed(2), +off.toFixed(2)] : [+off.toFixed(2), +a.toFixed(2)]);
+  }
+  return pts;
+}
+
+/** Where two polylines cross, with the direction of the second there. */
+function crossing(a, b) {
+  for (let i = 1; i < a.length; i++) {
+    for (let j = 1; j < b.length; j++) {
+      const [p, q, r, s2] = [a[i - 1], a[i], b[j - 1], b[j]];
+      if (!segmentsIntersect(p, q, r, s2)) continue;
+      const d1 = sub(q, p);
+      const d2 = sub(s2, r);
+      const den = d1[0] * d2[1] - d1[1] * d2[0];
+      const u = ((r[0] - p[0]) * d2[1] - (r[1] - p[1]) * d2[0]) / den;
+      return { at: lerp(p, q, u), dir: norm(d2) };
+    }
+  }
+  return null;
+}
+
+function blobPoints(c, rx, ry, t) {
+  const pts = [];
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * Math.PI * 2;
+    const j = 0.8 + t.random() * 0.4;
+    pts.push([+(c[0] + Math.cos(a) * rx * j).toFixed(2), +(c[1] + Math.sin(a) * ry * j).toFixed(2)]);
+  }
+  return pts;
+}
+
+function outdoorLayout(style, n, size, t) {
+  const terrain = [];
+  const placements = [];
+  const lines = []; // [{pts, clear}] to keep things away from
+  const paint = (kind, shape) => terrain.push({ id: newId('t'), kind, op: 'add', shape });
+  const horizontal = t.chance(0.5);
+  let road = null;
+  if (t.chance(style.road ?? 0)) {
+    road = chaikinOpen(wander(size, !horizontal, t, 3), 3);
+    paint(style.roadKind || 'road', { kind: 'path', points: road, width: 2 });
+    lines.push({ pts: road, clear: 2.5 });
+  }
+  if (t.chance(style.river ?? 0)) {
+    const kind = style.riverKind || 'water';
+    const w = t.int(2, 4);
+    const river = chaikinOpen(wander(size, horizontal, t, 4), 3);
+    if (kind === 'water') {
+      paint('water', { kind: 'path', points: river, width: w + 2 });
+      if (w >= 3) paint('deep-water', { kind: 'path', points: river, width: w });
+    } else paint(kind, { kind: 'path', points: river, width: w + 1 });
+    lines.push({ pts: river, clear: w / 2 + 2.5 });
+    const x = road && crossing(river, road);
+    if (x && style.bridge) {
+      const angle = Math.round(((Math.atan2(x.dir[1], x.dir[0]) * 180) / Math.PI) / 15) * 15;
+      placements.push({ id: newId('a'), asset: style.bridge, x: +x.at[0].toFixed(2), y: +x.at[1].toFixed(2), rot: (angle + 360) % 360, params: { len: w + 4, width: 2 }, auto: false });
+    }
+  }
+  const blobs = [];
+  const clearOf = (p, r) => p[0] > r + 1 && p[1] > r + 1 && p[0] < size.w - r - 1 && p[1] < size.h - r - 1 &&
+    lines.every((l) => distToLine(p, l.pts) > l.clear + r) && blobs.every((b) => dist(p, b.c) > b.r + r + 1.5);
+  const spot = (r) => {
+    for (let i = 0; i < 60; i++) {
+      const p = [t.int(2, size.w - 2), t.int(2, size.h - 2)];
+      if (clearOf(p, r)) return p;
+    }
+    return null;
+  };
+  for (const [kind, chance] of Object.entries(style.pools || {})) {
+    if (!t.chance(chance)) continue;
+    const r = t.int(3, 5);
+    const c = spot(r);
+    if (!c) continue;
+    paint(kind, { kind: 'cave', points: blobPoints(c, r, r * (0.7 + t.random() * 0.4), t), roughness: 0.3, seed: t.int(1, 1e6) });
+    blobs.push({ c, r });
+  }
+  if (style.camp && t.chance(style.camp)) {
+    const c = spot(4);
+    if (c) {
+      // A trodden clearing with a fire, tents round it and bedrolls.
+      paint('road', { kind: 'cave', points: blobPoints(c, 4.2, 3.6, t), roughness: 0.3, seed: t.int(1, 1e6) });
+      blobs.push({ c, r: 4.5 });
+      placements.push({ id: newId('a'), asset: 'campfire', x: c[0] + 0.5, y: c[1] + 0.5, rot: 0, auto: false });
+      const tents = t.int(2, 3);
+      for (let i = 0; i < tents; i++) {
+        const a = (i / tents) * Math.PI * 2 + t.random();
+        placements.push({ id: newId('a'), asset: 'tent', x: Math.round(c[0] + Math.cos(a) * 3.5), y: Math.round(c[1] + Math.sin(a) * 3.5), rot: t.int(0, 3) * 90, auto: false });
+        placements.push({ id: newId('a'), asset: 'bedroll', x: +(c[0] + Math.cos(a + 0.9) * 2.2).toFixed(1), y: +(c[1] + Math.sin(a + 0.9) * 2.2).toFixed(1), rot: Math.round((((a + 0.9) * 180) / Math.PI) / 15) * 15 % 360, auto: false });
+      }
+    }
+  }
+  // Buildings: one room each, away from water and the road.
+  const shapes = [];
+  const tags = [];
+  const houses = [];
+  const want = style.buildings ? Math.min(style.buildings.max ?? 4, Math.max(style.buildings.min ?? 0, Math.round(n / 2))) : 0;
+  for (let i = 0; i < want; i++) {
+    for (let k = 0; k < 80; k++) {
+      const w = t.int(5, 8);
+      const h = t.int(4, 7);
+      const x = t.int(2, size.w - w - 2);
+      const y = t.int(2, size.h - h - 2);
+      const r = { x, y, w, h };
+      const pts = [[x, y], [x + w, y], [x, y + h], [x + w, y + h], [x + w / 2, y + h / 2]];
+      if (houses.some((o) => overlaps(o, r, 3))) continue;
+      if (!pts.every((p) => lines.every((l) => distToLine(p, l.pts) > l.clear) && blobs.every((b) => dist(p, b.c) > b.r + 1))) continue;
+      houses.push({ ...r, area: w * h });
+      break;
+    }
+  }
+  if (houses.length) assignTypes(houses, style.buildings.rooms, t);
+  for (const r of houses) {
+    shapes.push({ kind: 'rect', x: r.x, y: r.y, w: r.w, h: r.h, radius: 0, walled: true });
+    tags.push({ type: r.type, at: centreOf(r) });
+  }
+  // The open ground: one region round everything, tagged with the style's outdoor type.
+  const inside = (p) => houses.some((r) => p[0] > r.x && p[0] < r.x + r.w && p[1] > r.y && p[1] < r.y + r.h);
+  let at = null;
+  for (let i = 0; i < 200 && !at; i++) {
+    const p = [t.int(1, size.w - 2) + 0.37, t.int(1, size.h - 2) + 0.41];
+    if (!inside(p)) at = p;
+  }
+  if (at) tags.push({ type: style.region.type, at, density: style.region.density });
+  return { shapes, tags, corridors: [], terrain, placements, ground: style.ground || 'grass' };
+}
+
+const BUILDERS = { rooms: roomsLayout, building: buildingLayout, ship: shipLayout, caves: cavesLayout, outdoor: outdoorLayout };
 
 /**
  * Generate a level layout.
  *  style: {layout, rooms: pool, corridor: {type, width}, shapes, loops}
  *  map:   the map (size; geometry needs it), seed: number, count: rooms wanted
- * Returns {shapes, rooms, doors} ready to put on an empty level (doors: ways in from outside).
+ * Returns {shapes, rooms, doors, terrain, placements, ground} ready to put on an empty level
+ * (doors: ways in from outside; placements: bridges and camps the layout puts down itself).
  */
 export function generateLayout({ style, map, count = 8, seed = 1, doorType = 'door' }) {
   const t = tools(seed);
   const build = BUILDERS[style.layout] || roomsLayout;
   const out = build(style, Math.max(2, count), map.size, t);
   const shapes = out.shapes.map((s) => ({ id: newId('s'), op: 'add', ...s }));
-  const rooms = out.tags.filter((g) => g.type).map((g) => ({ id: newId('r'), type: g.type, at: g.at, seed: t.int(1, 2 ** 30), reroll: 0 }));
+  const rooms = out.tags.filter((g) => g.type).map((g) => ({ id: newId('r'), type: g.type, at: g.at, seed: t.int(1, 2 ** 30), reroll: 0, ...(g.density != null ? { density: g.density } : {}) }));
   // Tag the corridors: in a generated layout every other space comes from them.
-  const corridorType = style.corridor?.type || style.rooms[0]?.type;
+  const corridorType = style.corridor?.type || style.rooms?.[0]?.type;
   if (corridorType && out.corridors.length) {
     const level = { shapes, walls: [], doors: [], edges: [], rooms, placements: [] };
     const geo = computeLevelGeometry(level, map);
@@ -401,7 +549,7 @@ export function generateLayout({ style, map, count = 8, seed = 1, doorType = 'do
     }
   }
   const doors = (out.entrances || []).map((e) => ({ id: newId('d'), type: e.wide ? (doorType === 'door' ? 'double' : doorType) : doorType, a: e.a, b: e.b }));
-  return { shapes, rooms, doors };
+  return { shapes, rooms, doors, terrain: out.terrain || [], placements: out.placements || [], ground: out.ground || null };
 }
 
 

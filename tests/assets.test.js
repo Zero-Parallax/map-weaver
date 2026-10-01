@@ -56,7 +56,7 @@ test('starter sets: valid, unique, 30+ per setting, room types exist', () => {
     for (const s of meta.settings) {
       perSetting[s] = (perSetting[s] || 0) + 1;
       const known = settings[s].roomTypes.map((t) => t.id);
-      const relevant = meta.roomTypes.filter((t) => t === '*' || known.includes(t));
+      const relevant = meta.roomTypes.filter((t) => t === '*' || t === 'by-hand' || known.includes(t));
       assert.ok(relevant.length, `${meta.id} suits no ${s} room type`);
     }
   }

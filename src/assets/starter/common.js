@@ -24,7 +24,7 @@ export default function define({ A, G }) {
     g.circle(50, 65, 3, 'p');
   });
 
-  A('barrel', 'Barrel', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'kitchen', 'tavern', 'barracks', 'smithy', 'prison'], max: 4, weight: 2 }, (g) => {
+  A('barrel', 'Barrel', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'kitchen', 'tavern', 'barracks', 'smithy', 'prison', 'farmyard', 'camp'], max: 4, weight: 2 }, (g) => {
     g.circle(50, 50, 39, 'o');
     g.circle(50, 50, 32, 'l');
     const chord = (x) => Math.sqrt(32 * 32 - (x - 50) ** 2);
@@ -32,7 +32,7 @@ export default function define({ A, G }) {
     g.circle(62, 38, 5, 'k');
   });
 
-  A('sacks', 'Sacks', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'kitchen', 'shop'], max: 3 }, (g) => {
+  A('sacks', 'Sacks', CF, [1, 1], { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'kitchen', 'shop', 'farmyard', 'camp'], max: 3 }, (g) => {
     g.ellipse(34, 48, 25, 30, 's');
     g.ellipse(34, 22, 9, 6, 'ko');
     g.ellipse(66, 62, 25, 28, 'o');
@@ -40,7 +40,7 @@ export default function define({ A, G }) {
     g.path('M22 52Q34 60 46 52M54 68Q66 76 78 68', 't');
   });
 
-  G('crate', 'Crate', CF, 'cargo', { w: 1, h: 1, style: 'crate' }, { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'shop', 'smithy'], max: 4, weight: 2 }, { w: [1, 2], h: [1, 2] });
+  G('crate', 'Crate', CF, 'cargo', { w: 1, h: 1, style: 'crate' }, { placement: 'corner', roomTypes: ['storeroom', 'cellar', 'shop', 'smithy', 'camp', 'farmyard'], max: 4, weight: 2 }, { w: [1, 2], h: [1, 2] });
 
   A('bed', 'Bed', CF, [1, 2], { placement: 'wall', roomTypes: ['barracks', 'bedroom', 'prison'], max: 6, weight: 2 }, (g) => {
     g.rect(8, 4, 84, 192, 'o', 6);
@@ -79,7 +79,7 @@ export default function define({ A, G }) {
     g.circle(50, 50, 10, 'ko');
   });
 
-  A('statue', 'Statue', CF, [1, 1], { placement: 'corner', blocksVision: true, roomTypes: ['throne-room', 'temple', 'crypt', 'great-hall', 'chamber', 'library', 'shop'], max: 4 }, (g) => {
+  A('statue', 'Statue', CF, [1, 1], { placement: 'corner', blocksVision: true, roomTypes: ['throne-room', 'temple', 'crypt', 'great-hall', 'chamber', 'library', 'shop', 'garden', 'graveyard'], max: 4 }, (g) => {
     g.rect(8, 8, 84, 84, 's', 4);
     g.rect(16, 16, 68, 68, 'l', 2);
     figure(g, 50, 46, 0.95, 'o');
@@ -116,7 +116,7 @@ export default function define({ A, G }) {
     flame(g, 50, 34, 14);
   });
 
-  A('rubble', 'Rubble', CF.concat('scifi'), [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['cave', 'crypt', 'corridor', 'prison', 'cellar', 'mine', 'alien-ruins'], max: 3, tags: ['difficult terrain'] }, (g) => {
+  A('rubble', 'Rubble', CF.concat('scifi'), [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['cave', 'crypt', 'corridor', 'prison', 'cellar', 'mine', 'alien-ruins', 'graveyard', 'crash-site', 'wasteland'], max: 3, tags: ['difficult terrain'] }, (g) => {
     g.poly(stoneShape(30, 34, 17, 3), 's');
     g.poly(stoneShape(66, 60, 20, 7), 'o');
     g.poly(stoneShape(32, 72, 12, 11), 's');
@@ -124,7 +124,7 @@ export default function define({ A, G }) {
     for (const [x, y] of [[58, 28], [48, 50], [80, 34], [50, 84]]) g.circle(x, y, 4, 'k');
   });
 
-  A('bones', 'Bones', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['crypt', 'prison', 'cave', 'corridor'], max: 3 }, (g) => {
+  A('bones', 'Bones', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['crypt', 'prison', 'cave', 'corridor', 'graveyard'], max: 3 }, (g) => {
     bone(g, 50, 64, 84, 84);
     bone(g, 56, 86, 86, 58);
     g.circle(36, 38, 18, 'o');
@@ -247,7 +247,7 @@ export default function define({ A, G }) {
     g.poly(stoneShape(50, 50, 12, 2, 6), 'ko');
   });
 
-  A('boulder', 'Boulder', CF.concat('scifi'), [2, 2], { placement: 'free', blocksVision: true, roomTypes: ['cave', 'mine', 'alien-ruins', 'landing-pad'], max: 2 }, (g) => {
+  A('boulder', 'Boulder', CF.concat('scifi'), [2, 2], { placement: 'free', blocksVision: true, roomTypes: ['cave', 'mine', 'alien-ruins', 'landing-pad', 'forest', 'clearing', 'wasteland', 'crash-site'], max: 2 }, (g) => {
     g.poly([[60, 12], [142, 8], [188, 60], [178, 150], [112, 190], [34, 172], [10, 96]], 's');
     g.poly([[70, 30], [132, 26], [166, 64], [150, 120], [96, 132], [48, 98]], 'o');
     g.path('M70 60L100 90L96 128M140 70L150 110', 'l');
@@ -261,7 +261,7 @@ export default function define({ A, G }) {
     }
   });
 
-  A('campfire', 'Campfire', CF, [1, 1], { light: { bright: 4, dim: 8, color: '#ff9b40', animation: 'torch' }, placement: 'centre', blocksMovement: false, roomTypes: ['cave', 'barracks'], max: 1 }, (g) => {
+  A('campfire', 'Campfire', CF, [1, 1], { light: { bright: 4, dim: 8, color: '#ff9b40', animation: 'torch' }, placement: 'centre', blocksMovement: false, roomTypes: ['cave', 'barracks', 'camp', 'clearing', 'wasteland', 'crash-site'], max: 1 }, (g) => {
     for (let i = 0; i < 9; i++) {
       const a = (i * Math.PI * 2) / 9;
       g.poly(stoneShape(50 + Math.cos(a) * 36, 50 + Math.sin(a) * 36, 9, i, 6), 's');
@@ -274,7 +274,7 @@ export default function define({ A, G }) {
   G('dais', 'Dais', C, 'dais', { w: 3, h: 2 }, { placement: 'wall', layer: 'floor', blocksMovement: false, roomTypes: ['throne-room', 'temple'], max: 1 }, { w: [2, 5], h: [1, 3] });
   G('pew', 'Pew', CF, 'bench', { len: 3, back: true }, { placement: 'free', facing: 'focal', roomTypes: ['temple'], max: 8, weight: 3 }, { len: [2, 5] });
 
-  A('urn', 'Urn', C, [1, 1], { placement: 'balcony', roomTypes: ['*'], max: 4 }, (g) => {
+  A('urn', 'Urn', C, [1, 1], { placement: 'balcony', roomTypes: ['*', 'graveyard'], max: 4 }, (g) => {
     g.ellipse(22, 50, 7, 12, 'o');
     g.ellipse(78, 50, 7, 12, 'o');
     g.circle(50, 50, 30, 's');
