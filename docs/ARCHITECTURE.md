@@ -85,6 +85,20 @@ Pure function, no DOM: `decorateRoom({geo, region, tag, assets, doors, links, ex
 
 Seed = hash(map seed, room id, room seed, reroll count), so results repeat until rerolled.
 
+## Ground and terrain (`src/core/terrain.js`, `src/render/terrain-render.js`)
+
+`level.ground` makes a level outdoors: computeAreas starts the floor as the whole map, the
+map-edge segments are dropped from the outline, and `geo.ground` (map minus drawn shapes) gets
+a ground texture. `level.terrain` is an ordered list of painted shapes per kind; later paint
+replaces other kinds, `erase` clears. `geo.terrain` is Map(kind -> rings). Each kind has
+`move` (normal / difficult / hazard / blocked) and `decor` (may furniture stand on it): the
+decorator blocks squares of water, lava and chasm and keeps roads clear. Textures are seeded
+Path2D patterns, memoised.
+
+Reachability in the decorator is checked locally: a blocking piece is fine if the walkable
+squares around it can still reach each other, which also works when water already splits a
+room.
+
 ## Layout generator (`src/generator/layout.js`)
 
 `generateLayout({style, map, count, seed, doorType})` returns `{shapes, rooms, doors}` for an
@@ -99,8 +113,30 @@ empty level. Styles come from each setting's `generator` list: `{id, name, layou
 - `ship`: spine corridor, compartments of varying depth either side, chamfered engine room
   aft, pointed bridge forward (`place: back / front`).
 - `caves`: rough blob chambers and roughened tunnels.
+- `tower`: a round tower with a central hub and slice rooms (hand walls), identical slices
+  on every floor so stairs line up.
+- `outdoor`: level.ground plus terrain: a wandering river (water, deep water, lava or chasm),
+  a road with a bridge placement where they cross, ponds and pools, an optional campsite
+  (trodden clearing, fire, tents, bedrolls) and small buildings; the open ground is one room
+  tagged with the style's outdoor type and density.
 Types are assigned by size (one-off large types to the largest rooms). Every leftover space
 is tagged with the corridor type. Doors and decoration are added by the app afterwards.
+
+`generateLevels` (`src/generator/levels.js`) builds several levels bottom first. For
+dungeons and caves it plans the stairs on the level below and starts the next level with a
+room exactly over that room (an anchor); for same-outline layouts it searches for a spot
+where the link's footprint and landings lie in one room's full squares on both levels; a
+walled stairwell through both is the fallback. Pieces of a room split by a stair opening keep
+the room's type.
+
+## Ruins (`src/generator/ruin.js`)
+
+`ruinLevel(map, level, {amount, seed})`: doors become breaches or archways, breaches open in
+shared walls (spots from `doorOptions`), the ground floor gets grass patches and a chasm
+sinkhole, upper floors void holes with drop edges; every room tag gets `ruin`. The decorator's
+ruin pass (from `tag.ruin`) removes most lights and some pieces, turns small ones askew,
+places `ruin` pieces (collapsed masonry, fallen beams / girders) and raises clutter, adding
+ruin-only decals.
 
 ## Room key (`src/core/room-key.js`)
 

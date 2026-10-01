@@ -36,6 +36,7 @@ switched off. The starter assets come from `assets/index.json`.
 | Polygon | P | Click corners at any angle; click the first corner or press Enter to close |
 | Cave | K | Drag freehand; the outline is smoothed and roughened |
 | Floor brush | B | Paint floor squares |
+| Terrain | N | Paint water, deep water, lava, chasms, ice, mud, roads, paving, grass, sand: brush, freehand area, or a river / road along a path. Alt or right-click erases |
 | Corridor | H | Click along a corridor 1–3 squares wide (straight or 45°); it stops behind the walls of the rooms it reaches. Double-click or Enter to finish |
 | Wall | W | Click grid points to chain walls, including diagonals |
 | Arc wall | A | Centre, start point, then sweep round |
@@ -70,6 +71,19 @@ switched off. The starter assets come from `assets/index.json`.
   angle box and size fields for resizable pieces (tables, shelves, rugs...).
 - Ctrl+Z / Ctrl+Y undo and redo. Ctrl+S saves, Ctrl+O opens.
 
+## Outdoor maps and terrain
+
+Set a level's **Outdoors** ground in the Levels panel (grass, dirt, sand, snow, bare rock,
+deck plating): the whole map becomes walkable ground with a matching texture, its edge is no
+longer a wall, and anything you draw becomes a building standing on it. Tag the open ground
+with an outdoor room type (forest, clearing, campsite, graveyard, farmyard, garden; alien
+jungle, wasteland, crash site, colony yard) and the decorator scatters trees, rocks, bushes,
+tents, gravestones, wreckage and so on in natural clumps with clearings between.
+
+Painted terrain works on any level. Water, mud and ice are difficult terrain, lava hurts,
+nobody walks into a chasm, and roads and paving stay clear of furniture. Bridges (wood,
+stone, metal gantry) and stepping stones are in the asset library to place by hand.
+
 ## Generating a level
 
 The **Generate** section of the panel replaces the current level with a new layout: pick a
@@ -83,8 +97,28 @@ back). Rooms are typed from the setting, joined with doors, decorated and given 
 | Fantasy | Inn or house, Castle, Dungeon, Caves |
 | Sci-fi | Starship (spine, compartments, engines aft, bridge forward), Station, Colony building, Mine or ruins |
 
+Outdoor styles too: Forest road, Graveyard, Chasm crossing (classic); Forest road, Village,
+Riverside camp, Graveyard (fantasy); Crash site, Alien jungle, Colony outpost, Volcanic wastes
+(sci-fi). They lay down a river (water, lava or a chasm), a road with a bridge where the two
+cross, ponds and pools, campsites and small buildings, then decorate the ground. And towers:
+Wizard tower, Tower, Comms spire (a round tower with rooms round a central hall).
+
+**Levels** (1-5) generates a whole multi-level map: dungeons and caves go down from an
+entrance level, buildings, towers and ships go up. Each pair of levels is joined by stairs
+(spiral stairs in towers, ladders between ship decks, lifts in sci-fi) placed where there is
+room on both floors.
+
 Buildings get a front door; caves get open archways. Styles and their room pools live in each
 setting's `setting.json` (`generator`), so new ones need no code.
+
+## Ruins
+
+The **Ruin** section turns a finished map into its abandoned version: walls breached, doors
+broken in or gone, a sinkhole and creeping grass on the ground floor, floors fallen through
+upstairs, most lights out, furniture lost or knocked askew, rubble heaps, fallen beams and
+more clutter. **Ruin this level** or **Ruin all levels** (Undo restores), or **Save a ruined
+copy…** to keep the original and get both maps from one design. Rooms remember the ruin, so
+rerolling keeps it.
 
 ## Exporting PNGs
 
@@ -115,7 +149,9 @@ room's name and GM notes (set them in the Room section); **Both** writes both fi
 - ambient lights for torches, fires, braziers, candelabra and glowing sci-fi screens, with
   colour and flicker (optional);
 - a difficult terrain Region per level over rubble, debris, ore piles and mushrooms, doubling
-  movement cost (optional);
+  movement cost, plus Regions for painted water, deep water, mud, ice and lava (optional);
+- chasms walled for movement only (you can see across), left open where a bridge crosses;
+  outdoor levels have no walls along the map's edge;
 - background images use the player version (no secret doors or traps).
 
 Files land in `exports/`. Copy the PNGs into your Foundry Data folder at the path you entered,
