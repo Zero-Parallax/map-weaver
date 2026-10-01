@@ -70,15 +70,16 @@ function doorPair(rooms, a, b) {
 }
 
 /**
- * Every place a door could join two rooms. Returns Map("lo,hi" -> {shared, options[]}),
- * where shared is the length of wall between them and each option is {a, b, clear}.
+ * Every place a door could join two rooms. Returns Map("lo,hi" -> {shared, options[], loose[]}),
+ * where shared is the length of wall between them and each option is {a, b, clear}. Loose
+ * options only share wall at their middle; they are used when a pair has nothing better.
  */
 export function doorOptions(geo, width = 1) {
   const rooms = geo.rooms;
   const pairs = new Map();
   const entry = (k) => {
     let e = pairs.get(k);
-    if (!e) pairs.set(k, (e = { shared: 0, options: [] }));
+    if (!e) pairs.set(k, (e = { shared: 0, options: [], loose: [] }));
     return e;
   };
   for (const [a, b] of geo.inner) {
@@ -96,7 +97,12 @@ export function doorOptions(geo, width = 1) {
       const du = norm(sub(db, da));
       const dn = perp(du);
       const k = pairAt(rooms, lerp(da, db, 0.5), dn);
-      if (!k || [0.1, 0.9].some((t) => pairAt(rooms, lerp(da, db, t), dn) !== k)) continue;
+      if (!k) continue;
+      if ([0.1, 0.9].some((t) => pairAt(rooms, lerp(da, db, t), dn) !== k)) {
+        // Only the middle is shared (a narrow corridor meeting a curve): a fallback spot.
+        entry(k).loose.push({ a: da, b: db, clear: 0 });
+        continue;
+      }
       // Clearance: how far the same shared wall carries on past each end.
       const reach = (from, dir) => {
         let c = 0;
@@ -139,7 +145,7 @@ export function planDoors({ geo, doors = [], targets, type = 'door', width = 1, 
   const eligible = (i) => regions[i] && regions[i].area >= MIN_AREA && regions[i].cells.length > 0;
   const targetSet = new Set(targets.filter(eligible));
   const pairs = [...doorOptions(geo, width)]
-    .map(([k, e]) => ({ pair: k.split(',').map(Number), ...e }))
+    .map(([k, e]) => ({ pair: k.split(',').map(Number), shared: e.shared, options: e.options.length ? e.options : e.loose }))
     .filter((p) => p.options.length && p.pair.every(eligible))
     .map((p) => ({ ...p, score: p.shared + p.pair.filter((i) => hub(regions[i]) || corridorLike(regions[i])).length * 1000 }))
     .sort((p, q) => q.score - p.score || p.pair[0] - q.pair[0] || p.pair[1] - q.pair[1]);
@@ -189,4 +195,16 @@ function pickOption(options, doors, blocked) {
     }
   }
   return best;
+}
+
+/** Number of separate groups the level's rooms (2+ squares) form when joined by these doors. */
+export function roomGroups(geo, doors) {
+  const regions = geo.rooms.regions;
+  const uf = unionFind(regions.length);
+  for (const d of doors) {
+    if (d.type === 'window') continue;
+    const k = doorPair(geo.rooms, d.a, d.b);
+    if (k) uf.join(...k.split(',').map(Number));
+  }
+  return new Set(regions.filter((r) => r.area >= MIN_AREA && r.cells.length).map((r) => uf.find(r.index))).size;
 }

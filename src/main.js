@@ -662,6 +662,38 @@ function levelSection() {
   );
 }
 
+function generateSection() {
+  const styles = app.setting?.generator || [];
+  if (!styles.length) return null;
+  if (!styles.some((g) => g.id === app.opts.genStyle)) app.opts.genStyle = styles[0].id;
+  app.opts.genRooms ??= 8;
+  const count = el('output', {}, String(app.opts.genRooms));
+  return section(
+    'Generate',
+    field('Style', select(styles, app.opts.genStyle, (v) => app.setOpt('genStyle', v))),
+    field('Rooms', el('div', { class: 'row' },
+      el('input', {
+        type: 'range', min: 3, max: 24, step: 1, value: app.opts.genRooms,
+        oninput: (e) => {
+          app.opts.genRooms = Number(e.target.value);
+          count.textContent = e.target.value;
+        },
+      }),
+      count)),
+    el('div', { class: 'actions' },
+      el('button', {
+        class: 'primary',
+        title: 'Replace this level with a new layout: rooms, corridors, doors and decoration',
+        onclick: async () => {
+          const empty = !app.level.shapes.length;
+          if (!empty && app.generatedRev !== app.rev && !(await ask('Replace everything on this level with a generated layout? (Undo brings it back.)', { ok: 'Generate', danger: true }))) return;
+          app.generateLevel({ styleId: app.opts.genStyle, count: app.opts.genRooms });
+        },
+      }, app.generatedRev === app.rev ? 'Generate another' : 'Generate level')),
+    el('p', { class: 'hint' }, 'Every click gives a new layout. Edit it like any map afterwards.'),
+  );
+}
+
 let panelTimer = null;
 function renderPanel() {
   panelTimer = null;
@@ -669,7 +701,7 @@ function renderPanel() {
   const scroll = panel.scrollTop;
   panel.replaceChildren(
     el('div', { class: 'panel-close' }, el('button', { type: 'button', onclick: () => document.body.classList.remove('panel-open') }, 'Close ✕')),
-    toolSection(), ...selectionSections().filter(Boolean), levelSection(), mapSection());
+    toolSection(), ...selectionSections().filter(Boolean), levelSection(), generateSection(), mapSection());
   panel.scrollTop = scroll;
 }
 

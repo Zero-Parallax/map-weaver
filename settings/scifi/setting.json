@@ -20,11 +20,14 @@
       "market",
       "cantina",
       "hangar",
-      "mess-hall"
+      "mess-hall",
+      "mine"
     ],
     "byRoom": {
       "detention": "locked",
-      "armoury": "locked"
+      "armoury": "locked",
+      "mine": "archway",
+      "alien-ruins": "archway"
     }
   },
   "roomTypes": [
@@ -128,5 +131,52 @@
       "id": "cloning-lab",
       "name": "Cloning lab"
     }
+  ],
+  "generator": [
+    {"id":"ship","name":"Starship","layout":"ship","corridor":{"type":"corridor"},"rooms":[
+      {"type":"bridge","place":"front","max":1},
+      {"type":"engine-room","place":"back","max":1},
+      {"type":"crew-quarters","weight":3},
+      {"type":"mess-hall","max":1,"weight":2},
+      {"type":"med-bay","max":1,"weight":2},
+      {"type":"cargo-bay","weight":2},
+      {"type":"lab","max":1},
+      {"type":"armoury","max":1},
+      {"type":"airlock","size":["small"],"max":2},
+      {"type":"server-room","max":1},
+      {"type":"workshop","max":1},
+      {"type":"detention","max":1},
+      {"type":"hydroponics-bay","max":1}
+    ]},
+    {"id":"station","name":"Station","layout":"rooms","corridor":{"type":"corridor","width":[2]},"shapes":{"round":0.4,"circle":0.1,"octagon":0.15},"loops":0.25,"rooms":[
+      {"type":"command-centre","size":["large"],"max":1},
+      {"type":"hangar","size":["large"],"max":1},
+      {"type":"market","size":["medium","large"],"max":1},
+      {"type":"cantina","max":1},
+      {"type":"clinic","max":1},
+      {"type":"apartment","weight":3},
+      {"type":"security","max":1},
+      {"type":"detention","max":1},
+      {"type":"hydroponics-bay","max":1},
+      {"type":"server-room","max":1},
+      {"type":"workshop","max":1},
+      {"type":"lab","max":2},
+      {"type":"mess-hall","max":1}
+    ]},
+    {"id":"colony","name":"Colony building","layout":"building","corridor":{"type":"corridor"},"rooms":[
+      {"type":"command-centre","size":["large"],"max":1},
+      {"type":"apartment","weight":3},
+      {"type":"clinic","max":1},
+      {"type":"mess-hall","max":1},
+      {"type":"workshop","max":1},
+      {"type":"lab","max":1},
+      {"type":"security","max":1},
+      {"type":"hydroponics-bay","max":1}
+    ]},
+    {"id":"mine","name":"Mine or ruins","layout":"caves","corridor":{"type":"mine"},"rooms":[
+      {"type":"mine","weight":5},
+      {"type":"alien-ruins","weight":2},
+      {"type":"workshop","max":1}
+    ]}
   ]
 }

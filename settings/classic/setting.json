@@ -4,7 +4,7 @@
   "description": "Old-school dungeon crawl in the style of early module maps.",
   "defaults": { "palette": "blue-white", "shading": "solid", "grid": "floor" },
   "walls": { "width": 0.12, "style": "line", "band": 0.7 },
-  "doors": { "type": "door", "hubs": ["corridor", "cave", "temple"], "byRoom": { "prison": "portcullis" } },
+  "doors": { "type": "door", "hubs": ["corridor", "cave", "temple"], "byRoom": { "prison": "portcullis", "cave": "archway" } },
   "roomTypes": [
     { "id": "corridor", "name": "Corridor" },
     { "id": "chamber", "name": "Chamber" },
@@ -16,5 +16,31 @@
     { "id": "prison", "name": "Prison" },
     { "id": "library", "name": "Library" },
     { "id": "cave", "name": "Cave" }
+  ],
+  "generator": [
+    {"id":"dungeon","name":"Dungeon","layout":"rooms","corridor":{"type":"corridor","width":[1,2]},"shapes":{"circle":0.12,"octagon":0.12},"rooms":[
+      {"type":"throne-room","size":["large"],"max":1},
+      {"type":"temple","size":["medium","large"],"max":1},
+      {"type":"crypt","weight":2},
+      {"type":"barracks","size":["medium","large"],"weight":2},
+      {"type":"storeroom","size":["small","medium"],"weight":2},
+      {"type":"prison","size":["small","medium"],"max":2},
+      {"type":"library","size":["medium"],"max":1},
+      {"type":"chamber","weight":4}
+    ]},
+    {"id":"keep","name":"Keep","layout":"building","corridor":{"type":"corridor"},"rooms":[
+      {"type":"throne-room","size":["large"],"max":1},
+      {"type":"barracks","max":2,"weight":2},
+      {"type":"library","max":1},
+      {"type":"temple","max":1},
+      {"type":"storeroom","size":["small","medium"],"weight":2},
+      {"type":"chamber","weight":3}
+    ]},
+    {"id":"caves","name":"Caves","layout":"caves","corridor":{"type":"cave"},"rooms":[
+      {"type":"cave","weight":6},
+      {"type":"crypt","max":1},
+      {"type":"temple","max":1},
+      {"type":"prison","max":1}
+    ]}
   ]
 }

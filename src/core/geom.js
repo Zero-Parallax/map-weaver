@@ -126,10 +126,12 @@ export function ringEdges(ring) {
 /**
  * Split segments against polygon rings and classify each piece.
  * Returns pieces {a, b, where} with where = 'inside' | 'outside' | 'edge'.
+ * Many ring edges (caves, curves) are looked up through a grid of one-square cells.
  */
 export function classifySegments(segments, rings, edgeEps = 1e-6) {
   const edges = rings.flatMap(ringEdges);
   const box = ringsBBox(rings);
+  const index = edges.length > 48 ? edgeGrid(edges) : null;
   const out = [];
   for (const [a, b] of segments) {
     const ts = [0, 1];
@@ -137,7 +139,8 @@ export function classifySegments(segments, rings, edgeEps = 1e-6) {
     const overlaps = !(sb.maxX < box.minX - edgeEps || sb.minX > box.maxX + edgeEps ||
       sb.maxY < box.minY - edgeEps || sb.minY > box.maxY + edgeEps);
     if (overlaps) {
-      for (const [c, d] of edges) {
+      const near = index ? index.near(sb.minX - edgeEps, sb.minY - edgeEps, sb.maxX + edgeEps, sb.maxY + edgeEps) : edges;
+      for (const [c, d] of near) {
         if (Math.max(c[0], d[0]) < sb.minX - edgeEps || Math.min(c[0], d[0]) > sb.maxX + edgeEps) continue;
         if (Math.max(c[1], d[1]) < sb.minY - edgeEps || Math.min(c[1], d[1]) > sb.maxY + edgeEps) continue;
         ts.push(...segmentHits(a, b, c, d));
@@ -151,13 +154,63 @@ export function classifySegments(segments, rings, edgeEps = 1e-6) {
       const mid = lerp(p, q, 0.5);
       let where = 'outside';
       if (overlaps) {
-        if (distToRings(mid, rings) < edgeEps) where = 'edge';
+        if (index) {
+          if (index.dist(mid, edgeEps) < edgeEps) where = 'edge';
+          else if (index.inside(mid)) where = 'inside';
+        } else if (distToRings(mid, rings) < edgeEps) where = 'edge';
         else if (pointInRings(mid, rings)) where = 'inside';
       }
       out.push({ a: p, b: q, where });
     }
   }
   return out;
+}
+
+/** Ring edges bucketed by square (for segment and distance lookups) and by row (for inside tests). */
+function edgeGrid(edges) {
+  const cells = new Map();
+  const rows = new Map();
+  const add = (map, key, e) => {
+    const list = map.get(key);
+    if (list) list.push(e);
+    else map.set(key, [e]);
+  };
+  for (const e of edges) {
+    const [c, d] = e;
+    const x0 = Math.floor(Math.min(c[0], d[0]));
+    const x1 = Math.floor(Math.max(c[0], d[0]));
+    const y0 = Math.floor(Math.min(c[1], d[1]));
+    const y1 = Math.floor(Math.max(c[1], d[1]));
+    for (let y = y0; y <= y1; y++) {
+      add(rows, y, e);
+      for (let x = x0; x <= x1; x++) add(cells, x * 65536 + y, e);
+    }
+  }
+  const near = (minX, minY, maxX, maxY) => {
+    const seen = new Set();
+    for (let y = Math.floor(minY); y <= Math.floor(maxY); y++) {
+      for (let x = Math.floor(minX); x <= Math.floor(maxX); x++) {
+        const list = cells.get(x * 65536 + y);
+        if (list) for (const e of list) seen.add(e);
+      }
+    }
+    return seen;
+  };
+  return {
+    near,
+    dist(p, eps) {
+      let best = Infinity;
+      for (const [c, d] of near(p[0] - eps, p[1] - eps, p[0] + eps, p[1] + eps)) best = Math.min(best, distToSegment(p, c, d));
+      return best;
+    },
+    inside([x, y]) {
+      let inside = false;
+      for (const [[xi, yi], [xj, yj]] of rows.get(Math.floor(y)) || []) {
+        if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+      }
+      return inside;
+    },
+  };
 }
 
 // Merge touching collinear pieces back into longer segments.

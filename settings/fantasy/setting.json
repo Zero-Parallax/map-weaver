@@ -4,8 +4,9 @@
   "description": "Towns, taverns and keeps.",
   "defaults": { "palette": "sepia", "shading": "hatch", "grid": "floor" },
   "walls": { "width": 0.14, "style": "line", "band": 0.7 },
-  "doors": { "type": "door", "hubs": ["great-hall", "tavern", "cave"], "byRoom": {} },
+  "doors": { "type": "door", "hubs": ["corridor", "great-hall", "tavern", "cave"], "byRoom": { "cave": "archway" } },
   "roomTypes": [
+    { "id": "corridor", "name": "Hallway" },
     { "id": "tavern", "name": "Tavern" },
     { "id": "bedroom", "name": "Bedroom" },
     { "id": "kitchen", "name": "Kitchen" },
@@ -16,5 +17,37 @@
     { "id": "temple", "name": "Temple" },
     { "id": "cellar", "name": "Cellar" },
     { "id": "cave", "name": "Cave" }
+  ],
+  "generator": [
+    {"id":"inn","name":"Inn or house","layout":"building","corridor":{"type":"corridor"},"rooms":[
+      {"type":"tavern","size":["large"],"max":1},
+      {"type":"kitchen","max":1,"weight":2},
+      {"type":"bedroom","weight":4},
+      {"type":"shop","max":1},
+      {"type":"library","max":1},
+      {"type":"smithy","max":1}
+    ]},
+    {"id":"castle","name":"Castle","layout":"building","corridor":{"type":"corridor"},"rooms":[
+      {"type":"great-hall","size":["large"],"max":1},
+      {"type":"kitchen","max":1},
+      {"type":"bedroom","weight":3},
+      {"type":"library","max":1},
+      {"type":"temple","max":1},
+      {"type":"smithy","max":1},
+      {"type":"cellar","max":2}
+    ]},
+    {"id":"dungeon","name":"Dungeon","layout":"rooms","corridor":{"type":"corridor","width":[1,2]},"shapes":{"circle":0.15,"octagon":0.1},"rooms":[
+      {"type":"great-hall","size":["large"],"max":1},
+      {"type":"temple","max":1},
+      {"type":"cellar","weight":3},
+      {"type":"library","max":1},
+      {"type":"cave","weight":2},
+      {"type":"smithy","max":1}
+    ]},
+    {"id":"caves","name":"Caves","layout":"caves","corridor":{"type":"cave"},"rooms":[
+      {"type":"cave","weight":6},
+      {"type":"temple","max":1},
+      {"type":"cellar","max":1}
+    ]}
   ]
 }

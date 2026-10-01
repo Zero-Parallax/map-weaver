@@ -1,6 +1,6 @@
 // Editor state, undo history, input handling and drawing of editor overlays.
 
-import { createMap, loadMap, saveMap } from '../core/model.js';
+import { createMap, loadMap, saveMap, newSeed } from '../core/model.js';
 import { computeLevelGeometry, cachedShapeRings, wallPolyline } from '../core/level-geometry.js';
 import { translateShape } from '../core/shapes.js';
 import { regionAt, sampleX, sampleY, STEP } from '../core/rooms.js';
@@ -10,6 +10,7 @@ import { linksOnLevel, linkContains } from '../core/links.js';
 import { placementContains, snapCentre, rotatedFootprint } from '../assets/library.js';
 import { decorateRoom } from '../decorator/decorate.js';
 import { planDoors } from '../core/auto-doors.js';
+import { generateLayout } from '../generator/layout.js';
 import { newId } from '../core/model.js';
 import { resolveStyle } from '../render/style.js';
 
@@ -254,6 +255,30 @@ export class App {
     if (!this.opts.autoDoors) return 0;
     const blockers = this.addDoorsIn(map, level, tagIds, { redecorating: false });
     return blockers.length ? this.decorateIn(map, level, blockers, { doors: false }) : 0;
+  }
+
+  /**
+   * Replace this level with a generated layout: rooms, corridors, room types, doors and
+   * decoration. The map grows if it is too small for the rooms asked for.
+   */
+  generateLevel({ styleId, count = 8, seed = newSeed() }) {
+    const style = (this.setting?.generator || []).find((g) => g.id === styleId);
+    if (!style) return;
+    let grew = false;
+    this.commit('Generate layout', (map, level) => {
+      const side = Math.ceil(Math.sqrt(count * (style.layout === 'building' ? 40 : 75) * 4 / 3));
+      const size = { w: Math.max(map.size.w, side), h: Math.max(map.size.h, Math.round((side * 3) / 4)) };
+      if (style.layout === 'ship') size.w = Math.max(size.w, 14 + Math.ceil((count - 2) / 2) * 6);
+      grew = size.w !== map.size.w || size.h !== map.size.h;
+      map.size = size;
+      const out = generateLayout({ style, map, count, seed, doorType: this.setting?.doors?.type });
+      Object.assign(level, { shapes: out.shapes, walls: [], doors: out.doors, edges: [], rooms: out.rooms, wallStyles: [], placements: [] });
+      this.decorateIn(map, level, level.rooms.map((r) => r.id), { doors: true });
+    });
+    this.generatedRev = this.rev;
+    if (grew) this.fitView();
+    const rooms = this.level.rooms.filter((r) => r.type !== style.corridor?.type).length;
+    this.status(`Generated ${rooms} room${rooms === 1 ? '' : 's'}${grew ? ' (the map was enlarged to fit)' : ''}. Generate again for another layout; Undo goes back.`);
   }
 
   decorate(tagIds, { reroll = false } = {}) {
