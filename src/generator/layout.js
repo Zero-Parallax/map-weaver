@@ -87,10 +87,12 @@ const overlaps = (a, b, gap) => a.x < b.x + b.w + gap && b.x < a.x + a.w + gap &
 const centreOf = (r) => [r.x + r.w / 2, r.y + r.h / 2];
 
 /** Rooms placed in a cluster: each new room near one already placed. */
-function placeCluster(n, size, t, sizeOf, gap) {
+function placeCluster(n, size, t, sizeOf, gap, anchor = null) {
   const placed = [];
   const margin = 2;
-  for (let i = 0; i < n; i++) {
+  // With an anchor (the stair room of the level below) the first room goes exactly there.
+  if (anchor) placed.push({ x: anchor.x, y: anchor.y, w: anchor.w, h: anchor.h, index: 0 });
+  for (let i = placed.length; i < n; i++) {
     for (let attempt = 0; attempt < 120; attempt++) {
       let [w, h] = sizeOf(i);
       if (attempt > 60) [w, h] = [Math.max(3, w - 2), Math.max(3, h - 2)];
@@ -184,17 +186,17 @@ function roomShape(r, shapes, t) {
 
 // ---- layouts --------------------------------------------------------------------
 
-function roomsLayout(style, n, size, t) {
+function roomsLayout(style, n, size, t, anchor) {
   const pool = style.rooms;
   const types = assignTypes(Array.from({ length: n }, () => ({ area: 30 })), pool, t).map((r) => r.type);
   const widths = style.corridor?.width || [1, 2];
   const width = t.pick(widths);
   const gap = width + 2;
-  const placed = placeCluster(n, size, t, (i) => sizeFor(pool.find((e) => e.type === types[i]), t), gap);
+  const placed = placeCluster(n, size, t, (i) => sizeFor(pool.find((e) => e.type === types[i]), t), gap, anchor);
   // Retype by the sizes rooms actually got.
   const rooms = placed.map((r) => ({ ...r, area: r.w * r.h }));
   assignTypes(rooms, pool, t);
-  const shapes = rooms.map((r) => ({ ...roomShape(r, style.shapes || {}, t), walled: true }));
+  const shapes = rooms.map((r, i) => ({ ...(anchor && i === 0 ? { kind: 'rect', x: r.x, y: r.y, w: r.w, h: r.h, radius: 0 } : roomShape(r, style.shapes || {}, t)), walled: true }));
   const tags = rooms.map((r) => ({ type: r.type, at: centreOf(r) }));
   const corridors = rooms.length > 1 ? connections(rooms, t, style.loops ?? 0.15).map(([i, j]) => corridorPath(rooms[i], rooms[j], width, t)) : [];
   // One shape for all corridors, so where they meet or run side by side they join up.
@@ -354,9 +356,9 @@ function blob(c, rx, ry, t) {
   return pts;
 }
 
-function cavesLayout(style, n, size, t) {
+function cavesLayout(style, n, size, t, anchor) {
   const width = 2;
-  const placed = placeCluster(n, size, t, () => [t.int(5, 10), t.int(5, 9)], 3);
+  const placed = placeCluster(n, size, t, () => [t.int(5, 10), t.int(5, 9)], 3, anchor && { x: anchor.x - 1, y: anchor.y - 1, w: anchor.w + 2, h: anchor.h + 2 });
   const rooms = placed.map((r) => ({ ...r, area: Math.round(r.w * r.h * 0.75) }));
   assignTypes(rooms, style.rooms, t);
   const shapes = rooms.map((r) => ({ kind: 'cave', points: blob(centreOf(r), r.w / 2, r.h / 2, t), roughness: 0.6, seed: t.int(1, 1e6), walled: true }));
@@ -523,7 +525,34 @@ function outdoorLayout(style, n, size, t) {
   return { shapes, tags, corridors: [], terrain, placements, ground: style.ground || 'grass' };
 }
 
-const BUILDERS = { rooms: roomsLayout, building: buildingLayout, ship: shipLayout, caves: cavesLayout, outdoor: outdoorLayout };
+// ---- tower ------------------------------------------------------------------------------
+
+/** A round tower: a central hub and rooms like slices round it, the same outline every floor. */
+function towerLayout(style, n, size, t) {
+  const R = Math.min(Math.floor(Math.min(size.w, size.h) / 2) - 2, 6 + Math.ceil(n / 3));
+  const c = [Math.round(size.w / 2), Math.round(size.h / 2)];
+  const k = Math.max(2, Math.min(6, n - 1));
+  const hub = 2.5;
+  const shapes = [
+    { kind: 'circle', cx: c[0], cy: c[1], r: R, walled: true },
+    { kind: 'circle', cx: c[0], cy: c[1], r: hub, walled: true },
+  ];
+  const walls = [];
+  // The same slices on every floor (only the room types change), so stairs can line up.
+  const turn = ((size.w * 7 + size.h * 3) % 12) * (Math.PI / 6) + 0.26;
+  const rooms = [];
+  for (let i = 0; i < k; i++) {
+    const a = turn + (i / k) * Math.PI * 2;
+    walls.push({ kind: 'line', a: [+(c[0] + Math.cos(a) * hub).toFixed(3), +(c[1] + Math.sin(a) * hub).toFixed(3)], b: [+(c[0] + Math.cos(a) * (R + 1)).toFixed(3), +(c[1] + Math.sin(a) * (R + 1)).toFixed(3)] });
+    const mid = a + Math.PI / k;
+    rooms.push({ at: [c[0] + Math.cos(mid) * (R + hub) / 2, c[1] + Math.sin(mid) * (R + hub) / 2], area: (Math.PI * (R * R - hub * hub)) / k });
+  }
+  assignTypes(rooms, style.rooms, t);
+  const tags = [...rooms.map((r) => ({ type: r.type, at: r.at })), { type: style.corridor?.type || style.rooms[0].type, at: [c[0] + 0.3, c[1] + 0.4] }];
+  return { shapes, walls, tags, corridors: [], entrances: [{ a: [c[0] - 0.5, c[1] + R], b: [c[0] + 0.5, c[1] + R] }] };
+}
+
+const BUILDERS = { rooms: roomsLayout, building: buildingLayout, ship: shipLayout, caves: cavesLayout, outdoor: outdoorLayout, tower: towerLayout };
 
 /**
  * Generate a level layout.
@@ -532,16 +561,16 @@ const BUILDERS = { rooms: roomsLayout, building: buildingLayout, ship: shipLayou
  * Returns {shapes, rooms, doors, terrain, placements, ground} ready to put on an empty level
  * (doors: ways in from outside; placements: bridges and camps the layout puts down itself).
  */
-export function generateLayout({ style, map, count = 8, seed = 1, doorType = 'door' }) {
+export function generateLayout({ style, map, count = 8, seed = 1, doorType = 'door', anchor = null }) {
   const t = tools(seed);
   const build = BUILDERS[style.layout] || roomsLayout;
-  const out = build(style, Math.max(2, count), map.size, t);
+  const out = build(style, Math.max(2, count), map.size, t, anchor);
   const shapes = out.shapes.map((s) => ({ id: newId('s'), op: 'add', ...s }));
   const rooms = out.tags.filter((g) => g.type).map((g) => ({ id: newId('r'), type: g.type, at: g.at, seed: t.int(1, 2 ** 30), reroll: 0, ...(g.density != null ? { density: g.density } : {}) }));
   // Tag the corridors: in a generated layout every other space comes from them.
   const corridorType = style.corridor?.type || style.rooms?.[0]?.type;
   if (corridorType && out.corridors.length) {
-    const level = { shapes, walls: [], doors: [], edges: [], rooms, placements: [] };
+    const level = { shapes, walls: out.walls || [], doors: [], edges: [], rooms, placements: [] };
     const geo = computeLevelGeometry(level, map);
     for (const r of geo.rooms.regions) {
       if (r.tag || r.area < 2 || !r.cells.length) continue;
@@ -549,7 +578,8 @@ export function generateLayout({ style, map, count = 8, seed = 1, doorType = 'do
     }
   }
   const doors = (out.entrances || []).map((e) => ({ id: newId('d'), type: e.wide ? (doorType === 'door' ? 'double' : doorType) : doorType, a: e.a, b: e.b }));
-  return { shapes, rooms, doors, terrain: out.terrain || [], placements: out.placements || [], ground: out.ground || null };
+  const walls = (out.walls || []).map((w) => ({ id: newId('w'), ...w }));
+  return { shapes, walls, rooms, doors, terrain: out.terrain || [], placements: out.placements || [], ground: out.ground || null };
 }
 
 

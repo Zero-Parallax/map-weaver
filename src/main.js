@@ -735,15 +735,19 @@ function generateSection() {
         },
       }),
       count)),
+    styles.find((g) => g.id === app.opts.genStyle)?.layout !== 'outdoor' && field('Levels', segmented([1, 2, 3, 4, 5].map((n) => ({ id: n, name: String(n) })), app.opts.genLevels ?? 1, (v) => app.setOpt('genLevels', v)),
+      'More than one replaces the whole map, joined by stairs, ladders or lifts.'),
     checkbox('Combat-ready rooms (cover spread over the floor)', !!app.opts.genCombat, (v) => (app.opts.genCombat = v)),
     el('div', { class: 'actions' },
       el('button', {
         class: 'primary',
         title: 'Replace this level with a new layout: rooms, corridors, doors and decoration',
         onclick: async () => {
-          const empty = !app.level.shapes.length;
-          if (!empty && app.generatedRev !== app.rev && !(await ask('Replace everything on this level with a generated layout? (Undo brings it back.)', { ok: 'Generate', danger: true }))) return;
-          app.generateLevel({ styleId: app.opts.genStyle, count: app.opts.genRooms, combat: app.opts.genCombat });
+          const multi = (app.opts.genLevels ?? 1) > 1 && styles.find((g) => g.id === app.opts.genStyle)?.layout !== 'outdoor';
+          const empty = app.map.levels.every((lv) => !lv.shapes.length) || (!multi && !app.level.shapes.length);
+          const what = multi ? 'Replace the whole map (every level) with generated levels?' : 'Replace everything on this level with a generated layout?';
+          if (!empty && app.generatedRev !== app.rev && !(await ask(`${what} (Undo brings it back.)`, { ok: 'Generate', danger: true }))) return;
+          app.generateLevel({ styleId: app.opts.genStyle, count: app.opts.genRooms, combat: app.opts.genCombat, levels: multi ? app.opts.genLevels : 1 });
         },
       }, app.generatedRev === app.rev ? 'Generate another' : 'Generate level')),
     el('p', { class: 'hint' }, 'Every click gives a new layout. Edit it like any map afterwards.'),

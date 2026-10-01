@@ -11,6 +11,7 @@ import { placementContains, snapCentre, rotatedFootprint } from '../assets/libra
 import { decorateRoom } from '../decorator/decorate.js';
 import { planDoors } from '../core/auto-doors.js';
 import { generateLayout } from '../generator/layout.js';
+import { generateLevels } from '../generator/levels.js';
 import { roomKey } from '../core/room-key.js';
 import { newId } from '../core/model.js';
 import { resolveStyle } from '../render/style.js';
@@ -273,9 +274,10 @@ export class App {
    * Replace this level with a generated layout: rooms, corridors, room types, doors and
    * decoration. The map grows if it is too small for the rooms asked for.
    */
-  generateLevel({ styleId, count = 8, seed = newSeed(), combat = false }) {
+  generateLevel({ styleId, count = 8, seed = newSeed(), combat = false, levels = 1 }) {
     const style = (this.setting?.generator || []).find((g) => g.id === styleId);
     if (!style) return;
+    if (levels > 1 && style.layout !== 'outdoor') return this.generateMap({ style, count, seed, combat, levels });
     let grew = false;
     this.commit('Generate layout', (map, level) => {
       const side = style.layout === 'outdoor' ? 40 : Math.ceil(Math.sqrt(count * (style.layout === 'building' ? 40 : 75) * 4 / 3));
@@ -294,6 +296,30 @@ export class App {
     if (grew) this.fitView();
     const rooms = this.level.rooms.filter((r) => r.type !== style.corridor?.type).length;
     this.status(`Generated ${rooms} room${rooms === 1 ? '' : 's'}${grew ? ' (the map was enlarged to fit)' : ''}. Generate again for another layout; Undo goes back.`);
+  }
+
+  /** Replace the whole map with generated levels joined by stairs (or ladders, lifts). */
+  generateMap({ style, count, seed, combat, levels }) {
+    const linkType = style.links || (style.layout === 'tower' ? 'spiral' : style.layout === 'ship' ? 'ladder' : this.map.setting === 'scifi' ? 'lift' : 'stairs');
+    let grew = false;
+    this.commit('Generate levels', (map) => {
+      const side = Math.ceil(Math.sqrt(count * (style.layout === 'building' ? 40 : 75) * 4 / 3));
+      const size = { w: Math.max(map.size.w, side), h: Math.max(map.size.h, Math.round((side * 3) / 4)) };
+      if (style.layout === 'ship') size.w = Math.max(size.w, 14 + Math.ceil((count - 2) / 2) * 6);
+      grew = size.w !== map.size.w || size.h !== map.size.h;
+      map.size = size;
+      const out = generateLevels({ style, map, count, levels, seed, doorType: this.setting?.doors?.type, linkType });
+      if (combat) for (const lv of out.levels) for (const r of lv.rooms) if (r.type !== style.corridor?.type) r.combat = true;
+      map.levels = out.levels;
+      map.links = out.links;
+      for (const lv of map.levels) this.decorateIn(map, lv, lv.rooms.map((r) => r.id), { doors: true });
+      this.levelIndex = style.layout === 'rooms' || style.layout === 'caves' ? map.levels.length - 1 : 0;
+    }, { prune: false });
+    this.geoCache.clear();
+    this.generatedRev = this.rev;
+    if (grew) this.fitView();
+    this.setLevel(this.levelIndex);
+    this.status(`Generated ${levels} levels joined by ${linkType === 'spiral' ? 'spiral stairs' : linkType === 'lift' ? 'lifts' : linkType === 'ladder' ? 'ladders' : 'stairs'}. PageUp / PageDown to look round; Undo goes back.`);
   }
 
   decorate(tagIds, { reroll = false } = {}) {

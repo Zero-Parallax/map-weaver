@@ -55,3 +55,36 @@ test('outdoor styles: ground, terrain, a bridge where the road crosses the river
   }
   assert.ok(bridges >= 5, `${bridges} bridges in 6 maps`);
 });
+
+test('multi-level maps: every pair of levels is joined where both have room', async () => {
+  const { generateLevels } = await import('../src/generator/levels.js');
+  const { linksOnLevel } = await import('../src/core/links.js');
+  for (const setting of settings) {
+    for (const style of setting.generator.filter((g) => g.layout !== 'outdoor')) {
+      for (const seed of [1, 2]) {
+        const map = createMap({ setting: setting.id, size: { w: 48, h: 36 } });
+        const linkType = style.layout === 'tower' ? 'spiral' : 'stairs';
+        const out = generateLevels({ style, map, count: 7, levels: 3, seed, linkType });
+        assert.equal(out.levels.length, 3);
+        assert.equal(out.links.length, 2, `${setting.id} ${style.id} seed ${seed}: ${out.links.length} links`);
+        const work = { ...map, levels: out.levels, links: out.links };
+        for (const link of out.links) {
+          for (const id of [link.from, link.to]) {
+            const lv = out.levels.find((l) => l.id === id);
+            const geo = computeLevelGeometry({ ...lv, rooms: lv.rooms }, { ...work, links: [] });
+            for (let y = link.y; y < link.y + link.h; y++) {
+              for (let x = link.x; x < link.x + link.w; x++) {
+                assert.ok(geo.rooms.regions.some((r) => r.cells.some(([cx, cy]) => cx === x && cy === y)), `${style.id}: link square ${x},${y} not on floor`);
+              }
+            }
+          }
+        }
+        for (const lv of out.levels) {
+          const geo = computeLevelGeometry(lv, work);
+          assert.ok(linksOnLevel(work, lv).length >= 1);
+          for (const r of geo.rooms.regions.filter((r) => r.area >= 2 && r.cells.length)) assert.ok(r.tag, `${style.id} ${lv.name}: untagged space`);
+        }
+      }
+    }
+  }
+});
