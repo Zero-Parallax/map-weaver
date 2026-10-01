@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+<title>Pew</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"pew","name":"Pew","settings":["fantasy"],"footprint":{"w":3,"h":1},"roomTypes":["temple"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":8,"tags":[],"facing":"focal","generator":{"id":"bench","params":{"len":3,"back":true},"sizes":{"len":[2,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<rect class="o" x="8" y="34" width="284" height="40" rx="5"/><path class="t" d="M8 47.3L292 47.3M8 60.7L292 60.7"/><rect class="ko" x="8" y="12" width="284" height="18" rx="4"/><path class="l" d="M14 36L14 72M100 36L100 72M200 36L200 72M286 36L286 72"/>
+</g>
+</svg>

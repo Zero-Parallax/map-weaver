@@ -104,7 +104,7 @@ export function removeLevel(map, levelId) {
   restack(map);
 }
 
-export function createMap({ name = 'Untitled map', setting = 'classic', style, size } = {}) {
+export function createMap({ name = 'Untitled map', setting = 'fantasy', style, size } = {}) {
   return {
     format: FORMAT,
     version: VERSION,
@@ -133,6 +133,7 @@ export function loadMap(data) {
   map.size = { ...base.size, ...map.size };
   map.feetPerSquare ??= 5;
   map.seed ??= newSeed();
+  if (map.setting === 'classic') map.setting = 'fantasy'; // merged into Fantasy
   map.links ??= [];
   if (!Array.isArray(map.levels) || !map.levels.length) map.levels = [createLevel()];
   for (const lv of map.levels) {

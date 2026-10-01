@@ -3,8 +3,8 @@
 
 import { leaves, stoneShape, planks } from '../motifs.js';
 
-const ALL = ['classic', 'fantasy', 'scifi'];
-const CF = ['classic', 'fantasy'];
+const ALL = ['fantasy', 'scifi'];
+const CF = ['fantasy'];
 const S = ['scifi'];
 const MANUAL = ['by-hand']; // no room type: the decorator never picks these
 
@@ -20,7 +20,7 @@ function canopy(g, cx, cy, r, seed, cls = 'o') {
 }
 
 export default function define({ A, G }) {
-  // ---- classic / fantasy ----------------------------------------------------------------
+  // ---- fantasy ----------------------------------------------------------------
 
   A('oak', 'Oak tree', CF, [2, 2], { placement: 'free', roomTypes: ['forest', 'clearing', 'camp', 'graveyard', 'farmyard', 'garden'], max: 3, weight: 4, cover: 'three-quarters' }, (g) => {
     canopy(g, 100, 100, 74, 1, 's');

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<title>Fallen leaves</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"fallen-leaves","name":"Fallen leaves","settings":["fantasy"],"footprint":{"w":1,"h":1},"roomTypes":["forest","graveyard","garden","ruin"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<g transform="rotate(20 28 30)"><ellipse class="s" cx="28" cy="30" rx="11" ry="6"/><line class="t" x1="17" y1="30" x2="39" y2="30"/></g><g transform="rotate(-30 64 40)"><ellipse class="s" cx="64" cy="40" rx="11" ry="6"/><line class="t" x1="53" y1="40" x2="75" y2="40"/></g><g transform="rotate(60 40 70)"><ellipse class="s" cx="40" cy="70" rx="11" ry="6"/><line class="t" x1="29" y1="70" x2="51" y2="70"/></g><g transform="rotate(10 76 74)"><ellipse class="s" cx="76" cy="74" rx="11" ry="6"/><line class="t" x1="65" y1="74" x2="87" y2="74"/></g>
+</svg>

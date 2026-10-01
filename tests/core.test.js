@@ -257,7 +257,7 @@ test('a long outer wall is split where the room beside it changes', () => {
 });
 
 test('a corridor stops behind the walls of the rooms it reaches', () => {
-  const map = createMap({ setting: 'classic', size: { w: 30, h: 30 } });
+  const map = createMap({ setting: 'fantasy', size: { w: 30, h: 30 } });
   const lv = map.levels[0];
   lv.shapes = [
     { id: 'a', kind: 'rect', op: 'add', walled: true, x: 2, y: 2, w: 5, h: 5 },
@@ -276,4 +276,10 @@ test('editor modules load (catches import and syntax mistakes the browser would 
   for (const m of ['../src/editor/app.js', '../src/editor/tools/shape-tools.js', '../src/editor/tools/item-tools.js', '../src/editor/tools/terrain-tool.js', '../src/editor/tools/level-tools.js', '../src/render/export.js', '../src/render/terrain-render.js']) {
     await import(m);
   }
+});
+
+test('maps saved with the old Classic D&D setting open as Fantasy', () => {
+  const old = JSON.parse(saveMap(createMap({ setting: 'fantasy' })));
+  old.setting = 'classic';
+  assert.equal(loadMap(old).setting, 'fantasy');
 });

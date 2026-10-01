@@ -127,7 +127,7 @@ export default function define({ A, G }) {
   });
 
   G('display-counter', 'Display counter', F, 'counter', { len: 3, kind: 'shop' }, { placement: 'centre', roomTypes: ['shop'], min: 1, max: 2 }, { len: [2, 5] });
-  G('goods-shelf', 'Goods shelf', ['classic', 'fantasy'], 'shelf', { len: 2, kind: 'goods' }, { placement: 'wall', roomTypes: ['shop', 'cellar', 'kitchen', 'storeroom'], max: 4, weight: 2 }, { len: [1, 4] });
+  G('goods-shelf', 'Goods shelf', F, 'shelf', { len: 2, kind: 'goods' }, { placement: 'wall', roomTypes: ['shop', 'cellar', 'kitchen', 'storeroom'], max: 4, weight: 2 }, { len: [1, 4] });
   G('wine-rack', 'Wine rack', F, 'shelf', { len: 2, kind: 'bottles' }, { placement: 'wall', roomTypes: ['cellar', 'tavern'], max: 3 }, { len: [1, 4] });
 
   A('plant', 'Potted plant', F, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['great-hall', 'bedroom', 'shop', 'tavern', 'library'], max: 2 }, (g) => {

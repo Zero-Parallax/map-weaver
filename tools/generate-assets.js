@@ -13,6 +13,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const assets = buildStarterAssets();
 const counts = {};
 const seen = new Set();
+const written = new Set(); // folder/file, so a piece that moved folder leaves no stale copy
 for (const { meta, drawing, folder } of assets) {
   const { errors } = normalizeMeta(meta);
   if (errors.length) throw new Error(`${meta.id}: ${errors.join(', ')}`);
@@ -21,6 +22,7 @@ for (const { meta, drawing, folder } of assets) {
   const dir = path.join(ROOT, 'assets', folder);
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(path.join(dir, `${meta.id}.svg`), assetSvg(meta, drawing));
+  written.add(`${folder}/${meta.id}.svg`);
   for (const s of meta.settings) counts[s] = (counts[s] || 0) + 1;
 }
 // Remove starter files that are no longer defined (your own files live elsewhere, e.g. imported/).
@@ -28,7 +30,7 @@ for (const folder of ['classic', 'common', 'fantasy', 'scifi']) {
   const dir = path.join(ROOT, 'assets', folder);
   const files = await fs.readdir(dir).catch(() => []);
   for (const f of files) {
-    if (f.endsWith('.svg') && !seen.has(f.slice(0, -4))) {
+    if (f.endsWith('.svg') && !written.has(`${folder}/${f}`)) {
       await fs.rm(path.join(dir, f));
       console.log(`Removed ${folder}/${f}`);
     }

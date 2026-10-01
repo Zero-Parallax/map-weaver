@@ -1,20 +1,26 @@
 {
   "id": "fantasy",
   "name": "Fantasy",
-  "description": "Towns, taverns and keeps.",
+  "description": "Dungeons, caves, taverns, keeps, towers and the wilds between: classic D&D and fantasy in one.",
   "defaults": { "palette": "sepia", "shading": "hatch", "grid": "floor" },
   "walls": { "width": 0.14, "style": "line", "band": 0.7 },
-  "doors": { "type": "door", "hubs": ["corridor", "great-hall", "tavern", "cave"], "byRoom": { "cave": "archway" } },
+  "doors": { "type": "door", "hubs": ["corridor", "cave", "temple", "great-hall", "tavern"], "byRoom": {"prison": "portcullis", "cave": "archway"} },
   "roomTypes": [
-    { "id": "corridor", "name": "Hallway" },
+    { "id": "corridor", "name": "Corridor" },
+    { "id": "chamber", "name": "Chamber" },
+    { "id": "throne-room", "name": "Throne room" },
+    { "id": "great-hall", "name": "Great hall" },
     { "id": "tavern", "name": "Tavern" },
     { "id": "bedroom", "name": "Bedroom" },
     { "id": "kitchen", "name": "Kitchen" },
-    { "id": "great-hall", "name": "Great hall" },
     { "id": "shop", "name": "Shop" },
     { "id": "smithy", "name": "Smithy" },
     { "id": "library", "name": "Library" },
     { "id": "temple", "name": "Temple" },
+    { "id": "crypt", "name": "Crypt" },
+    { "id": "barracks", "name": "Barracks" },
+    { "id": "storeroom", "name": "Storeroom" },
+    { "id": "prison", "name": "Prison" },
     { "id": "cellar", "name": "Cellar" },
     { "id": "cave", "name": "Cave" },
     { "id": "forest", "name": "Forest", "outdoor": true },
@@ -25,6 +31,27 @@
     { "id": "garden", "name": "Garden", "outdoor": true }
   ],
   "generator": [
+    {"id":"dungeon","name":"Dungeon","layout":"rooms","corridor":{"type":"corridor","width":[1,2]},"shapes":{"circle":0.15,"octagon":0.12},"rooms":[
+      {"type":"throne-room","size":["large"],"max":1},
+      {"type":"temple","size":["medium","large"],"max":1},
+      {"type":"crypt","weight":2},
+      {"type":"barracks","size":["medium","large"],"weight":2},
+      {"type":"storeroom","size":["small","medium"],"weight":2},
+      {"type":"prison","size":["small","medium"],"max":2},
+      {"type":"library","size":["medium"],"max":1},
+      {"type":"chamber","weight":4},
+      {"type":"great-hall","size":["large"],"max":1},
+      {"type":"cellar","weight":3},
+      {"type":"cave","weight":2},
+      {"type":"smithy","max":1}
+    ]},
+    {"id":"caves","name":"Caves","layout":"caves","corridor":{"type":"cave"},"rooms":[
+      {"type":"cave","weight":6},
+      {"type":"crypt","max":1},
+      {"type":"temple","max":1},
+      {"type":"prison","max":1},
+      {"type":"cellar","max":1}
+    ]},
     {"id":"inn","name":"Inn or house","layout":"building","corridor":{"type":"corridor"},"rooms":[
       {"type":"tavern","size":["large"],"max":1},
       {"type":"kitchen","max":1,"weight":2},
@@ -33,32 +60,33 @@
       {"type":"library","max":1},
       {"type":"smithy","max":1}
     ]},
-    {"id":"castle","name":"Castle","layout":"building","corridor":{"type":"corridor"},"rooms":[
+    {"id":"castle","name":"Castle or keep","layout":"building","corridor":{"type":"corridor"},"rooms":[
       {"type":"great-hall","size":["large"],"max":1},
       {"type":"kitchen","max":1},
       {"type":"bedroom","weight":3},
       {"type":"library","max":1},
       {"type":"temple","max":1},
       {"type":"smithy","max":1},
-      {"type":"cellar","max":2}
+      {"type":"cellar","max":2},
+      {"type":"throne-room","size":["large"],"max":1},
+      {"type":"barracks","max":2,"weight":2},
+      {"type":"storeroom","size":["small","medium"],"weight":2},
+      {"type":"chamber","weight":3}
     ]},
-    {"id":"dungeon","name":"Dungeon","layout":"rooms","corridor":{"type":"corridor","width":[1,2]},"shapes":{"circle":0.15,"octagon":0.1},"rooms":[
-      {"type":"great-hall","size":["large"],"max":1},
-      {"type":"temple","max":1},
-      {"type":"cellar","weight":3},
+    {"id":"tower","name":"Tower","layout":"tower","corridor":{"type":"corridor"},"rooms":[
       {"type":"library","max":1},
-      {"type":"cave","weight":2},
-      {"type":"smithy","max":1}
-    ]},
-    {"id":"caves","name":"Caves","layout":"caves","corridor":{"type":"cave"},"rooms":[
-      {"type":"cave","weight":6},
+      {"type":"chamber","weight":3},
       {"type":"temple","max":1},
+      {"type":"storeroom","weight":2},
+      {"type":"throne-room","max":1},
+      {"type":"bedroom","weight":3},
+      {"type":"kitchen","max":1},
       {"type":"cellar","max":1}
     ]},
     {"id":"forest-road","name":"Forest road","layout":"outdoor","ground":"grass","region":{"type":"forest","density":0.5},"road":0.9,"river":0.6,"bridge":"wooden-bridge","pools":{"water":0.4,"mud":0.3},"camp":0.4},
     {"id":"village","name":"Village","layout":"outdoor","ground":"grass","region":{"type":"farmyard","density":0.35},"road":1,"river":0.5,"bridge":"stone-bridge","pools":{"water":0.3},"buildings":{"min":2,"max":6,"rooms":[{"type":"tavern","max":1},{"type":"shop","max":1},{"type":"smithy","max":1},{"type":"bedroom","weight":3},{"type":"kitchen","max":1}]}},
     {"id":"camp","name":"Riverside camp","layout":"outdoor","ground":"grass","region":{"type":"clearing","density":0.35},"road":0.4,"river":1,"bridge":"wooden-bridge","pools":{"mud":0.4},"camp":1},
-    {"id":"graveyard","name":"Graveyard","layout":"outdoor","ground":"grass","region":{"type":"graveyard","density":0.55},"road":0.8,"roadKind":"paving","pools":{"mud":0.4},"buildings":{"min":1,"max":1,"rooms":[{"type":"temple"}]}},
-    {"id":"tower","name":"Tower","layout":"tower","corridor":{"type":"corridor"},"rooms":[{"type":"bedroom","weight":3},{"type":"library","max":1},{"type":"kitchen","max":1},{"type":"cellar","max":1},{"type":"temple","max":1}]}
+    {"id":"graveyard","name":"Graveyard","layout":"outdoor","ground":"grass","region":{"type":"graveyard","density":0.55},"road":0.8,"roadKind":"paving","pools":{"mud":0.4},"buildings":{"min":1,"max":1,"rooms":[{"type":"crypt"},{"type":"temple"}]}},
+    {"id":"rift","name":"Chasm crossing","layout":"outdoor","ground":"rock","region":{"type":"clearing","density":0.35},"road":1,"river":1,"riverKind":"chasm","bridge":"wooden-bridge","pools":{"chasm":0.3}}
   ]
 }

@@ -4,8 +4,8 @@
 
 import { stoneShape } from '../motifs.js';
 
-const ALL = ['classic', 'fantasy', 'scifi'];
-const CF = ['classic', 'fantasy'];
+const ALL = ['fantasy', 'scifi'];
+const CF = ['fantasy'];
 const S = ['scifi'];
 const opts = (roomTypes, more = {}) => ({ placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes, ...more });
 

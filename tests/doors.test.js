@@ -7,7 +7,7 @@ import { regionAt } from '../src/core/rooms.js';
 import { planDoors } from '../src/core/auto-doors.js';
 
 function level(shapes, doors = []) {
-  const map = createMap({ setting: 'classic', size: { w: 30, h: 30 } });
+  const map = createMap({ setting: 'fantasy', size: { w: 30, h: 30 } });
   const lv = map.levels[0];
   lv.shapes = shapes.map((s, i) => ({ id: 's' + i, kind: 'rect', op: 'add', walled: true, ...s }));
   lv.doors = doors;

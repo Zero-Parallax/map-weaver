@@ -1,9 +1,9 @@
-// Classic D&D and shared classic/fantasy assets. Backs face the top edge (wallSide n).
+// Fantasy assets (dungeons, keeps, temples...) and pieces shared with sci-fi. Backs face the top edge (wallSide n).
 
 import { candle, flame, figure, stoneShape, planks } from '../motifs.js';
 
-const C = ['classic'];
-const CF = ['classic', 'fantasy'];
+const C = ['fantasy'];
+const CF = ['fantasy'];
 
 // Bone: a line with knobbly ends.
 function bone(g, x1, y1, x2, y2) {

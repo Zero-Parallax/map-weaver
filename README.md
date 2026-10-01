@@ -99,15 +99,17 @@ a setting, a style and how many rooms. **↻ Try another** gives a new layout (U
 
 | Setting | Styles |
 | --- | --- |
-| Classic | Dungeon (rooms and corridors), Keep (building), Caves |
-| Fantasy | Inn or house, Castle, Dungeon, Caves |
-| Sci-fi | Starship (spine, compartments, engines aft, bridge forward), Station, Colony building, Mine or ruins |
+| Fantasy | Dungeon (rooms and corridors), Caves, Inn or house, Castle or keep, Tower |
+| Sci-fi | Starship (spine, compartments, engines aft, bridge forward), Station, Colony building, Mine or ruins, Comms spire |
 
-Outdoor styles too: Forest road, Graveyard, Chasm crossing (classic); Forest road, Village,
-Riverside camp, Graveyard (fantasy); Crash site, Alien jungle, Colony outpost, Volcanic wastes
-(sci-fi). They lay down a river (water, lava or a chasm), a road with a bridge where the two
-cross, ponds and pools, campsites and small buildings, then decorate the ground. And towers:
-Wizard tower, Tower, Comms spire (a round tower with rooms round a central hall).
+Outdoor styles too: Forest road, Village, Riverside camp, Graveyard, Chasm crossing (fantasy);
+Crash site, Alien jungle, Colony outpost, Volcanic wastes (sci-fi). They lay down a river
+(water, lava or a chasm), a road with a bridge where the two cross, ponds and pools, campsites
+and small buildings, then decorate the ground.
+
+There are two settings, **Fantasy** (dungeons, caves, taverns, keeps, towers and the wilds:
+classic D&D and fantasy in one) and **Sci-fi**. Maps saved with the old Classic D&D setting open
+as Fantasy.
 
 **Levels** (1-5) generates a whole multi-level map: dungeons and caves go down from an
 entrance level, buildings, towers and ships go up. Each pair of levels is joined by stairs

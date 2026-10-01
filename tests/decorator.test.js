@@ -13,7 +13,7 @@ import { rotatedFootprint } from '../src/assets/library.js';
 const metas = buildStarterAssets().map(({ meta }) => normalizeMeta(meta).meta);
 const forSetting = (s) => metas.filter((m) => m.settings.includes(s));
 
-function setup({ setting = 'classic', type = 'throne-room', w = 10, h = 8, density, doors = true } = {}) {
+function setup({ setting = 'fantasy', type = 'throne-room', w = 10, h = 8, density, doors = true } = {}) {
   const map = createMap({ setting, size: { w: 30, h: 30 } });
   map.seed = 7;
   const level = map.levels[0];
@@ -105,7 +105,7 @@ test('heavier density places more', () => {
 });
 
 test('every room type in every setting gets something and stays walkable between doors', async () => {
-  for (const setting of ['classic', 'fantasy', 'scifi']) {
+  for (const setting of ['fantasy', 'scifi']) {
     const types = JSON.parse(await fs.readFile(new URL(`../settings/${setting}/setting.json`, import.meta.url), 'utf8')).roomTypes.map((t) => t.id);
     for (const type of types) {
       for (const reroll of [0, 1, 2]) {
@@ -178,7 +178,7 @@ test('combat-ready rooms spread cover over the open floor and stay walkable', ()
     const m = metas.find((x) => x.id === p.asset);
     return m.cover !== 'none' && m.blocksMovement;
   };
-  for (const [setting, type] of [['classic', 'chamber'], ['fantasy', 'bedroom'], ['scifi', 'lab']]) {
+  for (const [setting, type] of [['fantasy', 'chamber'], ['fantasy', 'bedroom'], ['scifi', 'lab']]) {
     const plain = setup({ setting, type, w: 14, h: 12 });
     const combat = setup({ setting, type, w: 14, h: 12 });
     combat.tag.combat = true;

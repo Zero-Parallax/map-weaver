@@ -1,5 +1,5 @@
 // Starter asset sets. Each entry becomes one SVG file (see tools/generate-assets.js).
-// The drawings live in starter/common.js (classic and shared), starter/fantasy.js and
+// The drawings live in starter/common.js (fantasy and shared), starter/fantasy.js and
 // starter/scifi.js. Two-tone, bold silhouettes; backs face the top edge (wallSide n).
 // Units: 100 per square.
 

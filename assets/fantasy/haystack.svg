@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Haystack</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"haystack","name":"Haystack","settings":["fantasy"],"footprint":{"w":2,"h":2},"roomTypes":["farmyard"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":2,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<circle class="s" cx="100" cy="100" r="82"/><path class="t" d="M124 100L172.6 122.5M123.4 105.3L165.8 138.1M121.6 110.4L155.7 151.7M118.8 115L142.8 162.8M115 118.8L127.7 170.8M110.4 121.6L111.3 175.2M105.3 123.4L94.3 175.8M100 124L77.5 172.6M94.7 123.4L61.9 165.8M89.6 121.6L48.3 155.7M85 118.8L37.2 142.8M81.2 115L29.2 127.7M78.4 110.4L24.8 111.3M76.6 105.3L24.2 94.3M76 100L27.4 77.5M76.6 94.7L34.2 61.9M78.4 89.6L44.3 48.3M81.2 85L57.2 37.2M85 81.2L72.3 29.2M89.6 78.4L88.7 24.8M94.7 76.6L105.7 24.2M100 76L122.5 27.4M105.3 76.6L138.1 34.2M110.4 78.4L151.7 44.3M115 81.2L162.8 57.2M118.8 85L170.8 72.3M121.6 89.6L175.2 88.7M123.4 94.7L175.8 105.7"/><circle class="o" cx="100" cy="100" r="22"/>
+</g>
+</svg>

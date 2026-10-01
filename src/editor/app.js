@@ -96,7 +96,7 @@ export class App {
   }
 
   newMap(settingId) {
-    const id = settingId || [...this.catalog.settings.keys()][0] || 'classic';
+    const id = settingId || [...this.catalog.settings.keys()][0] || 'fantasy';
     const setting = this.catalog.settings.get(id);
     this.setMap(createMap({ setting: id, style: setting?.defaults }), null);
   }

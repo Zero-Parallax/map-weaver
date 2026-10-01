@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<title>Rat</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"rat","name":"Rat","settings":["fantasy"],"footprint":{"w":1,"h":1},"roomTypes":["cellar","prison","crypt","storeroom","cave","kitchen","corridor"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<path class="l" d="M30 56Q14 64 18 80Q22 90 34 86"/><ellipse class="m" cx="48" cy="50" rx="18" ry="10"/><polygon class="m" points="62,44 78,50 62,56"/><circle class="s" cx="60" cy="42" r="4"/><circle class="s" cx="60" cy="58" r="4"/><circle class="k" cx="72" cy="48" r="2"/>
+</svg>

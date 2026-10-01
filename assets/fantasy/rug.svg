@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+<title>Rug</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"rug","name":"Rug","settings":["fantasy"],"footprint":{"w":2,"h":3},"roomTypes":["throne-room","bedroom","library","great-hall","temple"],"placement":"centre","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[],"generator":{"id":"rug","params":{"w":2,"h":3,"pattern":"border"},"sizes":{"w":[2,4],"h":[2,5]}}}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<rect class="s" x="10" y="10" width="180" height="280" rx="2"/><rect class="o" x="22" y="22" width="156" height="256"/><rect class="d" x="30" y="30" width="140" height="240"/><polygon class="s" points="100,40 160,150 100,260 40,150"/><polygon class="ko" points="100,132 118,150 100,168 82,150"/><path class="t" d="M18 0L18 10M18 290L18 300M27 0L27 10M27 290L27 300M36 0L36 10M36 290L36 300M45 0L45 10M45 290L45 300M54 0L54 10M54 290L54 300M63 0L63 10M63 290L63 300M72 0L72 10M72 290L72 300M81 0L81 10M81 290L81 300M90 0L90 10M90 290L90 300M99 0L99 10M99 290L99 300M108 0L108 10M108 290L108 300M117 0L117 10M117 290L117 300M126 0L126 10M126 290L126 300M135 0L135 10M135 290L135 300M144 0L144 10M144 290L144 300M153 0L153 10M153 290L153 300M162 0L162 10M162 290L162 300M171 0L171 10M171 290L171 300M180 0L180 10M180 290L180 300"/>
+</svg>

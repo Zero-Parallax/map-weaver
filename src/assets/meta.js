@@ -1,9 +1,9 @@
 // Asset metadata, stored inside each SVG as JSON in <metadata id="map-weaver-asset">.
 //
 // {
-//   id:            unique, e.g. "classic.chest"
+//   id:            unique, e.g. "chest"
 //   name:          shown in the library
-//   settings:      settings it belongs to, e.g. ["classic", "fantasy"]
+//   settings:      settings it belongs to, e.g. ["fantasy", "scifi"]
 //   footprint:     {w, h} in squares, in the asset's own orientation
 //   roomTypes:     room type ids it suits; ["*"] = any room
 //   placement:     wall | corner | centre | door | balcony | free

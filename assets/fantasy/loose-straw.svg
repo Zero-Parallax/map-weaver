@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+<title>Loose straw</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"loose-straw","name":"Loose straw","settings":["fantasy"],"footprint":{"w":1,"h":1},"roomTypes":["barracks","prison","cellar","storeroom","tavern","smithy","kitchen"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<path class="l" d="M18 40L46 30M24 56L54 50M40 70L70 76M50 34L80 44M58 58L86 52M30 76L44 58M62 24L70 40"/><path class="t" d="M21 43L35 38M27 59L42 56M43 73L58 76M53 37L68 42M61 61L75 58M33 79L40 70M65 27L69 35"/>
+</svg>

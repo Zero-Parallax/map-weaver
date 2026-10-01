@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+<title>Hedge</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"hedge","name":"Hedge","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["garden","graveyard"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":4,"tags":[]}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<g filter="url(#sh)">
+<rect class="s" x="6" y="14" width="188" height="72" rx="30"/><ellipse class="o" cx="50.3" cy="50.0" rx="12.5" ry="5.7" transform="rotate(0.0 50.3 50.0)"/><ellipse class="o" cx="43.2" cy="62.4" rx="12.5" ry="5.7" transform="rotate(60.0 43.2 62.4)"/><ellipse class="o" cx="28.9" cy="62.4" rx="12.5" ry="5.7" transform="rotate(120.0 28.9 62.4)"/><ellipse class="o" cx="21.7" cy="50.0" rx="12.5" ry="5.7" transform="rotate(180.0 21.7 50.0)"/><ellipse class="o" cx="28.8" cy="37.6" rx="12.5" ry="5.7" transform="rotate(240.0 28.8 37.6)"/><ellipse class="o" cx="43.2" cy="37.6" rx="12.5" ry="5.7" transform="rotate(300.0 43.2 37.6)"/><circle class="k" cx="36" cy="50" r="5.7"/><ellipse class="o" cx="96.3" cy="50.0" rx="12.5" ry="5.7" transform="rotate(0.0 96.3 50.0)"/><ellipse class="o" cx="89.2" cy="62.4" rx="12.5" ry="5.7" transform="rotate(60.0 89.2 62.4)"/><ellipse class="o" cx="74.9" cy="62.4" rx="12.5" ry="5.7" transform="rotate(120.0 74.9 62.4)"/><ellipse class="o" cx="67.7" cy="50.0" rx="12.5" ry="5.7" transform="rotate(180.0 67.7 50.0)"/><ellipse class="o" cx="74.8" cy="37.6" rx="12.5" ry="5.7" transform="rotate(240.0 74.8 37.6)"/><ellipse class="o" cx="89.2" cy="37.6" rx="12.5" ry="5.7" transform="rotate(300.0 89.2 37.6)"/><circle class="k" cx="82" cy="50" r="5.7"/><ellipse class="o" cx="142.3" cy="50.0" rx="12.5" ry="5.7" transform="rotate(0.0 142.3 50.0)"/><ellipse class="o" cx="135.2" cy="62.4" rx="12.5" ry="5.7" transform="rotate(60.0 135.2 62.4)"/><ellipse class="o" cx="120.9" cy="62.4" rx="12.5" ry="5.7" transform="rotate(120.0 120.9 62.4)"/><ellipse class="o" cx="113.7" cy="50.0" rx="12.5" ry="5.7" transform="rotate(180.0 113.7 50.0)"/><ellipse class="o" cx="120.8" cy="37.6" rx="12.5" ry="5.7" transform="rotate(240.0 120.8 37.6)"/><ellipse class="o" cx="135.2" cy="37.6" rx="12.5" ry="5.7" transform="rotate(300.0 135.2 37.6)"/><circle class="k" cx="128" cy="50" r="5.7"/><ellipse class="o" cx="180.3" cy="50.0" rx="12.5" ry="5.7" transform="rotate(0.0 180.3 50.0)"/><ellipse class="o" cx="173.2" cy="62.4" rx="12.5" ry="5.7" transform="rotate(60.0 173.2 62.4)"/><ellipse class="o" cx="158.8" cy="62.4" rx="12.5" ry="5.7" transform="rotate(120.0 158.8 62.4)"/><ellipse class="o" cx="151.7" cy="50.0" rx="12.5" ry="5.7" transform="rotate(180.0 151.7 50.0)"/><ellipse class="o" cx="158.8" cy="37.6" rx="12.5" ry="5.7" transform="rotate(240.0 158.8 37.6)"/><ellipse class="o" cx="173.2" cy="37.6" rx="12.5" ry="5.7" transform="rotate(300.0 173.2 37.6)"/><circle class="k" cx="166" cy="50" r="5.7"/>
+</g>
+</svg>

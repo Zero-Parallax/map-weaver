@@ -2,8 +2,8 @@
 
 import { stoneShape, leaves } from '../motifs.js';
 
-const ALL = ['classic', 'fantasy', 'scifi'];
-const CF = ['classic', 'fantasy'];
+const ALL = ['fantasy', 'scifi'];
+const CF = ['fantasy'];
 const S = ['scifi'];
 const RUIN = ['ruin'];
 

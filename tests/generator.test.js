@@ -7,7 +7,7 @@ import { computeLevelGeometry } from '../src/core/level-geometry.js';
 import { planDoors, roomGroups } from '../src/core/auto-doors.js';
 import { generateLayout } from '../src/generator/layout.js';
 
-const settings = ['classic', 'fantasy', 'scifi'].map((id) => JSON.parse(fs.readFileSync(new URL(`../settings/${id}/setting.json`, import.meta.url))));
+const settings = ['fantasy', 'scifi'].map((id) => JSON.parse(fs.readFileSync(new URL(`../settings/${id}/setting.json`, import.meta.url))));
 
 for (const setting of settings) {
   for (const style of setting.generator) {
@@ -31,7 +31,7 @@ for (const setting of settings) {
 
 test('the same seed gives the same layout', () => {
   const style = settings[0].generator[0];
-  const map = createMap({ setting: 'classic' });
+  const map = createMap({ setting: 'fantasy' });
   const strip = (o) => JSON.stringify(o.shapes.map(({ id, ...s }) => s));
   assert.equal(strip(generateLayout({ style, map, seed: 9 })), strip(generateLayout({ style, map, seed: 9 })));
   assert.notEqual(strip(generateLayout({ style, map, seed: 9 })), strip(generateLayout({ style, map, seed: 10 })));
@@ -91,8 +91,8 @@ test('multi-level maps: every pair of levels is joined where both have room', as
 
 test('ruining a level breaches walls, breaks doors, opens the floor and marks every room', async () => {
   const { ruinLevel } = await import('../src/generator/ruin.js');
-  const style = settings[0].generator.find((g) => g.id === 'keep');
-  const map = createMap({ setting: 'classic', size: { w: 48, h: 36 } });
+  const style = settings[0].generator.find((g) => g.id === 'castle');
+  const map = createMap({ setting: 'fantasy', size: { w: 48, h: 36 } });
   const out = generateLayout({ style, map, count: 8, seed: 3 });
   const level = { ...map.levels[0], ...out, doors: [...out.doors] };
   map.levels[0] = level;

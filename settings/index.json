@@ -1,3 +1,6 @@
 {
-  "settings": ["classic", "fantasy", "scifi"]
+  "settings": [
+    "fantasy",
+    "scifi"
+  ]
 }

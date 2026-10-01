@@ -9,12 +9,12 @@ import { buildStarterAssets } from '../src/assets/starter.js';
 import { rotatedFootprint, snapCentre, placementContains } from '../src/assets/library.js';
 
 const settings = {};
-for (const id of ['classic', 'fantasy', 'scifi']) {
+for (const id of ['fantasy', 'scifi']) {
   settings[id] = JSON.parse(await fs.readFile(new URL(`../settings/${id}/setting.json`, import.meta.url), 'utf8'));
 }
 
 test('metadata survives a write and read through the SVG', () => {
-  const meta = { id: 't', name: 'T', settings: ['classic'], footprint: { w: 2, h: 1 }, placement: 'wall' };
+  const meta = { id: 't', name: 'T', settings: ['fantasy'], footprint: { w: 2, h: 1 }, placement: 'wall' };
   const svg = assetSvg(meta, new Drawing().rect(0, 0, 10, 10));
   assert.deepEqual(readMeta(svg), meta);
   const { meta: norm, errors } = normalizeMeta(readMeta(svg));
