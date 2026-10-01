@@ -194,7 +194,8 @@ function roomsLayout(style, n, size, t) {
   const shapes = rooms.map((r) => ({ ...roomShape(r, style.shapes || {}, t), walled: true }));
   const tags = rooms.map((r) => ({ type: r.type, at: centreOf(r) }));
   const corridors = rooms.length > 1 ? connections(rooms, t, style.loops ?? 0.15).map(([i, j]) => corridorPath(rooms[i], rooms[j], width, t)) : [];
-  for (const points of corridors) shapes.push({ kind: 'path', points, width, walled: true, under: true });
+  // One shape for all corridors, so where they meet or run side by side they join up.
+  if (corridors.length) shapes.push({ kind: 'path', paths: corridors, width, walled: true, under: true });
   return { shapes, tags, corridors: corridors.map((points) => ({ points, width })) };
 }
 

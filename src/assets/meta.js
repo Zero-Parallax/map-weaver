@@ -16,6 +16,7 @@
 //   facing:        optional; "focal" = seats that turn to face the room's showpiece (pews)
 //   clutter:       small decal (cracks, stains, papers) scattered after the furniture by the
 //                  room's clutter amount, not part of the furnishing
+//   gmOnly:        hidden from players (traps): left out of the player PNG export
 //   tags:          free-form words for search
 //   generator:     {id, params} if made by a parametric generator (the app can remake it at
 //                  other sizes); sizes: allowed ranges the decorator may pick from
@@ -87,6 +88,7 @@ export function normalizeMeta(raw) {
   meta.max ??= 0;
   meta.tags ??= [];
   meta.clutter = !!meta.clutter;
+  meta.gmOnly = !!meta.gmOnly;
   return { meta, errors };
 }
 

@@ -11,6 +11,7 @@ import { placementContains, snapCentre, rotatedFootprint } from '../assets/libra
 import { decorateRoom } from '../decorator/decorate.js';
 import { planDoors } from '../core/auto-doors.js';
 import { generateLayout } from '../generator/layout.js';
+import { roomKey } from '../core/room-key.js';
 import { newId } from '../core/model.js';
 import { resolveStyle } from '../render/style.js';
 
@@ -913,15 +914,22 @@ export class App {
     ctx.restore();
   }
 
+  /** Numbered rooms of the whole map, as the GM export shows them. */
+  roomKey() {
+    return roomKey(this.map, { geometry: (lv) => this.geometry(lv), typeName: (id) => this.roomTypeName(id) });
+  }
+
   drawRoomLabels(ctx, geo) {
     const { scale: s, ox, oy } = this.view;
+    const numbers = new Map(this.roomKey().map((e) => [e.tag.id, e.n]));
     ctx.save();
     ctx.font = '600 12px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const r of geo.rooms.regions) {
       if (!r.tag) continue;
-      const text = this.roomTypeName(r.tag.type);
+      const n = numbers.get(r.tag.id);
+      const text = (n ? `${n} · ` : '') + (r.tag.name?.trim() || this.roomTypeName(r.tag.type));
       const x = ox + r.labelAt[0] * s;
       const y = oy + r.labelAt[1] * s;
       const w = ctx.measureText(text).width + 26;

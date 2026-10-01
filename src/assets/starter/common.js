@@ -226,11 +226,19 @@ export default function define({ A, G }) {
     g.lines(s, 't');
   });
 
-  A('pit', 'Pit', C, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['corridor', 'chamber', 'prison'], max: 1, tags: ['trap'] }, (g) => {
+  A('pit', 'Pit trap', C, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['corridor', 'chamber', 'prison'], max: 1, weight: 0.5, tags: ['trap'], gmOnly: true }, (g) => {
     g.rect(6, 6, 88, 88, 's');
     g.rect(18, 18, 64, 64, 'm');
     g.rect(32, 32, 36, 36, 'k');
     g.lines([[6, 6, 32, 32], [94, 6, 68, 32], [6, 94, 32, 68], [94, 94, 68, 68]], 'l');
+  });
+
+  A('pressure-plate', 'Pressure plate trap', CF.concat('scifi'), [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['corridor', 'crypt', 'temple', 'throne-room', 'storeroom', 'cave', 'alien-ruins', 'armoury', 'security', 'cellar'], max: 1, weight: 0.4, tags: ['trap'], gmOnly: true }, (g) => {
+    g.rect(16, 16, 68, 68, 's', 4);
+    g.rect(26, 26, 48, 48, 'o', 3);
+    g.lines([[26, 26, 16, 16], [74, 26, 84, 16], [26, 74, 16, 84], [74, 74, 84, 84]], 't');
+    g.path('M50 34L60 54H40Z', 'ko');
+    g.circle(50, 62, 3.5, 'k');
   });
 
   A('stalagmite', 'Stalagmite', CF.concat('scifi'), [1, 1], { placement: 'free', blocksVision: true, roomTypes: ['cave', 'mine', 'alien-ruins'], max: 6, weight: 2 }, (g) => {

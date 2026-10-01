@@ -3,7 +3,8 @@
 import { App } from './editor/app.js';
 import { el, field, select, segmented, checkbox } from './editor/dom.js';
 import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport, hasServer } from './io/api.js';
-import { renderLevelPng, exportSize, exportFileName, slug, MAX_SIDE } from './render/export.js';
+import { renderLevelPng, exportSize, exportFileName, slug, MAX_SIDE, VIEWS } from './render/export.js';
+import { roomKey } from './core/room-key.js';
 import { buildFoundryScene, COMPLEXITY } from './export/foundry.js';
 import { OPEN_MODES } from './render/renderer.js';
 import { WALL_TEXTURES, WALL_WIDTHS } from './render/walls.js';
@@ -157,7 +158,7 @@ async function importFile() {
 
 // ---- PNG export ------------------------------------------------------------
 
-const exportOpts = { which: 'current', pps: 100, openMode: 'transparent', outsideMode: 'drawn', save: true, download: false };
+const exportOpts = { which: 'current', pps: 100, openMode: 'transparent', outsideMode: 'drawn', save: true, download: false, view: 'player', key: true };
 
 function exportDialog() {
   const dialog = el('dialog', { class: 'export-dialog' });
@@ -165,7 +166,7 @@ function exportDialog() {
   const status = el('p', { class: 'hint' });
   const refresh = () => {
     const { width, height } = exportSize(app.map, exportOpts.pps);
-    const n = exportOpts.which === 'all' ? app.map.levels.length : 1;
+    const n = (exportOpts.which === 'all' ? app.map.levels.length : 1) * (exportOpts.view === 'both' ? 2 : 1);
     sizeNote.textContent = `${width} × ${height} px per level, ${n} file${n > 1 ? 's' : ''}.` + (width > MAX_SIDE || height > MAX_SIDE ? ' Too big for the browser: lower the pixels per square.' : '');
   };
   const pps = el('input', { type: 'number', min: 10, max: 400, value: exportOpts.pps, oninput: (e) => {
@@ -175,17 +176,22 @@ function exportDialog() {
   const go = el('button', { type: 'button', class: 'primary', onclick: async () => {
     go.disabled = true;
     const indexes = exportOpts.which === 'all' ? app.map.levels.map((_, i) => i) : [app.levelIndex];
+    const views = exportOpts.view === 'both' ? ['player', 'gm'] : [exportOpts.view];
+    const key = views.includes('gm') ? app.roomKey() : null;
     const saved = [];
     try {
       for (const i of indexes) {
-        status.textContent = `Rendering ${app.map.levels[i].name}…`;
-        const blob = await renderLevelPng({
-          map: app.map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv),
-          pxPerSquare: exportOpts.pps, openMode: exportOpts.openMode, outsideMode: exportOpts.outsideMode,
-        });
-        const name = exportFileName(app.map, i);
-        if (server && exportOpts.save) saved.push((await saveExport(name, blob)).path);
-        if (!server || exportOpts.download) await downloadBlob(blob, name);
+        for (const view of views) {
+          status.textContent = `Rendering ${app.map.levels[i].name} (${view === 'gm' ? 'GM' : 'player'})…`;
+          const blob = await renderLevelPng({
+            map: app.map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv),
+            pxPerSquare: exportOpts.pps, openMode: exportOpts.openMode, outsideMode: exportOpts.outsideMode,
+            view, key: view === 'gm' ? key : null, keyColumn: exportOpts.key,
+          });
+          const name = exportFileName(app.map, i, views.length > 1 || view === 'gm' ? view : '');
+          if (server && exportOpts.save) saved.push((await saveExport(name, blob)).path);
+          if (!server || exportOpts.download) await downloadBlob(blob, name);
+        }
       }
       status.textContent = saved.length ? `Saved: ${saved.join(', ')}` : 'Done.';
       app.status(saved.length ? `Exported to ${saved.length > 1 ? 'the exports folder' : saved[0]}` : 'Exported.');
@@ -207,6 +213,11 @@ function exportDialog() {
         exportOpts.pps = n;
         refresh();
       } }, String(n))))),
+    field('Version', segmented(VIEWS, exportOpts.view, (v) => {
+      exportOpts.view = v;
+      refresh();
+    }), 'Player hides secret doors and traps. GM shows everything and numbers the rooms.'),
+    checkbox('GM: room key beside the map (names and notes from each room)', exportOpts.key, (v) => (exportOpts.key = v)),
     field('Open to below areas', select(OPEN_MODES, exportOpts.openMode, (v) => (exportOpts.openMode = v)),
       'Transparent suits stacked levels in Foundry; faded shows the level below for printing.'),
     field('Outside the building', select([{ id: 'drawn', name: 'As drawn (rock / hatching)' }, { id: 'transparent', name: 'Transparent' }], exportOpts.outsideMode, (v) => (exportOpts.outsideMode = v))),
@@ -256,7 +267,7 @@ function foundryDialog() {
         // transparent outside the building too.
         const blob = await renderLevelPng({
           map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv), pxPerSquare: foundryOpts.pps,
-          openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent',
+          openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent', view: 'player',
         });
         if (server) await saveExport(files[i], blob);
         else await downloadBlob(blob, files[i]);
@@ -518,6 +529,20 @@ function roomSection() {
         });
       }
     })),
+    tag && field('Name', el('input', {
+      type: 'text', value: tag.name || '', placeholder: app.roomTypeName(tag.type),
+      onchange: (e) => app.commit('Name room', (map, level) => {
+        const t = level.rooms.find((r) => r.id === tag.id);
+        if (t) t.name = e.target.value.trim() || undefined;
+      }, { prune: false }),
+    })),
+    tag && field('GM notes', el('textarea', {
+      rows: 3, placeholder: 'Shown in the room key of the GM export',
+      onchange: (e) => app.commit('Room notes', (map, level) => {
+        const t = level.rooms.find((r) => r.id === tag.id);
+        if (t) t.notes = e.target.value.trim() || undefined;
+      }, { prune: false }),
+    }, tag.notes || '')),
     el('p', { class: 'hint' }, `${region.cells.length} full squares, about ${Math.round(region.area)} sq in all.`),
     wallLookField(region, index, rooms, at),
     tag && field('Density',

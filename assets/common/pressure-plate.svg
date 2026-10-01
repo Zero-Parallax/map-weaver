@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-<title>Pit trap</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"pit","name":"Pit trap","settings":["classic"],"footprint":{"w":1,"h":1},"roomTypes":["corridor","chamber","prison"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":0.5,"min":0,"max":1,"tags":["trap"],"gmOnly":true}]]></metadata>
+<title>Pressure plate trap</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"pressure-plate","name":"Pressure plate trap","settings":["classic","fantasy","scifi"],"footprint":{"w":1,"h":1},"roomTypes":["corridor","crypt","temple","throne-room","storeroom","cave","alien-ruins","armoury","security","cellar"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":0.4,"min":0,"max":1,"tags":["trap"],"gmOnly":true}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="s" x="6" y="6" width="88" height="88"/><rect class="m" x="18" y="18" width="64" height="64"/><rect class="k" x="32" y="32" width="36" height="36"/><path class="l" d="M6 6L32 32M94 6L68 32M6 94L32 68M94 94L68 68"/>
+<rect class="s" x="16" y="16" width="68" height="68" rx="4"/><rect class="o" x="26" y="26" width="48" height="48" rx="3"/><path class="t" d="M26 26L16 16M74 26L84 16M26 74L16 84M74 74L84 84"/><path class="ko" d="M50 34L60 54H40Z"/><circle class="k" cx="50" cy="62" r="3.5"/>
 </svg>

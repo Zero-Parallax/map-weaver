@@ -259,13 +259,6 @@ export const OPEN_MODES = [
   { id: 'solid', name: 'Solid fill' },
 ];
 
-/**
- * Draw one level. ctx's transform must already map squares to pixels.
- *  links:    [{link, role}] touching this level
- *  below:    {level, geo, links} for the level underneath (shown through openings)
- *  openMode: how open-to-below areas are filled: 'transparent' | 'faded' | 'solid'
- *  pxPerSquare keeps hairlines visible when zoomed out.
- */
 /** Draw a level's placed assets of one layer. Images still loading are skipped. */
 export function drawPlacements(ctx, placements, layer, assets, tokens, pxPerSquare = 64) {
   if (!assets) return;
@@ -283,8 +276,17 @@ export function drawPlacements(ctx, placements, layer, assets, tokens, pxPerSqua
   }
 }
 
-export function drawLevel(ctx, { map, level, geo, style, links = [], below = null, openMode = 'faded', assets = null, pxPerSquare = 64 }) {
+/**
+ * Draw one level. ctx's transform must already map squares to pixels.
+ *  links:    [{link, role}] touching this level
+ *  below:    {level, geo, links} for the level underneath (shown through openings)
+ *  openMode: how open-to-below areas are filled: 'transparent' | 'faded' | 'solid'
+ *  pxPerSquare keeps hairlines visible when zoomed out.
+ *  view:     'gm' (everything) or 'player' (no secret doors or traps)
+ */
+export function drawLevel(ctx, { map, level, geo, style, links = [], below = null, openMode = 'faded', assets = null, pxPerSquare = 64, view = 'gm' }) {
   const { w, h } = map.size;
+  const { placements, doors } = visibleTo(level, assets, view);
   const L = layers(geo, style, map);
   const hair = 1 / pxPerSquare;
 
@@ -315,7 +317,7 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
       ctx.fillRect(0, 0, w, h);
     } else {
       // The level below, washed with a mid tone so it reads as further away.
-      drawLevel(ctx, { map, level: below.level, geo: below.geo, style, links: below.links, openMode: 'solid', assets, pxPerSquare });
+      drawLevel(ctx, { map, level: below.level, geo: below.geo, style, links: below.links, openMode: 'solid', assets, pxPerSquare, view });
       ctx.globalAlpha = 0.5;
       ctx.fillStyle = style.tokens.shade;
       ctx.fillRect(0, 0, w, h);
@@ -334,9 +336,9 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
   }
 
   // Rugs and decals, then links, then furniture; walls and doors go over them.
-  drawPlacements(ctx, level.placements, 'floor', assets, style.tokens, pxPerSquare);
+  drawPlacements(ctx, placements, 'floor', assets, style.tokens, pxPerSquare);
   for (const { link, role } of links) drawLink(ctx, link, role, style);
-  drawPlacements(ctx, level.placements, 'object', assets, style.tokens, pxPerSquare);
+  drawPlacements(ctx, placements, 'object', assets, style.tokens, pxPerSquare);
 
   // Edges of open areas: drops dashed, railings thin with posts.
   ctx.save();
@@ -358,8 +360,20 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
   // Walls, each in its room's look.
   const walls = levelWalls(geo, level, style);
   drawWallGroups(ctx, walls, style, pxPerSquare);
-  for (const door of level.doors) drawDoor(ctx, door, style, walls.doorWidth.get(door.id));
-  drawPlacements(ctx, level.placements, 'overhead', assets, style.tokens, pxPerSquare);
+  for (const door of doors) drawDoor(ctx, door, style, walls.doorWidth.get(door.id));
+  drawPlacements(ctx, placements, 'overhead', assets, style.tokens, pxPerSquare);
+}
+
+/**
+ * What a view shows. 'gm' shows everything; 'player' leaves out secret doors (the wall stays
+ * solid) and pieces marked gmOnly (traps).
+ */
+export function visibleTo(level, assets, view = 'gm') {
+  if (view !== 'player') return { placements: level.placements, doors: level.doors };
+  return {
+    placements: level.placements.filter((p) => !assets?.get(p.asset)?.gmOnly),
+    doors: level.doors.filter((d) => d.type !== 'secret'),
+  };
 }
 
 /** Wall groups for a level (cached until the geometry, room looks or style change). */

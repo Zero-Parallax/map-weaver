@@ -5,7 +5,8 @@
 // poly   {points: [[x,y]...], radius}   any angles, optional rounded corners
 // cave   {points, roughness, seed}      freehand outline, smoothed then roughened
 // cells  {cells: [[x,y]...]}            painted squares
-// path   {points, width}                a corridor: the centre line drawn width squares wide
+// path   {points | paths, width}        corridors: centre lines drawn width squares wide (paths:
+//                                       several lines, joined into one network)
 
 import { roundPolygon, circlePoints, chaikin, densify, simplify, signedArea, add, sub, scale, norm, perp, bbox } from './geom.js';
 import { normalize, strokePath } from './clip.js';
@@ -71,8 +72,11 @@ export function shapeRings(shape) {
       return normalize([caveRing(shape.points || [], shape.roughness ?? 0.5, shape.seed ?? 1)].filter((r) => r.length >= 3));
     case 'cells':
       return normalize(cellRings(shape.cells || []));
-    case 'path':
-      return strokePath(shape.points || [], shape.width || 1);
+    case 'path': {
+      const lines = shape.paths || [shape.points || []];
+      const rings = lines.flatMap((pts) => strokePath(pts, shape.width || 1));
+      return lines.length > 1 ? normalize(rings) : rings;
+    }
     default:
       return [];
   }
@@ -93,8 +97,11 @@ export function translateShape(shape, dx, dy) {
       break;
     case 'poly':
     case 'cave':
-    case 'path':
       s.points = s.points.map(move);
+      break;
+    case 'path':
+      if (s.points) s.points = s.points.map(move);
+      if (s.paths) s.paths = s.paths.map((line) => line.map(move));
       break;
     case 'cells':
       s.cells = s.cells.map(move);

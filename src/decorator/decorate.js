@@ -384,7 +384,8 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   const required = pool.filter((m) => m.min > 0).sort((a, b) => b.footprint.w * b.footprint.h - a.footprint.w * a.footprint.h);
   for (const m of required) for (let i = 0; i < m.min; i++) if (!place(m)) report.skipped.push(m.id);
   const floorPool = pool.filter((m) => m.layer === 'floor');
-  for (const m of floorPool) if (random() < 0.35 + density * 0.5 && underCap(m)) place(m);
+  // Traps (GM-only) are rarer: about one room in five.
+  for (const m of floorPool) if (random() < (0.35 + density * 0.5) * (m.gmOnly ? 0.3 : 1) && underCap(m)) place(m);
 
   let failures = 0;
   const main = pool.filter((m) => m.layer !== 'floor');
