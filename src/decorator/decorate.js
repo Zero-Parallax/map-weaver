@@ -319,10 +319,17 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
 
   const density = tag.density ?? DEFAULT_DENSITY;
   const usable = [...room.cells.keys()].filter((k) => !room.blocked.has(k) && !room.keepClear.has(k)).length;
-  // Share of the free floor to furnish: light ~14%, medium ~29%, heavy ~52%, full ~71%.
-  let budget = Math.round(usable * (0.04 + 0.32 * density + 0.35 * density * density));
-  // Per-room limits grow with density; one-of-a-kind pieces (max 1) stay unique.
-  const capOf = (m) => (!m.max || m.max === 1 ? m.max : Math.max(m.max, Math.round(m.max * (0.5 + density * 1.6))));
+  // Share of the free floor to furnish: light ~16%, medium ~34%, heavy ~62%, full ~85%.
+  let budget = Math.round(usable * (0.05 + 0.35 * density + 0.45 * density * density));
+  // Per-room limits grow with density; one-of-a-kind pieces (max 1) stay unique. When every
+  // piece has reached its limit and floor budget is left, the limits double (see below).
+  let capsLifted = false;
+  const capOf = (m) => {
+    if (!m.max || m.max === 1) return m.max;
+    const cap = Math.max(m.max, Math.round(m.max * (0.5 + density * 1.6)));
+    // Lifted, but never so far that one kind of piece takes over the room.
+    return capsLifted ? cap * 2 : cap;
+  };
   const underCap = (m) => !capOf(m) || (counts.get(m.id) || 0) < capOf(m);
   const pool = assets.filter((m) => suitsRoom(m, tag.type));
   const counts = new Map();
@@ -378,8 +385,18 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   let failures = 0;
   const main = pool.filter((m) => m.layer !== 'floor');
   const patience = Math.round(12 + 25 * density);
+  // Space only shrinks, so a piece that found no spot once never will: stop trying it and
+  // spend the rest of the budget on pieces that still fit (free-standing ones once the walls
+  // are full).
+  const noRoom = new Set();
+  const available = (m) => underCap(m) && !noRoom.has(m.id);
   while (budget > 0 && failures < patience && main.length) {
-    const open = main.filter(underCap);
+    let open = main.filter(available);
+    if (!open.length && !capsLifted && density >= 0.4) {
+      // A room type with only a few kinds of piece: carry on with more of the same.
+      capsLifted = true;
+      open = main.filter(available);
+    }
     if (!open.length) break;
     // Walls and corners fill first; centre pieces are rarer in light rooms.
     const weightOf = (m) => m.weight * (m.placement === 'centre' ? 0.6 + density : 1) * (m.roomTypes.includes('*') ? 0.4 : 1);
@@ -387,7 +404,10 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     let r = random() * total;
     const pick = open.find((m) => (r -= weightOf(m)) <= 0) || open[open.length - 1];
     if (place(pick)) failures = 0;
-    else failures++;
+    else {
+      failures++;
+      noRoom.add(pick.id);
+    }
   }
   return { placements, report };
 }
