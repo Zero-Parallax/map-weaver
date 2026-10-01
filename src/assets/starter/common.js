@@ -116,7 +116,7 @@ export default function define({ A, G }) {
     flame(g, 50, 34, 14);
   });
 
-  A('rubble', 'Rubble', CF.concat('scifi'), [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['cave', 'crypt', 'corridor', 'prison', 'cellar', 'mine', 'alien-ruins'], max: 3, tags: ['difficult terrain'] }, (g) => {
+  A('rubble', 'Rubble', CF.concat('scifi'), [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['cave', 'crypt', 'corridor', 'prison', 'cellar', 'mine', 'alien-ruins'], max: 3, tags: ['difficult terrain'] }, (g) => {
     g.poly(stoneShape(30, 34, 17, 3), 's');
     g.poly(stoneShape(66, 60, 20, 7), 'o');
     g.poly(stoneShape(32, 72, 12, 11), 's');
@@ -124,7 +124,7 @@ export default function define({ A, G }) {
     for (const [x, y] of [[58, 28], [48, 50], [80, 34], [50, 84]]) g.circle(x, y, 4, 'k');
   });
 
-  A('bones', 'Bones', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['crypt', 'prison', 'cave', 'corridor'], max: 3 }, (g) => {
+  A('bones', 'Bones', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['crypt', 'prison', 'cave', 'corridor'], max: 3 }, (g) => {
     bone(g, 50, 64, 84, 84);
     bone(g, 56, 86, 86, 58);
     g.circle(36, 38, 18, 'o');
@@ -133,7 +133,7 @@ export default function define({ A, G }) {
     g.circle(43, 36, 5, 'k');
   });
 
-  A('cobweb', 'Cobweb', CF, [1, 1], { placement: 'corner', layer: 'overhead', blocksMovement: false, roomTypes: ['crypt', 'cellar', 'storeroom', 'cave', 'prison', 'library', 'corridor'], max: 2 }, (g) => {
+  A('cobweb', 'Cobweb', CF, [1, 1], { placement: 'corner', layer: 'overhead', blocksMovement: false, clutter: true, roomTypes: ['crypt', 'cellar', 'storeroom', 'cave', 'prison', 'library', 'corridor'], max: 2 }, (g) => {
     const angles = [0, 0.3, 0.62, 0.95, 1.25, Math.PI / 2];
     g.lines(angles.map((a) => [0, 0, Math.cos(a) * 78, Math.sin(a) * 78]), 't');
     for (const r of [22, 40, 58, 74]) {

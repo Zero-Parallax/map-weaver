@@ -14,6 +14,8 @@
 //   weight:        how often the decorator picks it relative to others (default 1)
 //   min / max:     how many per room the decorator aims for (max 0 = no limit)
 //   facing:        optional; "focal" = seats that turn to face the room's showpiece (pews)
+//   clutter:       small decal (cracks, stains, papers) scattered after the furniture by the
+//                  room's clutter amount, not part of the furnishing
 //   tags:          free-form words for search
 //   generator:     {id, params} if made by a parametric generator (the app can remake it at
 //                  other sizes); sizes: allowed ranges the decorator may pick from
@@ -84,6 +86,7 @@ export function normalizeMeta(raw) {
   meta.min ??= 0;
   meta.max ??= 0;
   meta.tags ??= [];
+  meta.clutter = !!meta.clutter;
   return { meta, errors };
 }
 

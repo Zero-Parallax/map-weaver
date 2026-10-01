@@ -14,7 +14,7 @@ import { assetTool, sizeFields } from './editor/tools/asset-tool.js';
 import { AssetLibrary } from './assets/library.js';
 import { ask, askText, notice } from './editor/ask.js';
 import { regionAt } from './core/rooms.js';
-import { DENSITY, DEFAULT_DENSITY } from './decorator/decorate.js';
+import { DENSITY, DEFAULT_DENSITY, CLUTTER, DEFAULT_CLUTTER } from './decorator/decorate.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, joinControl } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
@@ -495,6 +495,14 @@ function roomSection() {
     app.decorateIn(map, level, [t.id]);
   });
   const preset = Object.entries(DENSITY).find(([, v]) => Math.abs(v - density) < 0.01)?.[0] || '';
+  const clutter = tag?.clutter ?? DEFAULT_CLUTTER;
+  const clutterPreset = Object.entries(CLUTTER).find(([, v]) => Math.abs(v - clutter) < 0.01)?.[0] || '';
+  const setClutter = (c) => app.commit('Room clutter', (map, level) => {
+    const t = level.rooms.find((r) => r.id === tag.id);
+    if (!t) return;
+    t.clutter = c;
+    app.decorateIn(map, level, [t.id]);
+  });
   return section(
     'Room',
     field('Type', select(types, tag?.type || '', (v) => {
@@ -516,6 +524,9 @@ function roomSection() {
       el('div', {},
         segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => setDensity(DENSITY[v])),
         el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: density, onchange: (e) => setDensity(Number(e.target.value)) }))),
+    tag && field('Clutter',
+      segmented([{ id: 'none', name: 'None' }, { id: 'light', name: 'Light' }, { id: 'heavy', name: 'Heavy' }], clutterPreset, (v) => setClutter(CLUTTER[v])),
+      'Cracks, stains, papers, cobwebs: small floor details.'),
     tag && el('div', { class: 'actions' },
       el('button', { onclick: () => app.decorate([tag.id]), title: 'Replace this room\'s automatic pieces (same layout)' }, 'Decorate'),
       el('button', { onclick: () => app.decorate([tag.id], { reroll: true }), title: 'A new random layout' }, 'Reroll'),

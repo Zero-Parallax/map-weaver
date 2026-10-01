@@ -18,6 +18,10 @@ const EDGE_MID = { n: [0.5, 0], e: [1, 0.5], s: [0.5, 1], w: [0, 0.5] };
 export const DENSITY = { light: 0.25, medium: 0.5, heavy: 0.8 };
 export const DEFAULT_DENSITY = DENSITY.light;
 
+/** None, light, heavy presets for the per-room clutter (0..1). */
+export const CLUTTER = { none: 0, light: 0.4, heavy: 1 };
+export const DEFAULT_CLUTTER = CLUTTER.light;
+
 export const rotateSide = (side, rot) => SIDES[(SIDES.indexOf(side) + Math.round(rot / 90)) % 4];
 const key = (x, y) => `${x},${y}`;
 
@@ -331,7 +335,7 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     return capsLifted ? cap * 2 : cap;
   };
   const underCap = (m) => !capOf(m) || (counts.get(m.id) || 0) < capOf(m);
-  const pool = assets.filter((m) => suitsRoom(m, tag.type));
+  const pool = assets.filter((m) => suitsRoom(m, tag.type) && !m.clutter);
   const counts = new Map();
   const placements = [];
   const report = { placed: 0, skipped: [] };
@@ -409,5 +413,67 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
       noRoom.add(pick.id);
     }
   }
+  placements.push(...scatterClutter({ room, tag, assets, occupied, mapSeed }));
   return { placements, report };
+}
+
+// ---- clutter ---------------------------------------------------------------
+
+/**
+ * Small decals after the furniture: mostly along walls and in corners, one per square, loose
+ * (a little off-centre, any angle). Its own random stream, so changing the clutter amount
+ * leaves the furniture where it is.
+ */
+function scatterClutter({ room, tag, assets, occupied, mapSeed }) {
+  const amount = tag.clutter ?? DEFAULT_CLUTTER;
+  const pool = assets.filter((m) => m.clutter && suitsRoom(m, tag.type));
+  if (!amount || !pool.length) return [];
+  const random = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'clutter'));
+  const out = [];
+  const cells = [...room.cells.values()].filter((c) => !room.blocked.has(key(c.x, c.y)));
+  let count = Math.round(cells.length * (0.03 + 0.1 * amount + 0.06 * amount * amount) + random() * 0.8);
+  const used = new Set();
+  const counts = new Map();
+  const cap = (m) => Math.max(1, Math.round((m.max || 3) * (0.6 + amount)));
+  for (let tries = 0; count > 0 && tries < count * 8 + 10; tries++) {
+    const choices = pool.filter((m) => (counts.get(m.id) || 0) < cap(m));
+    if (!choices.length) break;
+    const total = choices.reduce((s, m) => s + m.weight, 0);
+    let r = random() * total;
+    const meta = choices.find((m) => (r -= m.weight) <= 0) || choices[choices.length - 1];
+    let spot = null;
+    if (meta.placement === 'corner' || meta.placement === 'wall') {
+      // Cobwebs and the like: a proper corner or wall spot, turned to fit.
+      const spots = candidates(room, meta, meta.footprint, occupied, [0, 0]).filter((s) => !used.has(key(s.x, s.y)));
+      if (spots.length) {
+        const s = spots[Math.floor(random() * spots.length)];
+        spot = { x: s.x + s.w / 2, y: s.y + s.h / 2, rot: s.rot, k: key(s.x, s.y) };
+      }
+    } else {
+      // Loose decals: walls and corners three times as likely as open floor.
+      const free = cells.filter((c) => {
+        const k = key(c.x, c.y);
+        if (used.has(k) || occupied.object.has(k) || occupied.floor.has(k)) return false;
+        // Rough ground (difficult terrain) stays out of doorways.
+        return !(meta.tags.includes('difficult terrain') && room.keepClear.has(k));
+      });
+      if (free.length) {
+        const w = (c) => 1 + SIDES.filter((s) => c.sides[s] === 'wall').length * 2;
+        const total2 = free.reduce((s, c) => s + w(c), 0);
+        let q = random() * total2;
+        const c = free.find((x) => (q -= w(x)) <= 0) || free[free.length - 1];
+        const jitter = () => Math.round((random() - 0.5) * 0.36 * 100) / 100;
+        spot = { x: c.x + 0.5 + jitter(), y: c.y + 0.5 + jitter(), rot: Math.floor(random() * 24) * 15, k: key(c.x, c.y) };
+      }
+    }
+    if (!spot) {
+      counts.set(meta.id, Infinity);
+      continue;
+    }
+    used.add(spot.k);
+    counts.set(meta.id, (counts.get(meta.id) || 0) + 1);
+    out.push({ asset: meta.id, x: spot.x, y: spot.y, rot: spot.rot, auto: true, room: tag.id });
+    count--;
+  }
+  return out;
 }

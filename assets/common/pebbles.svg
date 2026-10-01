@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-<title>Rubble</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"rubble","name":"Rubble","settings":["classic","fantasy","scifi"],"footprint":{"w":1,"h":1},"roomTypes":["cave","crypt","corridor","prison","cellar","mine","alien-ruins"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":3,"tags":["difficult terrain"],"clutter":true}]]></metadata>
+<title>Pebbles</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"pebbles","name":"Pebbles","settings":["classic","fantasy","scifi"],"footprint":{"w":1,"h":1},"roomTypes":["cave","mine","alien-ruins","crypt"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="s" points="43.5,34 40.4,44.4 30,50 17.8,46.2 11.5,34 20.2,24.2 30,18.9 41.5,22.5"/><polygon class="o" points="83,60 79,73 66,79.9 50.9,75.1 50.1,60 53.7,47.7 66,41.2 80.4,45.6"/><polygon class="s" points="42.8,72 40.3,80.3 32,84.6 25.4,78.6 21.8,72 24.2,64.2 32,60 41.1,62.9"/><path class="t" d="M62 52L70 66M24 30L34 38"/><circle class="k" cx="58" cy="28" r="4"/><circle class="k" cx="48" cy="50" r="4"/><circle class="k" cx="80" cy="34" r="4"/><circle class="k" cx="50" cy="84" r="4"/>
+<polygon class="s" points="34.9,34 33.3,39.3 28,42.2 21.7,40.3 18.5,34 23,29 28,26.3 33.9,28.1"/><polygon class="o" points="60.7,26 59.6,29.6 56,31.6 51.8,30.2 49.6,26 52.6,22.6 56,20.8 60,22"/><polygon class="s" points="77.9,52 76.1,58.1 70,61.4 62.8,59.2 59.1,52 64.3,46.3 70,43.1 76.8,45.2"/><polygon class="o" points="45.6,64 44.4,68.4 40,70.7 34.9,69.1 34.7,64 35.9,59.9 40,57.7 44.8,59.2"/><polygon class="s" points="68.1,78 67.2,81.2 64,82.8 60.3,81.7 60.2,78 61,75 64,73.4 67.5,74.5"/><polygon class="o" points="26.2,70 25.2,73.2 22,74.9 18.3,73.7 18.1,70 19,67 22,65.4 25.5,66.5"/>
 </svg>

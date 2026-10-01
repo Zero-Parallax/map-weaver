@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-<title>Rubble</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"rubble","name":"Rubble","settings":["classic","fantasy","scifi"],"footprint":{"w":1,"h":1},"roomTypes":["cave","crypt","corridor","prison","cellar","mine","alien-ruins"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":3,"tags":["difficult terrain"],"clutter":true}]]></metadata>
+<title>Loose straw</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"loose-straw","name":"Loose straw","settings":["classic","fantasy"],"footprint":{"w":1,"h":1},"roomTypes":["barracks","prison","cellar","storeroom","tavern","smithy","kitchen"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="s" points="43.5,34 40.4,44.4 30,50 17.8,46.2 11.5,34 20.2,24.2 30,18.9 41.5,22.5"/><polygon class="o" points="83,60 79,73 66,79.9 50.9,75.1 50.1,60 53.7,47.7 66,41.2 80.4,45.6"/><polygon class="s" points="42.8,72 40.3,80.3 32,84.6 25.4,78.6 21.8,72 24.2,64.2 32,60 41.1,62.9"/><path class="t" d="M62 52L70 66M24 30L34 38"/><circle class="k" cx="58" cy="28" r="4"/><circle class="k" cx="48" cy="50" r="4"/><circle class="k" cx="80" cy="34" r="4"/><circle class="k" cx="50" cy="84" r="4"/>
+<path class="l" d="M18 40L46 30M24 56L54 50M40 70L70 76M50 34L80 44M58 58L86 52M30 76L44 58M62 24L70 40"/><path class="t" d="M21 43L35 38M27 59L42 56M43 73L58 76M53 37L68 42M61 61L75 58M33 79L40 70M65 27L69 35"/>
 </svg>
