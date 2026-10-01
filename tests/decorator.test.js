@@ -50,8 +50,18 @@ test('decorates a throne room: required throne, no overlaps, doors kept clear', 
   assert.ok(placements.length >= 3, `placed ${placements.length}`);
   assert.ok(placements.some((p) => p.asset === 'throne'), 'throne placed');
   const used = { floor: new Set(), object: new Set(), overhead: new Set() };
+  const clutterAt = new Set();
   for (const p of placements) {
-    const { meta, squares } = squaresOf(p);
+    const meta = metas.find((m) => m.id === p.asset);
+    if (meta.clutter && meta.placement === 'free') {
+      // Loose decals: centre in a room square, one per square.
+      const k = `${Math.floor(p.x)},${Math.floor(p.y)}`;
+      assert.ok(room.cells.has(k), `${p.asset} inside room`);
+      assert.ok(!clutterAt.has(k), `two decals at ${k}`);
+      clutterAt.add(k);
+      continue;
+    }
+    const { squares } = squaresOf(p);
     for (const k of squares) {
       assert.ok(room.cells.has(k), `${p.asset} inside room`);
       assert.ok(!used[meta.layer].has(k), `${p.asset} overlaps at ${k}`);
@@ -67,7 +77,7 @@ test('wall pieces have their backs against a wall', () => {
     const { placements, room } = run(s);
     for (const p of placements) {
       const { meta, f, x0, y0 } = squaresOf(p);
-      if (meta.placement !== 'wall') continue;
+      if (meta.placement !== 'wall' || meta.clutter) continue;
       const side = rotateSide(meta.wallSide, p.rot);
       const edge = [];
       if (side === 'n') for (let x = x0; x < x0 + f.w; x++) edge.push(`${x},${y0}`);
@@ -147,4 +157,18 @@ test('hand-placed pieces are respected', () => {
     const { meta, squares } = squaresOf(p);
     if (meta.layer === 'object') assert.ok(!squares.includes('5,2'), `${p.asset} placed on the hand-placed chest`);
   }
+});
+
+test('clutter follows the room\'s amount and leaves the furniture alone', () => {
+  const furniture = (ps) => JSON.stringify(ps.filter((p) => !metas.find((m) => m.id === p.asset).clutter));
+  const clutterOf = (ps) => ps.filter((p) => metas.find((m) => m.id === p.asset).clutter).length;
+  const none = run(setup({ type: 'crypt' }), {}).placements;
+  const base = setup({ type: 'crypt' });
+  base.tag.clutter = 0;
+  const off = run(base).placements;
+  base.tag.clutter = 1;
+  const heavy = run(base).placements;
+  assert.equal(clutterOf(off), 0);
+  assert.ok(clutterOf(heavy) > clutterOf(none), `heavy ${clutterOf(heavy)} vs light ${clutterOf(none)}`);
+  assert.equal(furniture(off), furniture(heavy));
 });
