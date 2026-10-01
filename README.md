@@ -1,7 +1,8 @@
 # Map Weaver
 
 A local, browser-based tool for drawing 2D top-down battle maps for tabletop RPGs.
-Draw the rooms, tag each one with a room type, and (from build step 4) let the decorator furnish them.
+Draw the rooms (or generate a whole level), tag each one with a room type, and let the decorator
+add doors, furniture, clutter and cover.
 
 ## Run it
 
@@ -35,6 +36,7 @@ switched off. The starter assets come from `assets/index.json`.
 | Polygon | P | Click corners at any angle; click the first corner or press Enter to close |
 | Cave | K | Drag freehand; the outline is smoothed and roughened |
 | Floor brush | B | Paint floor squares |
+| Corridor | H | Click along a corridor 1–3 squares wide (straight or 45°); it stops behind the walls of the rooms it reaches. Double-click or Enter to finish |
 | Wall | W | Click grid points to chain walls, including diagonals |
 | Arc wall | A | Centre, start point, then sweep round |
 | Door | D | Click a wall. Door, double, secret, locked, portcullis, sliding, archway, window |
@@ -54,7 +56,11 @@ switched off. The starter assets come from `assets/index.json`.
   **Merge** opens it into the floor it touches, making one larger room. **On top** gives it its
   own walls, removing walls of earlier rooms inside it (also how you draw a room inside a room).
   **Overlap** gives it its own walls and keeps the earlier ones, so where two rooms cross
-  becomes a third space. Change it later on any selected shape.
+  becomes a third space. **Behind** (corridors) gives it walls only outside floor drawn
+  before it, so it stops at the rooms it reaches and they keep their walls for doors. Change
+  it later on any selected shape.
+- **Room type while drawing**: shape tools and the corridor tool have a Room type option. Pick
+  one and every room you draw is tagged straight away (doors and decoration follow).
 - **Walls**: the Map panel sets the default texture (solid, double line, stone blocks, brick,
   wooden planks, rough, dashed) and thickness. Select a room to give it its own; a wall shared
   by two rooms takes the thicker look.
@@ -64,6 +70,22 @@ switched off. The starter assets come from `assets/index.json`.
   angle box and size fields for resizable pieces (tables, shelves, rugs...).
 - Ctrl+Z / Ctrl+Y undo and redo. Ctrl+S saves, Ctrl+O opens.
 
+## Generating a level
+
+The **Generate** section of the panel replaces the current level with a new layout: pick a
+style and how many rooms, then **Generate level**. Each click gives a new layout (Undo goes
+back). Rooms are typed from the setting, joined with doors, decorated and given clutter; tick
+**Combat-ready rooms** to spread cover too. The map grows if it is too small.
+
+| Setting | Styles |
+| --- | --- |
+| Classic | Dungeon (rooms and corridors), Keep (building), Caves |
+| Fantasy | Inn or house, Castle, Dungeon, Caves |
+| Sci-fi | Starship (spine, compartments, engines aft, bridge forward), Station, Colony building, Mine or ruins |
+
+Buildings get a front door; caves get open archways. Styles and their room pools live in each
+setting's `setting.json` (`generator`), so new ones need no code.
+
 ## Exporting PNGs
 
 **Export PNG** (Ctrl+E) renders the current level or every level at the pixels per square you
@@ -72,6 +94,11 @@ stacking in Foundry, faded level below for printing, or solid) and whether every
 the building is kept or made transparent. Files go to the `exports/` folder
 (`<map>-L<n>-<level>.png`) and/or download in the browser. Every level has the same size, so
 they line up.
+
+**Version**: **Player** leaves out secret doors (the wall shows solid) and traps; **GM** shows
+everything, puts a number on each room and adds a room key down the right-hand side with each
+room's name and GM notes (set them in the Room section); **Both** writes both files (`-player`,
+`-gm`). Corridors aren't numbered. The editor's room labels show the same numbers.
 
 ## Foundry VTT (v14, built-in Scene Levels)
 
@@ -84,7 +111,12 @@ they line up.
 - railings as two walls on the same line: one blocks movement both ways, the other blocks
   sight and light only from the open side, so you can see down from a balcony but not up onto it.
   If Foundry blocks the wrong side, tick "Flip one-way railing sight" and export again;
-- wall complexity (high / medium / low) sets how closely walls follow curves and caves.
+- wall complexity (high / medium / low) sets how closely walls follow curves and caves;
+- ambient lights for torches, fires, braziers, candelabra and glowing sci-fi screens, with
+  colour and flicker (optional);
+- a difficult terrain Region per level over rubble, debris, ore piles and mushrooms, doubling
+  movement cost (optional);
+- background images use the player version (no secret doors or traps).
 
 Files land in `exports/`. Copy the PNGs into your Foundry Data folder at the path you entered,
 create a scene, right-click it and choose **Import Data**, then pick the `.foundry-scene.json`.
@@ -100,6 +132,19 @@ The decorator follows each asset's placement rule, never overlaps pieces, keeps 
 clear in front of doors and a ring round stairs, ladders and lifts, leaves balcony edges to
 balcony pieces, and only accepts a piece if every entrance can still reach every other.
 Corridors (rooms 3 squares or narrower) only get pieces along their walls.
+
+Select a room to name it, add GM notes (for the GM export's room key), and set its
+**Clutter** (none / light / heavy): cracks, puddles, stains, papers, cobwebs, cables and the
+like, scattered after the furniture without moving it.
+
+### Combat-ready rooms
+
+Tick **Combat ready** on a room (or when generating) and the decorator adds free-standing
+cover until nearly all open floor is within two squares of something to hide behind. Each
+added piece keeps a clear square all round it, so there are lanes to move through, and the
+room stays fully walkable. Every asset has a cover level: full if it blocks sight, half if it
+blocks movement (or as set in its metadata). The Map section's **Tactical overlay** shows
+cover and difficult terrain square by square.
 
 ### Automatic doors
 
@@ -118,7 +163,9 @@ Levels panel for every room) runs it again on demand. The door type comes from t
 SVG files under `assets/` (`common/` holds ones shared by several settings). Each file carries
 its own metadata as JSON inside `<metadata id="map-weaver-asset">`: settings, footprint in
 squares, room types, placement rule (wall, corner, centre, door, balcony, free), whether it
-blocks movement or vision, and which side faces the wall. Shapes use the classes `o s m k p h l t d`
+blocks movement or vision, which side faces the wall, and optionally cover level, light
+(bright / dim range, colour, animation), clutter and GM-only (traps). Tag a piece
+`difficult terrain` for the Foundry terrain regions. Shapes use the classes `o s m k p h l t d`
 so they recolour to the map's palette. See `src/assets/meta.js` for every field.
 
 The starter sets are generated: edit the drawings in `src/assets/starter/` (common, fantasy,

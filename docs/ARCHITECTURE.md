@@ -40,6 +40,8 @@ Recomputed from the level when it changes:
 4. **Rooms** (`rooms.js`): floor sampled at 4x4 points per square, links crossing a wall blocked,
    then flood-filled. Each room knows its full squares, which the decorator will use.
    Tags attach to whichever room contains their point, so they survive edits.
+   Corridors are `path` shapes (centre lines drawn N squares wide) joined **Behind**: walls
+   only outside the floor drawn before them, earlier walls kept.
 5. **Automatic doors** (`auto-doors.js`): every wall stretch two rooms share is sampled for
    door spans and how much wall carries on past each end. Rooms are joined by a spanning tree
    over the whole level (existing doors count, windows don't; hubs from the setting's
@@ -74,13 +76,43 @@ Pure function, no DOM: `decorateRoom({geo, region, tag, assets, doors, links, ex
    centre prefers the middle; door sits beside the clear zone; showpieces (throne, altar) go
    far from the entrances, centred on their wall; `facing: "focal"` seats turn to face them.
 4. **Check** each blocking piece: entrances still connected and no square cut off.
+5. **Combat ready** (`tag.combat`): add free-standing cover (the room's own cover pieces, else
+   crates, barrels, drums) where it covers the most open squares not yet within two squares of
+   cover, each with a clear one-square ring, until 88% of open floor is covered.
+6. **Clutter** (`meta.clutter`, `tag.clutter` 0..1): decals scattered from a separate seeded
+   stream, mostly along walls, jittered and at any angle, one per square; corner/wall clutter
+   (cobwebs) uses the normal candidates. Changing clutter never moves furniture.
 
 Seed = hash(map seed, room id, room seed, reroll count), so results repeat until rerolled.
+
+## Layout generator (`src/generator/layout.js`)
+
+`generateLayout({style, map, count, seed, doorType})` returns `{shapes, rooms, doors}` for an
+empty level. Styles come from each setting's `generator` list: `{id, name, layout, corridor:
+{type, width}, shapes, loops, rooms: [{type, weight, max, size, place}]}`. Layouts:
+- `rooms`: rooms placed in a cluster (each near one already placed), joined by a minimum
+  spanning tree plus a few loops; corridors are straight where rooms line up, else one bend,
+  and all go in one `path` shape (joined Behind) so they form a network.
+- `building`: a footprint split by a hallway into two strips of rooms (one about twice as big
+  for the hall / tavern / throne room), or by binary space partition; sometimes L-shaped;
+  a front door.
+- `ship`: spine corridor, compartments of varying depth either side, chamfered engine room
+  aft, pointed bridge forward (`place: back / front`).
+- `caves`: rough blob chambers and roughened tunnels.
+Types are assigned by size (one-off large types to the largest rooms). Every leftover space
+is tagged with the corridor type. Doors and decoration are added by the app afterwards.
+
+## Room key (`src/core/room-key.js`)
+
+Rooms numbered across the map: bottom level first, then in bands of four squares top to
+bottom, left to right. Corridors are skipped. Used by the GM PNG export (badges and a key
+column with names and notes) and the editor's labels.
 
 ## Rendering (`src/render/`)
 
 One Canvas 2D renderer draws paper, shading (solid, hatched band, cross-hatched band, line
-hatching), grid, walls and doors. The editor and the PNG export share it.
+hatching), grid, walls and doors. The editor and the PNG export share it. `view: 'player'`
+leaves out secret doors and `gmOnly` pieces.
 
 ## Build plan
 
@@ -96,7 +128,11 @@ Phase 2:
 - Foundry VTT v14 export **(done)**: `src/export/foundry.js` builds Scene data (Levels with
   `elevation`, `background`, `visibility.levels`; walls with `c`, `levels`, `move/sight/light/sound`,
   `dir`, `door`, `ds`). Schema checked against the v14 type definitions
-  (`@league-of-foundry-developers/foundry-vtt-types` 14.366).
+  (`@league-of-foundry-developers/foundry-vtt-types` 14.366). Also AmbientLights from asset
+  `light` data (`x`, `y`, `elevation`, `levels`, `config.bright/dim` in scene units, colour,
+  animation) and one Region per level for difficult terrain (rectangle `shapes`, `levels`,
+  `elevation`, a `modifyMovementCost` behaviour with `system.difficulties` set to 2). The
+  behaviour's system fields aren't in the type package, so check them in Foundry.
 - PNG asset import with a tagging screen **(done)**: `src/assets/png-meta.js` reads and writes
   the same metadata JSON in an `iTXt` chunk (keyword `map-weaver-asset`);
   `src/editor/import-dialog.js` is the tagging screen; `PUT/DELETE /api/assets/imported/<file>.png`.
