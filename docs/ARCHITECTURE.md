@@ -104,12 +104,17 @@ room.
 `generateLayout({style, map, count, seed, doorType})` returns `{shapes, rooms, doors}` for an
 empty level. Styles come from each setting's `generator` list: `{id, name, layout, corridor:
 {type, width}, shapes, loops, rooms: [{type, weight, max, size, place}]}`. Layouts:
-- `rooms`: rooms placed in a cluster (each near one already placed), joined by a minimum
+- `rooms`: rooms placed in a cluster (rectangles, rounded, round, octagonal or L-shaped,
+  some with alcoves or an apse merged on) (each near one already placed), joined by a minimum
   spanning tree plus a few loops; corridors are straight where rooms line up, else one bend,
   and all go in one `path` shape (joined Behind) so they form a network.
-- `building`: a footprint split by a hallway into two strips of rooms (one about twice as big
-  for the hall / tavern / throne room), or by binary space partition; sometimes L-shaped;
-  a front door.
+- `building` (`floorplan.js`): an organic floor plan on the square grid. A main block with
+  wings (L, T, U shapes); a two-square hallway spine from the front that may stop short (a
+  big end room) with branches into the wings; rooms grown from spread-out seeds, first as
+  rectangles taking turns to push a side out, then the gaps shared out square by square
+  (L-shapes, nooks), one-square jogs smoothed and tiny rooms merged. Rooms are walled
+  `cells` shapes. Options: `towers` (round turrets on the outer corners), `bays` (bay
+  windows on long outside walls). A front door at the hallway's end.
 - `ship`: spine corridor, compartments of varying depth either side, chamfered engine room
   aft, pointed bridge forward (`place: back / front`).
 - `caves`: rough blob chambers and roughened tunnels.

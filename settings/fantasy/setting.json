@@ -60,7 +60,7 @@
       {"type":"library","max":1},
       {"type":"smithy","max":1}
     ]},
-    {"id":"castle","name":"Castle or keep","layout":"building","corridor":{"type":"corridor"},"rooms":[
+    {"id":"castle","towers":true,"bays":false,"name":"Castle or keep","layout":"building","corridor":{"type":"corridor"},"rooms":[
       {"type":"great-hall","size":["large"],"max":1},
       {"type":"kitchen","max":1},
       {"type":"bedroom","weight":3},

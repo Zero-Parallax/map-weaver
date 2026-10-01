@@ -183,7 +183,7 @@
       {"type":"lab","max":2},
       {"type":"mess-hall","max":1}
     ]},
-    {"id":"colony","name":"Colony building","layout":"building","corridor":{"type":"corridor"},"rooms":[
+    {"id":"colony","bays":false,"name":"Colony building","layout":"building","corridor":{"type":"corridor"},"rooms":[
       {"type":"command-centre","size":["large"],"max":1},
       {"type":"apartment","weight":3},
       {"type":"clinic","max":1},

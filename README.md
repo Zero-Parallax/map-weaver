@@ -116,7 +116,10 @@ entrance level, buildings, towers and ships go up. Each pair of levels is joined
 (spiral stairs in towers, ladders between ship decks, lifts in sci-fi) placed where there is
 room on both floors.
 
-Buildings get a front door; caves get open archways. Styles and their room pools live in each
+Buildings are laid out like real ones: wings, a hallway that branches into them, rooms of
+mixed sizes and L-shapes, bay windows on houses and round corner towers on castles; dungeon
+rooms come in many shapes, some with alcoves or an apse. Buildings get a front door; caves
+get open archways. Styles and their room pools live in each
 setting's `setting.json` (`generator`), so new ones need no code.
 
 ## Ruins

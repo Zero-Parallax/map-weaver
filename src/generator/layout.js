@@ -2,7 +2,7 @@
 //
 // Layouts (a setting's styles each pick one, plus the room types to use):
 //   rooms     rooms scattered in a cluster, joined by corridors (dungeons, stations)
-//   building  a footprint split into rooms, with a hallway down the middle when big enough
+//   building  an organic floor plan (floorplan.js): wings, branching hallway, grown rooms
 //   ship      a spine corridor with compartments either side, engines aft, bridge forward
 //   caves     rough chambers joined by rough tunnels
 //   outdoor   open ground with a river (water, lava or a chasm), a road with a bridge where
@@ -19,6 +19,7 @@ import { computeLevelGeometry } from '../core/level-geometry.js';
 import { strokePath } from '../core/clip.js';
 import { lerp, dist, projectOnSegment, segmentsIntersect, sub, norm } from '../core/geom.js';
 import { chaikinOpen } from '../core/shapes.js';
+import { organicBuilding } from './floorplan.js';
 
 export const LAYOUTS = ['rooms', 'building', 'ship', 'caves'];
 
@@ -168,20 +169,80 @@ function corridorPath(a, b, width, t) {
   return t.chance(0.5) ? [[ax, ay], [bx, ay], [bx, by]] : [[ax, ay], [ax, by], [bx, by]];
 }
 
-/** Floor shape for a room: a rectangle, or now and then rounded, round or octagonal. */
-function roomShape(r, shapes, t) {
-  const square = Math.abs(r.w - r.h) <= 1 && Math.min(r.w, r.h) >= 5;
-  if (square && t.chance(shapes.circle || 0)) {
-    const d = Math.min(r.w, r.h);
-    return { kind: 'circle', cx: r.x + r.w / 2, cy: r.y + r.h / 2, r: d / 2 };
+/**
+ * Floor shapes for a room and where its label goes. Mostly rectangles, but also rounded,
+ * round, octagonal or L-shaped rooms, and rooms with alcoves or a rounded apse at one end
+ * (those are unwalled shapes that merge into the room, opening its wall).
+ */
+function roomShapes(r, shapes, t) {
+  const { x, y, w, h } = r;
+  const centre = centreOf(r);
+  const square = Math.abs(w - h) <= 1 && Math.min(w, h) >= 5;
+  if (square && t.chance(shapes.circle ?? 0)) {
+    const d = Math.min(w, h);
+    return { shapes: [{ kind: 'circle', cx: centre[0], cy: centre[1], r: d / 2, walled: true }], at: centre };
   }
-  if (Math.min(r.w, r.h) >= 5 && t.chance(shapes.octagon || 0)) {
-    const c = Math.floor(Math.min(r.w, r.h) / 3);
-    const { x, y, w, h } = r;
-    return { kind: 'poly', points: [[x + c, y], [x + w - c, y], [x + w, y + c], [x + w, y + h - c], [x + w - c, y + h], [x + c, y + h], [x, y + h - c], [x, y + c]] };
+  if (Math.min(w, h) >= 5 && t.chance(shapes.octagon ?? 0)) {
+    const c = Math.floor(Math.min(w, h) / 3);
+    return { shapes: [{ kind: 'poly', walled: true, points: [[x + c, y], [x + w - c, y], [x + w, y + c], [x + w, y + h - c], [x + w - c, y + h], [x + c, y + h], [x, y + h - c], [x, y + c]] }], at: centre };
   }
-  const radius = Math.min(r.w, r.h) >= 4 && t.chance(shapes.round || 0) ? 1 : 0;
-  return { kind: 'rect', x: r.x, y: r.y, w: r.w, h: r.h, radius };
+  const out = [];
+  let at = centre;
+  if (Math.min(w, h) >= 6 && t.chance(shapes.l ?? 0.2)) {
+    // An L: a corner taken out.
+    const cw = Math.round(w * (0.35 + t.random() * 0.15));
+    const ch = Math.round(h * (0.35 + t.random() * 0.15));
+    const left = t.chance(0.5);
+    const top = t.chance(0.5);
+    const cx = left ? x + cw : x + w - cw;
+    const cy = top ? y + ch : y + h - ch;
+    const pts = left && top ? [[cx, y], [x + w, y], [x + w, y + h], [x, y + h], [x, cy], [cx, cy]]
+      : !left && top ? [[x, y], [cx, y], [cx, cy], [x + w, cy], [x + w, y + h], [x, y + h]]
+        : left && !top ? [[x, y], [x + w, y], [x + w, y + h], [cx, y + h], [cx, cy], [x, cy]]
+          : [[x, y], [x + w, y], [x + w, cy], [cx, cy], [cx, y + h], [x, y + h]];
+    out.push({ kind: 'poly', walled: true, points: pts });
+    at = [x + w * (left ? 0.68 : 0.32), y + h * (top ? 0.68 : 0.32)];
+  } else {
+    const radius = Math.min(w, h) >= 4 && t.chance(shapes.round ?? 0) ? 1 : 0;
+    out.push({ kind: 'rect', x, y, w, h, radius, walled: true });
+    // A rounded apse on one of the short ends (chapels, halls).
+    if (!radius && Math.min(w, h) >= 4 && t.chance(shapes.apse ?? 0.12)) {
+      const wide = w >= h;
+      const end = t.chance(0.5);
+      const rr = Math.min(2, Math.floor((wide ? h : w) / 2) - 0.5);
+      const c = wide ? [end ? x + w : x, y + h / 2] : [x + w / 2, end ? y + h : y];
+      out.push({ kind: 'circle', cx: c[0], cy: c[1], r: rr, walled: false });
+    }
+  }
+  // Alcoves: little niches off the walls.
+  if (Math.min(w, h) >= 4 && t.chance(shapes.alcoves ?? 0.3)) {
+    const count = t.int(1, 3);
+    for (let i = 0; i < count; i++) {
+      const side = t.pick(['n', 's', 'e', 'w']);
+      const along = side === 'n' || side === 's' ? w : h;
+      const len = Math.min(t.pick([1, 2, 2]), along - 2);
+      const off = t.int(1, Math.max(1, along - len - 1));
+      const niche = side === 'n' ? { x: x + off, y: y - 1, w: len, h: 1 }
+        : side === 's' ? { x: x + off, y: y + h, w: len, h: 1 }
+          : side === 'w' ? { x: x - 1, y: y + off, w: 1, h: len }
+            : { x: x + w, y: y + off, w: 1, h: len };
+      // Only where the room's own wall is (not across an L's missing corner).
+      const probe = [niche.x + niche.w / 2 - (side === 'e' ? 1 : side === 'w' ? -1 : 0) * 0.6, niche.y + niche.h / 2 - (side === 's' ? 1 : side === 'n' ? -1 : 0) * 0.6];
+      if (out[0].kind === 'poly' && !pointInRingsSimple(probe, out[0].points)) continue;
+      out.push({ kind: 'rect', ...niche, radius: 0, walled: false });
+    }
+  }
+  return { shapes: out, at };
+}
+
+function pointInRingsSimple([px, py], ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
 // ---- layouts --------------------------------------------------------------------
@@ -196,8 +257,10 @@ function roomsLayout(style, n, size, t, anchor) {
   // Retype by the sizes rooms actually got.
   const rooms = placed.map((r) => ({ ...r, area: r.w * r.h }));
   assignTypes(rooms, pool, t);
-  const shapes = rooms.map((r, i) => ({ ...(anchor && i === 0 ? { kind: 'rect', x: r.x, y: r.y, w: r.w, h: r.h, radius: 0 } : roomShape(r, style.shapes || {}, t)), walled: true }));
-  const tags = rooms.map((r) => ({ type: r.type, at: centreOf(r) }));
+  // The anchored room (over the stairs below) stays a plain rectangle so the stairs fit.
+  const made = rooms.map((r, i) => (anchor && i === 0 ? { shapes: [{ kind: 'rect', x: r.x, y: r.y, w: r.w, h: r.h, radius: 0, walled: true }], at: centreOf(r) } : roomShapes(r, style.shapes || {}, t)));
+  const shapes = made.flatMap((m) => m.shapes);
+  const tags = rooms.map((r, i) => ({ type: r.type, at: made[i].at }));
   const corridors = rooms.length > 1 ? connections(rooms, t, style.loops ?? 0.15).map(([i, j]) => corridorPath(rooms[i], rooms[j], width, t)) : [];
   // One shape for all corridors, so where they meet or run side by side they join up.
   if (corridors.length) shapes.push({ kind: 'path', paths: corridors, width, walled: true, under: true });
@@ -205,91 +268,7 @@ function roomsLayout(style, n, size, t, anchor) {
 }
 
 function buildingLayout(style, n, size, t) {
-  const area = n * t.int(28, 38);
-  const aspect = 1.2 + t.random() * 0.5;
-  let W = Math.min(size.w - 4, Math.round(Math.sqrt(area * aspect)));
-  let H = Math.min(size.h - 4, Math.round(area / W));
-  W = Math.max(W, 6);
-  H = Math.max(H, 6);
-  const x0 = Math.round((size.w - W) / 2);
-  const y0 = Math.round((size.h - H) / 2);
-  const horizontal = W >= H;
-  const hall = n >= 5 && Math.min(W, H) >= 10 && style.corridor;
-  const hallWidth = 2;
-  const leaves = [];
-  const drop = n >= 5 && t.chance(0.4); // an L-shaped building: one end room left out
-  const want = n + (drop ? 1 : 0);
-  // Split a strip into k rooms with cuts across it (so each still touches the hallway).
-  // One room in the first strip is made about twice as big: the hall, tavern or throne room.
-  const strip = (r, k, big) => {
-    const along = horizontal ? r.w : r.h;
-    const share = Array.from({ length: k }, () => 0.8 + t.random() * 0.4);
-    if (big && k > 1) share[t.int(0, k - 1)] = 2;
-    const total = share.reduce((a, b) => a + b, 0);
-    const cuts = [];
-    let sum = 0;
-    for (let i = 0; i < k - 1; i++) cuts.push(Math.round(((sum += share[i]) / total) * along));
-    let prev = 0;
-    for (const c of [...cuts, along]) {
-      if (c - prev >= 3) leaves.push(horizontal ? { x: r.x + prev, y: r.y, w: c - prev, h: r.h } : { x: r.x, y: r.y + prev, w: r.w, h: c - prev });
-      prev = c;
-    }
-  };
-  let corridor = null;
-  if (hall) {
-    const depth = horizontal ? H : W;
-    const at = Math.round((depth - hallWidth) / 2 + t.int(-1, 1));
-    const a = horizontal ? { x: x0, y: y0, w: W, h: at } : { x: x0, y: y0, w: at, h: H };
-    const b = horizontal ? { x: x0, y: y0 + at + hallWidth, w: W, h: H - at - hallWidth } : { x: x0 + at + hallWidth, y: y0, w: W - at - hallWidth, h: H };
-    corridor = horizontal ? { x: x0, y: y0 + at, w: W, h: hallWidth } : { x: x0 + at, y: y0, w: hallWidth, h: H };
-    const ka = Math.ceil(want / 2);
-    strip(a, ka, true);
-    strip(b, want - ka, false);
-  } else {
-    // Binary space partition: split the biggest room along its longer side.
-    leaves.push({ x: x0, y: y0, w: W, h: H });
-    while (leaves.length < want) {
-      leaves.sort((p, q) => q.w * q.h - p.w * p.h);
-      const r = leaves[0];
-      const vertical = r.w > r.h || (r.w === r.h && t.chance(0.5));
-      const len = vertical ? r.w : r.h;
-      if (len < 6) break;
-      const cut = t.int(Math.max(3, Math.round(len * 0.35)), Math.min(len - 3, Math.round(len * 0.65)));
-      leaves.shift();
-      if (vertical) leaves.push({ x: r.x, y: r.y, w: cut, h: r.h }, { x: r.x + cut, y: r.y, w: r.w - cut, h: r.h });
-      else leaves.push({ x: r.x, y: r.y, w: r.w, h: cut }, { x: r.x, y: r.y + cut, w: r.w, h: r.h - cut });
-    }
-  }
-  if (drop && leaves.length > 3) {
-    // Leave out a corner room.
-    const corner = (r) => (r.x === x0 || r.x + r.w === x0 + W) && (r.y === y0 || r.y + r.h === y0 + H);
-    const i = leaves.findIndex(corner);
-    if (i >= 0) leaves.splice(i, 1);
-  }
-  const rooms = leaves.map((r) => ({ ...r, area: r.w * r.h }));
-  assignTypes(rooms, style.rooms, t);
-  const shapes = rooms.map((r) => ({ kind: 'rect', x: r.x, y: r.y, w: r.w, h: r.h, radius: 0, walled: true }));
-  const tags = rooms.map((r) => ({ type: r.type, at: centreOf(r) }));
-  const corridors = [];
-  // A way in from outside: double doors at the end of the hallway, else into the biggest room.
-  const entrances = [];
-  if (corridor) {
-    const points = horizontal
-      ? [[corridor.x, corridor.y + 1], [corridor.x + corridor.w, corridor.y + 1]]
-      : [[corridor.x + 1, corridor.y], [corridor.x + 1, corridor.y + corridor.h]];
-    shapes.push({ kind: 'rect', x: corridor.x, y: corridor.y, w: corridor.w, h: corridor.h, radius: 0, walled: true });
-    corridors.push({ points, width: hallWidth });
-    entrances.push(horizontal
-      ? { a: [corridor.x, corridor.y], b: [corridor.x, corridor.y + 2], wide: true }
-      : { a: [corridor.x, corridor.y + corridor.h], b: [corridor.x + 2, corridor.y + corridor.h], wide: true });
-  } else if (rooms.length) {
-    const r = [...rooms].sort((p, q) => q.area - p.area)[0];
-    if (r.y + r.h === y0 + H) entrances.push({ a: [r.x + Math.floor(r.w / 2), r.y + r.h], b: [r.x + Math.floor(r.w / 2) + 1, r.y + r.h] });
-    else if (r.y === y0) entrances.push({ a: [r.x + Math.floor(r.w / 2), r.y], b: [r.x + Math.floor(r.w / 2) + 1, r.y] });
-    else if (r.x === x0) entrances.push({ a: [r.x, r.y + Math.floor(r.h / 2)], b: [r.x, r.y + Math.floor(r.h / 2) + 1] });
-    else entrances.push({ a: [r.x + r.w, r.y + Math.floor(r.h / 2)], b: [r.x + r.w, r.y + Math.floor(r.h / 2) + 1] });
-  }
-  return { shapes, tags, corridors, entrances };
+  return organicBuilding(style, n, size, t, assignTypes);
 }
 
 function shipLayout(style, n, size, t) {
@@ -567,14 +546,16 @@ export function generateLayout({ style, map, count = 8, seed = 1, doorType = 'do
   const out = build(style, Math.max(2, count), map.size, t, anchor);
   const shapes = out.shapes.map((s) => ({ id: newId('s'), op: 'add', ...s }));
   const rooms = out.tags.filter((g) => g.type).map((g) => ({ id: newId('r'), type: g.type, at: g.at, seed: t.int(1, 2 ** 30), reroll: 0, ...(g.density != null ? { density: g.density } : {}) }));
-  // Tag the corridors: in a generated layout every other space comes from them.
+  // Tag what is left: corridors (every other space in a generated layout comes from them), or
+  // pieces a layout knows the type of (a room a tower cut a corner off).
   const corridorType = style.corridor?.type || style.rooms?.[0]?.type;
-  if (corridorType && out.corridors.length) {
+  if ((corridorType && out.corridors.length) || out.typeAt) {
     const level = { shapes, walls: out.walls || [], doors: [], edges: [], rooms, placements: [] };
     const geo = computeLevelGeometry(level, map);
     for (const r of geo.rooms.regions) {
       if (r.tag || r.area < 2 || !r.cells.length) continue;
-      rooms.push({ id: newId('r'), type: corridorType, at: r.labelAt, seed: t.int(1, 2 ** 30), reroll: 0 });
+      const type = out.typeAt?.(r.labelAt) || corridorType;
+      if (type) rooms.push({ id: newId('r'), type, at: r.labelAt, seed: t.int(1, 2 ** 30), reroll: 0 });
     }
   }
   const doors = (out.entrances || []).map((e) => ({ id: newId('d'), type: e.wide ? (doorType === 'door' ? 'double' : doorType) : doorType, a: e.a, b: e.b }));
