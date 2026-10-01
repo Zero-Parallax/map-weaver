@@ -40,6 +40,7 @@ export class App {
       linkType: 'stairs', linkSpan: 1, spiralSize: 2, edgeKind: 'wall',
       asset: null, assetParams: null, assetRoom: null, assetSearch: '',
       autoDecorate: true, autoDoors: true, drawType: '', corridorWidth: 2,
+      terrainKind: 'water', terrainMethod: 'brush', terrainBrush: 2, terrainWidth: 3,
     };
     this.showBelow = true;
     this.view = { scale: 32, ox: 40, oy: 40 };
@@ -196,6 +197,7 @@ export class App {
       }
       const out = decorateRoom({
         geo, region: geo.rooms.regions[index], tag, assets: metas, doors: level.doors, links, existing, mapSeed: map.seed,
+        outdoor: !!this.setting?.roomTypes?.find((t) => t.id === tag.type)?.outdoor,
       });
       for (const p of out.placements) level.placements.push({ id: newId('a'), ...p });
       placed += out.placements.length;

@@ -12,6 +12,8 @@
 //   rooms[]   room tags: {at: point inside the room, type, seed, reroll}
 //   wallStyles[]  per-room wall looks: {at: point inside the room, texture, width}
 //   placements[]  decorated assets (step 3+)
+//   ground        optional: outdoors (grass, dirt, sand, snow, rock, plating); see terrain.js
+//   terrain[]     painted areas: water, lava, chasm, roads... {kind, op, shape}
 
 export const FORMAT = 'map-weaver/map';
 export const VERSION = 1;
@@ -37,6 +39,7 @@ export const DOOR_TYPES = [
   { id: 'sliding', name: 'Sliding door', width: 1 },
   { id: 'archway', name: 'Archway (open)', width: 1 },
   { id: 'window', name: 'Window', width: 1 },
+  { id: 'breach', name: 'Breach (collapsed)', width: 1 },
 ];
 export const DOOR_TYPE_IDS = DOOR_TYPES.map((d) => d.id);
 
@@ -63,6 +66,7 @@ export function createLevel(name = 'Ground floor', elevation = 0) {
     rooms: [],
     wallStyles: [],
     placements: [],
+    terrain: [],
   };
 }
 
@@ -136,7 +140,7 @@ export function loadMap(data) {
     lv.name ??= 'Level';
     lv.elevation ??= 0;
     lv.height ??= 2;
-    for (const key of ['shapes', 'walls', 'doors', 'edges', 'rooms', 'wallStyles', 'placements']) {
+    for (const key of ['shapes', 'walls', 'doors', 'edges', 'rooms', 'wallStyles', 'placements', 'terrain']) {
       if (!Array.isArray(lv[key])) lv[key] = [];
     }
     lv.shapes = lv.shapes.filter((s) => SHAPE_KINDS.includes(s.kind));
@@ -144,6 +148,8 @@ export function loadMap(data) {
       s.id ??= newId('s');
       if (!SHAPE_OPS.includes(s.op)) s.op = 'add';
     }
+    lv.terrain = lv.terrain.filter((t) => t.shape && SHAPE_KINDS.includes(t.shape.kind));
+    for (const t of lv.terrain) t.id ??= newId('t');
     lv.walls = lv.walls.filter((w) => WALL_KINDS.includes(w.kind));
     for (const w of lv.walls) w.id ??= newId('w');
     lv.edges = lv.edges.filter((e) => Array.isArray(e.at) && EDGE_KIND_IDS.includes(e.kind));

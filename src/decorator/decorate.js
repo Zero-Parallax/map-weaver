@@ -8,6 +8,7 @@
 import { rng, hash } from '../core/rng.js';
 import { distToSegment, projectOnSegment, polylineSegments, add, scale } from '../core/geom.js';
 import { suitsRoom } from '../assets/meta.js';
+import { TERRAIN, terrainAt } from '../core/terrain.js';
 import { runGenerator } from '../assets/generators.js';
 
 export const SIDES = ['n', 'e', 's', 'w'];
@@ -104,6 +105,16 @@ export function analyseRoom({ geo, region, doors, links = [] }) {
   }
   // Squares on a balcony edge stay free for balcony assets only.
   const balconyCells = new Set([...cells.values()].filter((c) => SIDES.some((s) => c.sides[s] === 'balcony')).map((c) => key(c.x, c.y)));
+  // Painted terrain: nothing stands in water, lava or chasms; roads stay clear of furniture.
+  if (geo.terrain?.size) {
+    for (const c of cells.values()) {
+      const kind = terrainAt(geo.terrain, [c.x + 0.5, c.y + 0.5]);
+      const t = kind && TERRAIN[kind];
+      if (!t || t.decor) continue;
+      if (t.keepClear) keepClear.add(key(c.x, c.y));
+      else blocked.add(key(c.x, c.y));
+    }
+  }
   return { cells, keepClear, blocked, anchors: [...new Set(anchors)], balconyCells };
 }
 
@@ -245,45 +256,39 @@ function candidates(room, meta, fp, occupied, centre) {
 
 // ---- reachability --------------------------------------------------------
 
-/** Can every entrance still reach every other, walking only on squares not blocked? */
-function entrancesConnected(room, blockedSquares) {
-  const anchors = room.anchors.filter((k) => !blockedSquares.has(k));
-  if (anchors.length !== room.anchors.length) return false;
-  if (anchors.length < 2) return true;
-  const seen = new Set([anchors[0]]);
-  const queue = [anchors[0]];
-  while (queue.length) {
-    const [x, y] = queue.pop().split(',').map(Number);
+/**
+ * Does blocking `squares` keep the room walkable? The squares around the new piece must
+ * still reach each other, so no part of the room is cut off. Checking only around the piece
+ * works even when water or a chasm already splits the room.
+ */
+function keepsWalkable(room, blocking, squares) {
+  const taken = new Set(squares);
+  if (room.anchors.some((k) => taken.has(k))) return false;
+  const walkable = (k) => room.cells.has(k) && !room.blocked.has(k) && !blocking.has(k) && !taken.has(k);
+  const around = new Set();
+  for (const k of squares) {
+    const [x, y] = k.split(',').map(Number);
     for (const s of SIDES) {
-      const [dx, dy] = STEP[s];
-      const k = key(x + dx, y + dy);
-      if (seen.has(k) || !room.cells.has(k) || blockedSquares.has(k) || room.blocked.has(k)) continue;
-      seen.add(k);
-      queue.push(k);
+      const n = key(x + STEP[s][0], y + STEP[s][1]);
+      if (walkable(n)) around.add(n);
     }
   }
-  return anchors.every((k) => seen.has(k));
-}
-
-/** Also keep most of the room walkable: no square cut off from the entrances. */
-function noIslands(room, blockedSquares) {
-  const start = room.anchors.find((k) => !blockedSquares.has(k)) || [...room.cells.keys()].find((k) => !blockedSquares.has(k) && !room.blocked.has(k));
-  if (!start) return true;
+  if (around.size < 2) return true;
+  const [start] = around;
   const seen = new Set([start]);
   const queue = [start];
-  while (queue.length) {
-    const [x, y] = queue.pop().split(',').map(Number);
+  let found = 1;
+  while (queue.length && found < around.size) {
+    const [x, y] = queue.shift().split(',').map(Number);
     for (const s of SIDES) {
-      const [dx, dy] = STEP[s];
-      const k = key(x + dx, y + dy);
-      if (seen.has(k) || !room.cells.has(k) || blockedSquares.has(k) || room.blocked.has(k)) continue;
-      seen.add(k);
-      queue.push(k);
+      const n = key(x + STEP[s][0], y + STEP[s][1]);
+      if (seen.has(n) || !walkable(n)) continue;
+      seen.add(n);
+      if (around.has(n)) found++;
+      queue.push(n);
     }
   }
-  let free = 0;
-  for (const k of room.cells.keys()) if (!blockedSquares.has(k) && !room.blocked.has(k)) free++;
-  return seen.size === free;
+  return found === around.size;
 }
 
 // ---- main ----------------------------------------------------------------
@@ -298,7 +303,7 @@ function noIslands(room, blockedSquares) {
  *                [{meta, footprint (rotated), x, y}] with x, y the top-left square
  * Returns {placements, report}.
  */
-export function decorateRoom({ geo, region, tag, assets, doors, links = [], existing = [], mapSeed = 0 }) {
+export function decorateRoom({ geo, region, tag, assets, doors, links = [], existing = [], mapSeed = 0, outdoor = false }) {
   const random = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0));
   const room = analyseRoom({ geo, region, doors, links });
   const xs = region.cells.map((c) => c[0]);
@@ -330,7 +335,8 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   let capsLifted = false;
   const capOf = (m) => {
     if (!m.max || m.max === 1) return m.max;
-    const cap = Math.max(m.max, Math.round(m.max * (0.5 + density * 1.6)));
+    // Outdoors, limits grow with the area: a wood has more than six trees.
+    const cap = Math.max(m.max, Math.round(m.max * (0.5 + density * 1.6))) * (outdoor ? Math.max(1, Math.round(usable / 40)) : 1);
     // Lifted, but never so far that one kind of piece takes over the room.
     return capsLifted ? cap * 2 : cap;
   };
@@ -339,6 +345,15 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   const counts = new Map();
   const placements = [];
   const report = { placed: 0, skipped: [] };
+
+  // Smooth seeded noise over the room: high values are where things gather.
+  const noise = valueNoise(rng(hash(mapSeed, tag.id, tag.seed, 'clumps')), 5);
+  const pickClumped = (spots) => {
+    const w = spots.map((sp) => noise(sp.x + sp.w / 2, sp.y + sp.h / 2) ** 3 + 0.02);
+    let r = random() * w.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < w.length; i++) if ((r -= w[i]) <= 0) return i;
+    return w.length - 1;
+  };
 
   const place = (meta) => {
     const sizes = sizeOptions(meta, random);
@@ -355,14 +370,15 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
       if (!spots.length) continue;
       const ranked = meta.placement === 'centre' || isFocal(meta) || (meta.facing === 'focal' && room.focal);
       if (ranked) spots.sort((a, b) => a.score - b.score).splice(Math.max(isFocal(meta) ? 2 : 3, Math.ceil(spots.length * (isFocal(meta) ? 0.03 : 0.1))));
+      // Outdoors, free-standing pieces gather in clumps (woods, rock fields) with clearings.
+      const clumped = outdoor && (meta.placement === 'free' || meta.placement === 'centre');
       // Try a few spots in random order until one keeps the room walkable.
       for (let attempt = 0; attempt < 8 && spots.length; attempt++) {
-        const i = Math.floor(random() * spots.length);
+        const i = clumped ? pickClumped(spots) : Math.floor(random() * spots.length);
         const s = spots.splice(i, 1)[0];
         const squares = rectCells(s.x, s.y, s.w, s.h).map(([a, b]) => key(a, b));
         if (meta.blocksMovement) {
-          const trial = new Set([...blocking, ...squares]);
-          if (!entrancesConnected(room, trial) || !noIslands(room, trial)) continue;
+          if (!keepsWalkable(room, blocking, squares)) continue;
           for (const k of squares) blocking.add(k);
         }
         for (const k of squares) occupied[meta.layer].add(k);
@@ -475,8 +491,7 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
         }
       }
       if (!best) break;
-      const trial = new Set([...blocking, ...best.squares]);
-      if (!entrancesConnected(room, trial) || !noIslands(room, trial)) {
+      if (!keepsWalkable(room, blocking, best.squares)) {
         rejected.add(`${best.meta.id}|${best.x},${best.y},${best.rot}`);
         continue;
       }
@@ -494,6 +509,28 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
 
 /** Cover any room may use when its own pieces can't provide enough. */
 const GENERIC_COVER = ['crate', 'barrel', 'cargo-crate', 'fuel-drum'];
+
+/** 2D value noise in [0, 1] with cells `size` squares across. */
+function valueNoise(random, size) {
+  const grid = new Map();
+  const at = (i, j) => {
+    const k = `${i},${j}`;
+    if (!grid.has(k)) grid.set(k, random());
+    return grid.get(k);
+  };
+  const smooth = (t) => t * t * (3 - 2 * t);
+  return (x, y) => {
+    const fx = x / size;
+    const fy = y / size;
+    const i = Math.floor(fx);
+    const j = Math.floor(fy);
+    const u = smooth(fx - i);
+    const v = smooth(fy - j);
+    const a = at(i, j) * (1 - u) + at(i + 1, j) * u;
+    const b = at(i, j + 1) * (1 - u) + at(i + 1, j + 1) * u;
+    return a * (1 - v) + b * v;
+  };
+}
 
 // ---- clutter ---------------------------------------------------------------
 

@@ -19,10 +19,12 @@ import { DENSITY, DEFAULT_DENSITY, CLUTTER, DEFAULT_CLUTTER } from './decorator/
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, joinControl } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
+import { terrainTool } from './editor/tools/terrain-tool.js';
+import { GROUNDS } from './core/terrain.js';
 
 const TOOL_GROUPS = [
   [selectTool],
-  [rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool],
+  [rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, terrainTool],
   [wallTool, arcTool, doorTool],
   [linkTool, edgeTool],
   [roomTool, assetTool, eraseTool],
@@ -698,6 +700,10 @@ function levelSection() {
         },
       }, 'Delete'),
     ),
+    field('Outdoors', select([{ id: '', name: '— indoors —' }, ...GROUNDS], current.ground || '', (v) => app.commit('Outdoors', (map, level) => {
+      if (v) level.ground = v;
+      else delete level.ground;
+    })), 'Outdoors the whole map is ground and its edge is no wall; drawn rooms become buildings.'),
     app.levelIndex > 0 && checkbox('Show level below as outlines', app.showBelow, (v) => {
       app.showBelow = v;
       app.requestRender();

@@ -52,6 +52,21 @@ export function caveRing(points, roughness = 0.5, seed = 1) {
   });
 }
 
+/** Chaikin corner cutting for an open polyline (ends stay put). */
+function chaikinOpen(points, iterations) {
+  let pts = points;
+  for (let k = 0; k < iterations; k++) {
+    const next = [pts[0]];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [a, b] = [pts[i], pts[i + 1]];
+      next.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75]);
+    }
+    next.push(pts[pts.length - 1]);
+    pts = next;
+  }
+  return pts;
+}
+
 function cellRings(cells) {
   return cells.map(([x, y]) => rectRing({ x, y, w: 1, h: 1 }));
 }
@@ -73,8 +88,9 @@ export function shapeRings(shape) {
     case 'cells':
       return normalize(cellRings(shape.cells || []));
     case 'path': {
-      const lines = shape.paths || [shape.points || []];
-      const rings = lines.flatMap((pts) => strokePath(pts, shape.width || 1));
+      // smooth: a curving centre line with round ends (rivers, roads); else corridor corners.
+      const lines = (shape.paths || [shape.points || []]).map((pts) => (shape.smooth && pts.length > 2 ? chaikinOpen(pts, 3) : pts));
+      const rings = lines.flatMap((pts) => strokePath(pts, shape.width || 1, !!shape.smooth));
       return lines.length > 1 ? normalize(rings) : rings;
     }
     default:

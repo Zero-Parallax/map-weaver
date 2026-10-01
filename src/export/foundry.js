@@ -16,6 +16,7 @@
 // covering pieces tagged "difficult terrain" (rubble, debris), doubling walking cost.
 
 import { simplify, polylineSegments, projectOnSegment, dist, sub, norm, add, scale, pointInRings } from '../core/geom.js';
+import { TERRAIN } from '../core/terrain.js';
 import { hash } from '../core/rng.js';
 
 export const COMPLEXITY = {
@@ -34,6 +35,7 @@ const DOORS = {
   portcullis: { door: 1, sight: 0, light: 0, sound: 0 }, // bars: see and hear through
   window: { sight: 0, light: 0, sound: 10 },
   archway: null, // open: no wall
+  breach: null, // collapsed: no wall
 };
 
 /** A stable 16-character Foundry-style id. */
@@ -141,12 +143,13 @@ function toWall(a, b, pps, levelId, props) {
 }
 
 /** Walls for one level. geo from computeLevelGeometry. */
-export function levelWalls({ level, geo, pps, levelId, tolerance, assetWalls = [], flipOneWay = false }) {
+export function levelWalls({ level, geo, pps, levelId, tolerance, assetWalls = [], flipOneWay = false, bridges = [] }) {
   const walls = [];
   const simplifyLines = (lines) => lines.map((l) => (l.length > 2 ? simplify(l, tolerance) : l));
 
-  // Solid walls: the outline, inner walls and edges made into walls.
-  const outline = geo.structure.map((ring) => [...ring, ring[0]]);
+  // Solid walls: the outline, inner walls and edges made into walls. Outdoors the map's
+  // edge is no wall, so only the rest of the outline (cliffs, cut-away floor) counts.
+  const outline = level.ground ? chainSegments(geo.outerSegments) : geo.structure.map((ring) => [...ring, ring[0]]);
   const inner = chainSegments(geo.inner);
   const edgeWalls = geo.edgeRuns.filter((r) => r.kind === 'wall').map((r) => r.points);
   const solid = simplifyLines([...outline, ...inner, ...edgeWalls]).flatMap((l) => polylineSegments(l));
@@ -168,6 +171,19 @@ export function levelWalls({ level, geo, pps, levelId, tolerance, assetWalls = [
       if (flipOneWay) dir = dir === 1 ? 2 : 1;
       walls.push(toWall(a, b, pps, levelId, { sight: 0, light: 0, sound: 0 }));
       walls.push(toWall(a, b, pps, levelId, { move: 0, sound: 0, dir }));
+    }
+  }
+
+  // Chasms: walls that stop movement only (you can see and shoot across), left open where a
+  // bridge crosses.
+  const chasm = geo.terrain?.get('chasm');
+  if (chasm) {
+    for (const ring of chasm) {
+      for (const [a, b] of polylineSegments(simplify([...ring, ring[0]], tolerance))) {
+        const mid = scale(add(a, b), 0.5);
+        if (bridges.some((r) => pointInRings(mid, [r]))) continue;
+        walls.push(toWall(a, b, pps, levelId, { sight: 0, light: 0, sound: 0 }));
+      }
     }
   }
 
@@ -220,16 +236,21 @@ export function buildFoundryScene(map, { geometry, imagePath, pps = 100, complex
   }));
   const walls = map.levels.flatMap((lv, i) => {
     const rings = [];
-    if (assetWalls && resolve) {
+    const bridges = [];
+    if (resolve) {
       for (const pl of lv.placements) {
         const r = resolve(pl);
-        if (r?.meta.blocksVision) rings.push(placementRing(pl, r.footprint));
+        if (assetWalls && r?.meta.blocksVision) rings.push(placementRing(pl, r.footprint));
+        if (r?.meta.tags?.includes('bridge')) bridges.push(placementRing(pl, r.footprint, -0.05));
       }
     }
-    return levelWalls({ level: lv, geo: geometry(lv), pps, levelId: ids[i], tolerance, assetWalls: rings, flipOneWay });
+    return levelWalls({ level: lv, geo: geometry(lv), pps, levelId: ids[i], tolerance, assetWalls: rings, flipOneWay, bridges });
   });
   const lightDocs = lights && resolve ? map.levels.flatMap((lv, i) => assetLights(lv, { resolve, pps, fps, levelId: ids[i] })) : [];
-  const regions = terrain && resolve ? map.levels.flatMap((lv, i) => terrainRegions(lv, { resolve, pps, fps, levelId: ids[i] })) : [];
+  const regions = terrain ? map.levels.flatMap((lv, i) => [
+    ...(resolve ? terrainRegions(lv, { resolve, pps, fps, levelId: ids[i] }) : []),
+    ...paintedRegions(lv, geometry(lv), { pps, fps, levelId: ids[i], tolerance }),
+  ]) : [];
   const ground = map.levels.findIndex((lv) => lv.elevation === 0);
   return {
     name: map.name,
@@ -319,4 +340,42 @@ export function terrainRegions(level, { resolve, pps, fps, levelId }) {
     hidden: false,
     locked: false,
   }];
+}
+
+/**
+ * Regions for painted terrain that changes movement: water, mud, ice (difficult), lava
+ * (difficult; the region is named so the GM can add damage). Chasms are walls instead.
+ */
+export function paintedRegions(level, geo, { pps, fps, levelId, tolerance }) {
+  const out = [];
+  for (const [kind, rings] of geo.terrain || []) {
+    const t = TERRAIN[kind];
+    if (!t || (t.move !== 'difficult' && t.move !== 'hazard')) continue;
+    const shapes = rings.map((ring) => {
+      const pts = simplify([...ring, ring[0]], tolerance).slice(0, -1);
+      const hole = rings.some((other) => other !== ring && pointInRings(ring[0], [other]));
+      return { type: 'polygon', points: pts.flatMap(([x, y]) => [Math.round(x * pps), Math.round(y * pps)]), hole, gridBased: false };
+    }).filter((sh) => sh.points.length >= 6);
+    if (!shapes.length) continue;
+    out.push({
+      _id: foundryId(levelId, 'terrain', kind),
+      name: `${t.name}${t.move === 'hazard' ? ' (hazard)' : ''} (${level.name})`,
+      color: { water: '#3c7fb0', 'deep-water': '#24527a', lava: '#d2461e', ice: '#9cc9e0', mud: '#7a5a3a' }[kind] || '#b07a3c',
+      shapes,
+      elevation: { bottom: level.elevation * fps, top: (level.elevation + level.height) * fps },
+      levels: [levelId],
+      behaviors: [{
+        _id: foundryId(levelId, 'terrain', kind, 'cost'),
+        name: t.swim ? 'Swimming' : 'Difficult terrain',
+        type: 'modifyMovementCost',
+        system: { difficulties: { walk: 2, crawl: 2, climb: 2, jump: 2, swim: 2, burrow: 2 } },
+        disabled: false,
+      }],
+      visibility: 0,
+      hidden: false,
+      locked: false,
+      flags: { 'map-weaver': { terrain: kind } },
+    });
+  }
+  return out;
 }

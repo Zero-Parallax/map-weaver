@@ -7,6 +7,7 @@ import { rng, hash } from '../core/rng.js';
 import { drawLink } from './link-symbols.js';
 import { wallGroups, drawWallGroups } from './walls.js';
 import { BITMAP_PPS } from '../assets/library.js';
+import { drawGround, drawTerrain } from './terrain-render.js';
 
 function ringsPath(rings, path = new Path2D()) {
   for (const ring of rings) {
@@ -244,6 +245,39 @@ export function drawDoor(ctx, door, style, wallWidth = style.wallWidth) {
       ctx.lineWidth = stroke * 1.6;
       ctx.stroke();
       break;
+    case 'breach': {
+      // A collapsed stretch of wall: a ragged gap with broken stone along it.
+      quad(ctx, m, u, n, len / 2 + t * 0.4, t * 0.5 + stroke * 1.5);
+      ctx.fill();
+      const r = rng(hash('breach', Math.round(m[0] * 100), Math.round(m[1] * 100)));
+      ctx.fillStyle = style.ink;
+      const chunks = Math.max(4, Math.round(len * 7));
+      for (let i = 0; i < chunks; i++) {
+        const along = (r() - 0.5) * (len + t);
+        const across = (r() - 0.5) * t * 2.4;
+        const c = add(add(m, scale(u, along)), scale(n, across));
+        const size = t * (0.25 + r() * 0.45);
+        ctx.beginPath();
+        for (let k = 0; k < 5; k++) {
+          const a = (k / 5) * Math.PI * 2 + r() * 0.6;
+          const q = [c[0] + Math.cos(a) * size, c[1] + Math.sin(a) * size];
+          if (k) ctx.lineTo(...q);
+          else ctx.moveTo(...q);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+      // Broken wall ends.
+      for (const [end, dir] of [[door.a, -1], [door.b, 1]]) {
+        const tip = add(end, scale(u, dir * -t * 0.4));
+        ctx.beginPath();
+        ctx.moveTo(...add(tip, scale(n, -t * 0.5)));
+        ctx.lineTo(...add(tip, scale(u, dir * t * 0.6)));
+        ctx.lineTo(...add(tip, scale(n, t * 0.5)));
+        ctx.fill();
+      }
+      break;
+    }
     default:
       gap();
       leaf(m, len * 0.43, leafDepth);
@@ -305,6 +339,10 @@ export function drawLevel(ctx, { map, level, geo, style, links = [], below = nul
     ctx.stroke(L.hatch);
     ctx.restore();
   }
+
+  // Outdoor ground, then painted terrain (water, lava, roads...).
+  if (level.ground) drawGround(ctx, geo, level.ground, style, map.seed, hair);
+  drawTerrain(ctx, geo, style, hash(map.seed, level.id), hair, L.floor);
 
   // Open to below.
   if (L.open) {

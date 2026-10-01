@@ -30,6 +30,7 @@ import { union, difference } from './clip.js';
 import { shapeRings } from './shapes.js';
 import { detectRooms } from './rooms.js';
 import { linksOnLevel, linkOpenings } from './links.js';
+import { computeTerrain } from './terrain.js';
 
 const ringCache = new Map();
 const CORNER_COS = Math.cos((35 * Math.PI) / 180);
@@ -51,9 +52,14 @@ export function wallPolyline(wall) {
   return [];
 }
 
-/** Floor and open areas from the level's shapes plus any link openings. */
-export function computeAreas(level, openings = { rings: [], gaps: [] }) {
-  let floor = [];
+const mapRing = (size) => [[0, 0], [size.w, 0], [size.w, size.h], [0, size.h]];
+
+/**
+ * Floor and open areas from the level's shapes plus any link openings. Outdoor levels
+ * (level.ground) start with the whole map as floor.
+ */
+export function computeAreas(level, openings = { rings: [], gaps: [] }, size = null) {
+  let floor = level.ground && size ? [mapRing(size)] : [];
   let open = [];
   const rings = level.shapes.map(cachedShapeRings);
   level.shapes.forEach((s, i) => {
@@ -202,10 +208,23 @@ function linkGeometry(map, level) {
 /** Full derived geometry for a level. */
 export function computeLevelGeometry(level, map) {
   const openings = linkGeometry(map, level);
-  const { floor, open, structure, shapeRings } = computeAreas(level, openings);
+  const { floor, open, structure, shapeRings } = computeAreas(level, openings, map.size);
   const inner = computeInnerWalls(level, shapeRings, floor);
   const edgeRuns = computeEdgeRuns(floor, structure, openings.gaps, level.edges || []);
-  const outerSegments = structure.flatMap((ring) => polylineSegments(ring, true));
+  let outerSegments = structure.flatMap((ring) => polylineSegments(ring, true));
+  if (level.ground) {
+    // Outdoors the map's edge is not a wall.
+    const { w, h } = map.size;
+    const onEdge = (a, b) => (Math.abs(a[0]) < 1e-6 && Math.abs(b[0]) < 1e-6) || (Math.abs(a[0] - w) < 1e-6 && Math.abs(b[0] - w) < 1e-6) ||
+      (Math.abs(a[1]) < 1e-6 && Math.abs(b[1]) < 1e-6) || (Math.abs(a[1] - h) < 1e-6 && Math.abs(b[1] - h) < 1e-6);
+    outerSegments = outerSegments.filter(([a, b]) => !onEdge(a, b));
+  }
+  // Outdoors, ground shows wherever no floor was drawn (buildings stand on it).
+  let ground = [];
+  if (level.ground) {
+    const built = level.shapes.reduce((acc, s, i) => (s.op === 'add' ? union(acc, shapeRings[i]) : acc), []);
+    ground = difference(floor, built);
+  }
   const edgeWalls = edgeRuns.filter((r) => r.kind === 'wall').flatMap((r) => polylineSegments(r.points));
   // Railings and drops still bound the floor for room detection; walls too.
   const rooms = detectRooms(floor, inner, map.size, level.rooms);
@@ -220,6 +239,8 @@ export function computeLevelGeometry(level, map) {
     // Everything drawn as a wall, and where doors can go.
     wallSegments: outerSegments.concat(inner, edgeWalls),
     rooms,
+    ground,
+    terrain: computeTerrain(level),
     cache: {}, // renderer scratch space (paths, hatching)
   };
 }
