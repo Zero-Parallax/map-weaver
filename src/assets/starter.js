@@ -10,6 +10,7 @@ import defineFantasy from './starter/fantasy.js';
 import defineScifi from './starter/scifi.js';
 import defineClutter from './starter/clutter.js';
 import defineOutdoor from './starter/outdoor.js';
+import defineRuin from './starter/ruin.js';
 
 const defs = [];
 
@@ -23,7 +24,7 @@ function G(id, name, settings, generator, params, opts, sizes) {
   defs.push({ id, name, settings, ...opts, generator: { id: generator, params }, sizes });
 }
 
-for (const define of [defineCommon, defineFantasy, defineScifi, defineClutter, defineOutdoor]) define({ A, G });
+for (const define of [defineCommon, defineFantasy, defineScifi, defineClutter, defineOutdoor, defineRuin]) define({ A, G });
 
 // ---- build ---------------------------------------------------------------
 

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+<title>Collapsed masonry</title>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"collapsed-masonry","name":"Collapsed masonry","settings":["classic","fantasy"],"footprint":{"w":2,"h":2},"roomTypes":["ruin"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":["difficult terrain"],"cover":"half"}]]></metadata>
+<style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.k{fill:var(--ink,#1b1b1b);stroke:none}
+.ko{fill:var(--ink,#1b1b1b);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round}
+.p{fill:var(--paper,#fff);stroke:none}
+.h{fill:var(--shade,#c6c6c6);stroke:none}
+.hm{fill:var(--mid,#8d8d8d);stroke:none}
+.l{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:4.5;stroke-linejoin:round;stroke-linecap:round}
+.t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
+<polygon class="s" points="59.9,50 55.4,65.4 40,73.7 21.9,68.1 12.4,50 25.6,35.6 40,27.7 57.1,32.9"/><polygon class="s" points="119.3,34 114.1,52.1 96,61.8 74.8,55.2 63.8,34 79.1,17.1 96,7.8 116.1,13.9"/><polygon class="o" points="169,60 164.7,74.7 150,82.6 132.8,77.2 123.9,60 136.2,46.2 150,38.7 166.3,43.7"/><polygon class="s" points="84.2,110 78.7,128.7 60,138.6 38.2,131.8 37.4,110 42.5,92.5 60,83 80.7,89.3"/><polygon class="s" points="147.9,100 141.5,121.5 120,132.9 95,125 94,100 99.8,79.8 120,68.9 143.7,76.3"/><polygon class="o" points="178.3,150 174.1,164.1 160,171.6 143.6,166.4 142.8,150 146.7,136.7 160,129.6 175.6,134.4"/><polygon class="s" points="90.3,160 85.6,175.6 70,183.9 51.8,178.2 51,160 55.3,145.3 70,137.4 87.2,142.8"/><polygon class="s" points="135.5,160 131.9,171.9 120,178.2 106.2,173.8 105.5,160 108.8,148.8 120,142.8 133.1,146.9"/><path class="t" d="M30 46L52 56M88 30L104 42M112 96L132 108"/><circle class="k" cx="20" cy="90" r="5"/><circle class="k" cx="180" cy="100" r="5"/><circle class="k" cx="100" cy="190" r="5"/><circle class="k" cx="30" cy="170" r="5"/>
+</svg>

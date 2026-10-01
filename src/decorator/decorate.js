@@ -432,9 +432,51 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
       noRoom.add(pick.id);
     }
   }
+  if (tag.ruin) ruinRoom();
   if (tag.combat) addCover();
-  placements.push(...scatterClutter({ room, tag, assets: assets.filter(fits), occupied, mapSeed }));
+  const ruinOnly = (m) => tag.ruin > 0 && m.roomTypes.includes('ruin');
+  placements.push(...scatterClutter({ room, tag, assets: assets.filter((m) => fits(m) || ruinOnly(m)), occupied, mapSeed }));
   return { placements, report };
+
+  /**
+   * Ruined rooms: most lights are out, some pieces are gone (their space taken by rubble),
+   * others knocked askew, and fallen beams and collapsed masonry lie about.
+   */
+  function ruinRoom() {
+    const r = tag.ruin;
+    const rr = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'ruin'));
+    const squaresOf = (p, m) => {
+      const fp = footprintOf(m, p.params);
+      const quarter = Math.round(p.rot / 90) % 2 === 1;
+      const w = quarter ? fp.h : fp.w;
+      const h = quarter ? fp.w : fp.h;
+      return rectCells(Math.round(p.x - w / 2), Math.round(p.y - h / 2), w, h).map(([i, j]) => key(i, j));
+    };
+    for (let i = placements.length - 1; i >= 0; i--) {
+      const p = placements[i];
+      const m = assets.find((a) => a.id === p.asset);
+      if (!m) continue;
+      const gone = (m.light && rr() < 0.4 + 0.6 * r) || (!isFocal(m) && rr() < 0.4 * r);
+      if (gone) {
+        placements.splice(i, 1);
+        for (const k of squaresOf(p, m)) {
+          occupied[m.layer].delete(k);
+          blocking.delete(k);
+        }
+        continue;
+      }
+      // Knocked askew: small free-standing pieces turn a little.
+      const fp = footprintOf(m, p.params);
+      if (['free', 'centre', 'corner'].includes(m.placement) && fp.w * fp.h <= 4 && rr() < r * 0.7) {
+        p.rot = (p.rot + (rr() < 0.5 ? -1 : 1) * 15 * (1 + Math.floor(rr() * 2)) + 360) % 360;
+      }
+    }
+    // Fallen beams and heaps of masonry.
+    const heavy = assets.filter((m) => m.roomTypes.includes('ruin') && !m.clutter);
+    const count = Math.round((room.cells.size / 30) * r) + (r > 0.5 ? 1 : 0);
+    budget = Math.max(budget, count * 3);
+    for (let i = 0; i < count && heavy.length; i++) place(heavy[Math.floor(rr() * heavy.length)]);
+  }
 
   /**
    * Combat-ready rooms: free-standing cover spread over the open floor, until nearly every
@@ -542,7 +584,8 @@ function valueNoise(random, size) {
  * leaves the furniture where it is.
  */
 function scatterClutter({ room, tag, assets, occupied, mapSeed }) {
-  const amount = tag.clutter ?? DEFAULT_CLUTTER;
+  // Ruins are messier.
+  const amount = Math.max(tag.clutter ?? DEFAULT_CLUTTER, tag.ruin ? 0.4 + 0.6 * tag.ruin : 0);
   const pool = assets.filter((m) => m.clutter && suitsRoom(m, tag.type));
   if (!amount || !pool.length) return [];
   const random = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'clutter'));

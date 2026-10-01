@@ -12,6 +12,7 @@ import { decorateRoom } from '../decorator/decorate.js';
 import { planDoors } from '../core/auto-doors.js';
 import { generateLayout } from '../generator/layout.js';
 import { generateLevels } from '../generator/levels.js';
+import { ruinLevel } from '../generator/ruin.js';
 import { roomKey } from '../core/room-key.js';
 import { newId } from '../core/model.js';
 import { resolveStyle } from '../render/style.js';
@@ -320,6 +321,29 @@ export class App {
     if (grew) this.fitView();
     this.setLevel(this.levelIndex);
     this.status(`Generated ${levels} levels joined by ${linkType === 'spiral' ? 'spiral stairs' : linkType === 'lift' ? 'lifts' : linkType === 'ladder' ? 'ladders' : 'stairs'}. PageUp / PageDown to look round; Undo goes back.`);
+  }
+
+  /** Ruin levels of a map in place (call inside commit): structure first, then redecorate. */
+  ruinIn(map, levels, amount, seed = newSeed()) {
+    for (const lv of levels) {
+      ruinLevel(map, lv, { amount, seed });
+      this.decorateIn(map, lv, lv.rooms.map((r) => r.id), { doors: false });
+    }
+  }
+
+  /** Ruin this level, or every level. Undo restores it. */
+  ruin(amount, { all = false } = {}) {
+    this.commit('Ruin', (map, level) => this.ruinIn(map, all ? map.levels : [level], amount), { prune: false });
+    this.status('Ruined. Undo restores it; Save a ruined copy keeps the original as it was.');
+  }
+
+  /** A ruined copy of the whole map, leaving this one alone. Returns the new map. */
+  ruinedCopy(amount) {
+    const copy = structuredClone(this.map);
+    copy.id = newId('map');
+    copy.name = `${this.map.name} (ruined)`;
+    this.ruinIn(copy, copy.levels, amount);
+    return copy;
   }
 
   decorate(tagIds, { reroll = false } = {}) {

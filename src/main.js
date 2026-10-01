@@ -8,7 +8,7 @@ import { roomKey } from './core/room-key.js';
 import { buildFoundryScene, COMPLEXITY } from './export/foundry.js';
 import { OPEN_MODES } from './render/renderer.js';
 import { WALL_TEXTURES, WALL_WIDTHS } from './render/walls.js';
-import { loadMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
+import { loadMap, saveMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
 import { LINK_TYPES, DIRS, linkRange } from './core/links.js';
 import { linkTool, edgeTool } from './editor/tools/level-tools.js';
 import { assetTool, sizeFields } from './editor/tools/asset-tool.js';
@@ -717,6 +717,43 @@ function levelSection() {
   );
 }
 
+const RUIN_AMOUNTS = [{ id: 0.35, name: 'Light' }, { id: 0.7, name: 'Heavy' }];
+
+function ruinSection() {
+  app.opts.ruinAmount ??= 0.7;
+  const amount = () => app.opts.ruinAmount;
+  return section(
+    'Ruin',
+    field('Ruin', segmented(RUIN_AMOUNTS, app.opts.ruinAmount, (v) => app.setOpt('ruinAmount', v))),
+    el('div', { class: 'actions' },
+      el('button', { onclick: () => app.ruin(amount()), title: 'Breached walls, broken doors, collapsed floor, rubble, lights out' }, 'Ruin this level'),
+      app.map.levels.length > 1 && el('button', { onclick: () => app.ruin(amount(), { all: true }) }, 'Ruin all levels'),
+      el('button', { onclick: saveRuinedCopy, title: 'Save the whole map ruined as a new file; this one stays as it is' }, 'Save a ruined copy…'),
+    ),
+    el('p', { class: 'hint' }, 'The same design, abandoned: two maps from one. Rooms remember the ruin, so rerolling keeps it.'),
+  );
+}
+
+async function saveRuinedCopy() {
+  const copy = app.ruinedCopy(app.opts.ruinAmount ?? 0.7);
+  const base = app.fileName || app.map.name;
+  try {
+    if (server) {
+      const name = await askText('Save the ruined copy as:', `${base} (ruined)`, { ok: 'Save' });
+      if (!name) return;
+      const res = await saveMapFile(name, saveMap(copy));
+      if (await ask(`Saved to ${res.path}. Open it now?`, { ok: 'Open ruined copy', cancel: 'Stay here' })) {
+        if (await confirmDiscard()) app.setMap(loadMap(copy), name);
+      }
+    } else {
+      await downloadBlob(new Blob([saveMap(copy)], { type: 'application/json' }), `${base} (ruined).map.json`);
+      app.status('Ruined copy downloaded. Open it to see it.');
+    }
+  } catch (err) {
+    await notice(`Could not save: ${err.message}`);
+  }
+}
+
 function generateSection() {
   const styles = app.setting?.generator || [];
   if (!styles.length) return null;
@@ -761,7 +798,7 @@ function renderPanel() {
   const scroll = panel.scrollTop;
   panel.replaceChildren(
     el('div', { class: 'panel-close' }, el('button', { type: 'button', onclick: () => document.body.classList.remove('panel-open') }, 'Close ✕')),
-    toolSection(), ...selectionSections().filter(Boolean), levelSection(), generateSection(), mapSection());
+    toolSection(), ...selectionSections().filter(Boolean), levelSection(), generateSection(), ruinSection(), mapSection());
   panel.scrollTop = scroll;
 }
 

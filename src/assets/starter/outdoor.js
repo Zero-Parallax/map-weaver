@@ -124,7 +124,7 @@ export default function define({ A, G }) {
     }
   });
 
-  A('tall-grass', 'Tall grass', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['forest', 'clearing', 'camp', 'farmyard', 'graveyard'], weight: 2 }, (g) => {
+  A('tall-grass', 'Tall grass', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['forest', 'clearing', 'camp', 'farmyard', 'graveyard', 'ruin'], weight: 2 }, (g) => {
     const blades = [];
     for (const [x, y] of [[26, 70], [50, 78], [72, 66], [40, 44], [64, 40]]) {
       blades.push([x, y, x - 10, y - 30], [x, y, x + 2, y - 36], [x, y, x + 12, y - 28]);
@@ -132,7 +132,7 @@ export default function define({ A, G }) {
     g.lines(blades, 'l');
   });
 
-  A('fallen-leaves', 'Fallen leaves', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['forest', 'graveyard', 'garden'] }, (g) => {
+  A('fallen-leaves', 'Fallen leaves', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['forest', 'graveyard', 'garden', 'ruin'] }, (g) => {
     for (const [x, y, a] of [[28, 30, 20], [64, 40, -30], [40, 70, 60], [76, 74, 10]]) {
       g.add(`<g transform="rotate(${a} ${x} ${y})">`).ellipse(x, y, 11, 6, 's').line(x - 11, y, x + 11, y, 't').add('</g>');
     }
@@ -215,7 +215,7 @@ export default function define({ A, G }) {
   G('barrier', 'Barrier', S, 'fence', { len: 3, style: 'barrier' }, { placement: 'free', roomTypes: ['colony-yard', 'crash-site', 'wasteland'], max: 3, cover: 'half' }, { len: [2, 5] });
   G('gantry-bridge', 'Gantry bridge', S, 'bridge', { len: 4, width: 2, style: 'metal' }, { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: MANUAL, tags: ['bridge'] }, { len: [2, 10], width: [1, 3] });
 
-  A('alien-grass', 'Alien grass', S, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['jungle', 'colony-yard'], weight: 2 }, (g) => {
+  A('alien-grass', 'Alien grass', S, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, clutter: true, roomTypes: ['jungle', 'colony-yard', 'ruin'], weight: 2 }, (g) => {
     for (const [x, y] of [[26, 66], [56, 74], [76, 50], [40, 38]]) {
       g.path(`M${x} ${y}q-12 -20 -4 -34`, 'l');
       g.path(`M${x} ${y}q10 -18 14 -30`, 'l');

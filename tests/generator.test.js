@@ -88,3 +88,44 @@ test('multi-level maps: every pair of levels is joined where both have room', as
     }
   }
 });
+
+test('ruining a level breaches walls, breaks doors, opens the floor and marks every room', async () => {
+  const { ruinLevel } = await import('../src/generator/ruin.js');
+  const style = settings[0].generator.find((g) => g.id === 'keep');
+  const map = createMap({ setting: 'classic', size: { w: 48, h: 36 } });
+  const out = generateLayout({ style, map, count: 8, seed: 3 });
+  const level = { ...map.levels[0], ...out, doors: [...out.doors] };
+  map.levels[0] = level;
+  const geo = computeLevelGeometry(level, map);
+  level.doors.push(...planDoors({ geo, targets: geo.rooms.regions.map((r) => r.index) }).map((d, i) => ({ id: 'd' + i, type: 'door', a: d.a, b: d.b })));
+  const before = level.doors.length;
+  ruinLevel(map, level, { amount: 0.8, seed: 5 });
+  assert.ok(level.doors.filter((d) => d.type === 'breach').length >= 2, 'breaches');
+  assert.ok(level.doors.length > before, 'new breaches in walls');
+  assert.ok(level.terrain.some((t) => t.kind === 'chasm'), 'a sinkhole on the ground floor');
+  assert.ok(level.rooms.every((r) => r.ruin === 0.8));
+});
+
+test('ruined rooms lose lights and gain rubble, the same on reroll-free redecoration', async () => {
+  const { buildStarterAssets } = await import('../src/assets/starter.js');
+  const { normalizeMeta } = await import('../src/assets/meta.js');
+  const { decorateRoom } = await import('../src/decorator/decorate.js');
+  const metas = buildStarterAssets().map(({ meta }) => normalizeMeta(meta).meta).filter((m) => m.settings.includes('fantasy'));
+  const map = createMap({ setting: 'fantasy', size: { w: 30, h: 30 } });
+  const level = map.levels[0];
+  level.shapes.push({ id: 's', kind: 'rect', op: 'add', walled: true, x: 2, y: 2, w: 12, h: 10 });
+  level.doors.push({ id: 'd', type: 'door', a: [2, 5], b: [2, 6] });
+  const run = (ruin) => {
+    const tag = { id: 't', type: 'great-hall', at: [5, 5], seed: 9, reroll: 0, density: 0.6, ruin };
+    level.rooms = [tag];
+    const geo = computeLevelGeometry(level, map);
+    return decorateRoom({ geo, region: geo.rooms.regions[geo.rooms.tagRegion.get('t')], tag, assets: metas, doors: level.doors, mapSeed: 1 }).placements;
+  };
+  const meta = (p) => metas.find((m) => m.id === p.asset);
+  const fresh = run(0);
+  const ruined = run(0.9);
+  const lights = (ps) => ps.filter((p) => meta(p).light).length;
+  assert.ok(lights(ruined) <= lights(fresh));
+  assert.ok(ruined.some((p) => meta(p).roomTypes.includes('ruin')), 'ruin pieces');
+  assert.deepEqual(run(0.9), ruined, 'same result again');
+});

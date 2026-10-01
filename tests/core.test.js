@@ -271,3 +271,9 @@ test('a corridor stops behind the walls of the rooms it reaches', () => {
   assert.equal(walls.length, 2);
   assert.ok(walls.every(([a, b]) => a[0] === b[0] && [7, 14].includes(a[0])));
 });
+
+test('editor modules load (catches import and syntax mistakes the browser would hit)', async () => {
+  for (const m of ['../src/editor/app.js', '../src/editor/tools/shape-tools.js', '../src/editor/tools/item-tools.js', '../src/editor/tools/terrain-tool.js', '../src/editor/tools/level-tools.js', '../src/render/export.js', '../src/render/terrain-render.js']) {
+    await import(m);
+  }
+});
