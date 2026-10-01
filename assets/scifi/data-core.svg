@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
 <title>Data core</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"data-core","name":"Data core","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["server-room","alien-ruins","command-centre"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[]}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"data-core","name":"Data core","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["server-room","alien-ruins","command-centre"],"placement":"centre","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":1,"max":1,"tags":[],"light":{"bright":1,"dim":3,"color":"#59d8ff","animation":"pulse"}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}

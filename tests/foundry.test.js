@@ -114,3 +114,33 @@ test('vision-blocking assets get walls round them', () => {
   const without = buildFoundryScene(map, { geometry: geometry(map), imagePath: () => null, resolve, assetWalls: false }).walls.length;
   assert.equal(withAssets - without, 4);
 });
+
+test('lights come from light-giving assets and difficult terrain becomes a movement-cost region', () => {
+  const map = twoLevelMap();
+  const ground = map.levels[0];
+  ground.placements.push({ id: 'p1', asset: 'torch', x: 4.5, y: 2.5, rot: 0 });
+  ground.placements.push({ id: 'p2', asset: 'rubble', x: 8.5, y: 6.5, rot: 90 });
+  ground.placements.push({ id: 'p3', asset: 'table', x: 6, y: 6, rot: 0 });
+  const metas = {
+    torch: { meta: { light: { bright: 4, dim: 8, color: '#ff9b40', animation: 'torch' }, tags: [] }, footprint: { w: 1, h: 1 } },
+    rubble: { meta: { tags: ['difficult terrain'] }, footprint: { w: 1, h: 1 } },
+    table: { meta: { tags: [] }, footprint: { w: 2, h: 1 } },
+  };
+  const scene = buildFoundryScene(map, { geometry: geometry(map), imagePath: () => 'x.png', pps: 100, resolve: (pl) => metas[pl.asset] });
+  assert.equal(scene.lights.length, 1);
+  const [light] = scene.lights;
+  assert.deepEqual([light.x, light.y], [450, 250]);
+  assert.deepEqual(light.levels, [scene.levels[0]._id]);
+  assert.equal(light.config.bright, 20); // 4 squares of 5 ft
+  assert.equal(light.config.dim, 40);
+  assert.equal(light.config.animation.type, 'torch');
+  assert.equal(scene.regions.length, 1);
+  const [region] = scene.regions;
+  assert.deepEqual(region.levels, [scene.levels[0]._id]);
+  assert.deepEqual(region.shapes, [{ type: 'rectangle', x: 800, y: 600, width: 100, height: 100, rotation: 0, hole: false, gridBased: false }]);
+  assert.equal(region.behaviors[0].type, 'modifyMovementCost');
+  assert.equal(region.behaviors[0].system.difficulties.walk, 2);
+  // Both can be turned off.
+  const bare = buildFoundryScene(map, { geometry: geometry(map), imagePath: () => 'x.png', resolve: (pl) => metas[pl.asset], lights: false, terrain: false });
+  assert.deepEqual([bare.lights.length, bare.regions.length], [0, 0]);
+});

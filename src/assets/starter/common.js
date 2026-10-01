@@ -99,7 +99,7 @@ export default function define({ A, G }) {
     g.circle(100, 34, 5, 'p');
   });
 
-  A('brazier', 'Brazier', CF, [1, 1], { placement: 'free', roomTypes: ['temple', 'throne-room', 'crypt', 'great-hall', 'cave'], max: 4 }, (g) => {
+  A('brazier', 'Brazier', CF, [1, 1], { light: { bright: 3, dim: 6, color: '#ff9b40', animation: 'torch' }, placement: 'free', roomTypes: ['temple', 'throne-room', 'crypt', 'great-hall', 'cave'], max: 4 }, (g) => {
     for (let i = 0; i < 3; i++) {
       const a = -Math.PI / 2 + (i * Math.PI * 2) / 3;
       g.line(50, 50, 50 + Math.cos(a) * 42, 50 + Math.sin(a) * 42, 'l');
@@ -110,7 +110,7 @@ export default function define({ A, G }) {
     g.circle(50, 50, 6, 'k');
   });
 
-  A('torch', 'Wall torch', CF, [1, 1], { placement: 'door', layer: 'overhead', blocksMovement: false, roomTypes: ['*'], max: 2, tags: ['light'] }, (g) => {
+  A('torch', 'Wall torch', CF, [1, 1], { light: { bright: 4, dim: 8, color: '#ff9b40', animation: 'torch' }, placement: 'door', layer: 'overhead', blocksMovement: false, roomTypes: ['*'], max: 2, tags: ['light'] }, (g) => {
     g.rect(40, 0, 20, 10, 'ko', 2);
     g.line(50, 10, 50, 26, 'l');
     flame(g, 50, 34, 14);
@@ -253,7 +253,7 @@ export default function define({ A, G }) {
     g.path('M70 60L100 90L96 128M140 70L150 110', 'l');
   });
 
-  A('mushrooms', 'Mushrooms', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['cave', 'cellar'], max: 3 }, (g) => {
+  A('mushrooms', 'Mushrooms', CF, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['cave', 'cellar'], max: 3, tags: ['difficult terrain'] }, (g) => {
     for (const [x, y, r, cls] of [[34, 36, 16, 's'], [64, 58, 20, 'o'], [36, 72, 11, 'o'], [72, 26, 9, 's']]) {
       g.circle(x, y, r, cls);
       g.circle(x - r * 0.3, y - r * 0.2, r * 0.18, 'k');
@@ -261,7 +261,7 @@ export default function define({ A, G }) {
     }
   });
 
-  A('campfire', 'Campfire', CF, [1, 1], { placement: 'centre', blocksMovement: false, roomTypes: ['cave', 'barracks'], max: 1 }, (g) => {
+  A('campfire', 'Campfire', CF, [1, 1], { light: { bright: 4, dim: 8, color: '#ff9b40', animation: 'torch' }, placement: 'centre', blocksMovement: false, roomTypes: ['cave', 'barracks'], max: 1 }, (g) => {
     for (let i = 0; i < 9; i++) {
       const a = (i * Math.PI * 2) / 9;
       g.poly(stoneShape(50 + Math.cos(a) * 36, 50 + Math.sin(a) * 36, 9, i, 6), 's');
@@ -299,7 +299,7 @@ export default function define({ A, G }) {
     g.lines(f, 't');
   });
 
-  A('candelabra', 'Candelabra', CF, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['temple', 'crypt', 'throne-room', 'library'], max: 2 }, (g) => {
+  A('candelabra', 'Candelabra', CF, [1, 1], { light: { bright: 1, dim: 3, color: '#ffc870', animation: 'torch' }, placement: 'corner', blocksMovement: false, roomTypes: ['temple', 'crypt', 'throne-room', 'library'], max: 2 }, (g) => {
     const arms = [];
     const pts = [];
     for (let i = 0; i < 5; i++) {

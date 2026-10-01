@@ -37,7 +37,7 @@ export default function define({ A, G }) {
     seat(g, 50, 62, 's', 62);
   });
 
-  A('holo-table', 'Holo table', S, [2, 2], { placement: 'centre', roomTypes: ['bridge', 'lab', 'armoury', 'command-centre'], max: 1 }, (g) => {
+  A('holo-table', 'Holo table', S, [2, 2], { light: { bright: 0, dim: 2, color: '#59d8ff' }, placement: 'centre', roomTypes: ['bridge', 'lab', 'armoury', 'command-centre'], max: 1 }, (g) => {
     g.chamfer(8, 8, 184, 184, 40, 's');
     g.circle(100, 100, 70, 'ko');
     g.circle(100, 100, 56, 'pl');
@@ -104,7 +104,7 @@ export default function define({ A, G }) {
     g.circle(66, 30, 5, 'k');
   });
 
-  A('reactor', 'Reactor core', S, [3, 3], { placement: 'centre', blocksVision: true, roomTypes: ['engine-room', 'server-room'], min: 1, max: 1 }, (g) => {
+  A('reactor', 'Reactor core', S, [3, 3], { light: { bright: 2, dim: 5, color: '#57c7ff', animation: 'pulse' }, placement: 'centre', blocksVision: true, roomTypes: ['engine-room', 'server-room'], min: 1, max: 1 }, (g) => {
     g.chamfer(6, 6, 288, 288, 64, 's');
     hazardRing(g, 150, 150, 120, 104);
     g.circle(150, 150, 96, 'ko');
@@ -160,7 +160,7 @@ export default function define({ A, G }) {
 
   G('lab-bench', 'Lab bench', S, 'counter', { len: 3, kind: 'lab' }, { placement: 'wall', roomTypes: ['lab', 'med-bay', 'cloning-lab', 'clinic'], max: 3, weight: 2 }, { len: [2, 5] });
 
-  A('specimen-tank', 'Specimen tank', S, [1, 1], { placement: 'corner', blocksVision: true, roomTypes: ['lab', 'med-bay', 'cloning-lab'], max: 4 }, (g) => {
+  A('specimen-tank', 'Specimen tank', S, [1, 1], { light: { bright: 0, dim: 2, color: '#7dffb0' }, placement: 'corner', blocksVision: true, roomTypes: ['lab', 'med-bay', 'cloning-lab'], max: 4 }, (g) => {
     g.chamfer(4, 4, 92, 92, 22, 'ko');
     g.circle(50, 50, 36, 'm');
     g.path('M40 36Q56 28 62 44Q70 60 52 66Q36 70 40 56Q46 48 40 36Z', 'k'); // the specimen
@@ -245,7 +245,7 @@ export default function define({ A, G }) {
     g.rect(16, 64, 16, 12, 's', 3);
   });
 
-  A('landing-lights', 'Landing lights', S, [1, 1], { placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['hangar', 'landing-pad'], max: 4 }, (g) => {
+  A('landing-lights', 'Landing lights', S, [1, 1], { light: { bright: 1, dim: 3, color: '#ff4040', animation: 'pulse' }, placement: 'free', layer: 'floor', blocksMovement: false, roomTypes: ['hangar', 'landing-pad'], max: 4 }, (g) => {
     for (const [x, y] of [[25, 25], [75, 25], [25, 75], [75, 75]]) {
       g.circle(x, y, 12, 'ko');
       g.circle(x, y, 5, 'p');
@@ -341,7 +341,7 @@ export default function define({ A, G }) {
     }
   });
 
-  A('data-core', 'Data core', S, [2, 2], { placement: 'centre', blocksVision: true, roomTypes: ['server-room', 'alien-ruins', 'command-centre'], min: 1, max: 1 }, (g) => {
+  A('data-core', 'Data core', S, [2, 2], { light: { bright: 1, dim: 3, color: '#59d8ff', animation: 'pulse' }, placement: 'centre', blocksVision: true, roomTypes: ['server-room', 'alien-ruins', 'command-centre'], min: 1, max: 1 }, (g) => {
     g.star(100, 100, 92, 6, 92, 's', Math.PI / 6);
     g.star(100, 100, 70, 6, 70, 'ko', Math.PI / 6);
     g.star(100, 100, 48, 6, 48, 'pl', Math.PI / 6);
@@ -375,7 +375,7 @@ export default function define({ A, G }) {
     g.poly([[76, 8], [92, 14], [86, 30], [72, 26]], 'ko');
   });
 
-  A('welding-station', 'Welding station', S, [1, 1], { placement: 'wall', roomTypes: ['workshop', 'hangar'], max: 1 }, (g) => {
+  A('welding-station', 'Welding station', S, [1, 1], { light: { bright: 1, dim: 2, color: '#9fdcff', animation: 'torch' }, placement: 'wall', roomTypes: ['workshop', 'hangar'], max: 1 }, (g) => {
     g.chamfer(8, 4, 84, 44, 10, 's');
     g.circle(28, 26, 12, 'ko');
     g.circle(62, 26, 12, 'ko');
@@ -402,7 +402,7 @@ export default function define({ A, G }) {
     g.circle(116, 124, 7, 'm');
   });
 
-  A('holo-stage', 'Holo stage', S, [2, 2], { placement: 'centre', layer: 'floor', blocksMovement: false, roomTypes: ['cantina', 'market', 'command-centre'], max: 1 }, (g) => {
+  A('holo-stage', 'Holo stage', S, [2, 2], { light: { bright: 1, dim: 3, color: '#c070ff', animation: 'pulse' }, placement: 'centre', layer: 'floor', blocksMovement: false, roomTypes: ['cantina', 'market', 'command-centre'], max: 1 }, (g) => {
     g.circle(100, 100, 90, 's');
     g.circle(100, 100, 74, 'ko');
     g.circle(100, 100, 58, 'd');
@@ -410,7 +410,7 @@ export default function define({ A, G }) {
     figure(g, 100, 100, 0.9, 'hm');
   });
 
-  A('jukebox', 'Jukebox', S, [1, 1], { placement: 'wall', roomTypes: ['cantina', 'apartment'], max: 1 }, (g) => {
+  A('jukebox', 'Jukebox', S, [1, 1], { light: { bright: 0, dim: 2, color: '#ff70c0' }, placement: 'wall', roomTypes: ['cantina', 'apartment'], max: 1 }, (g) => {
     g.path('M10 70V30Q10 4 50 4Q90 4 90 30V70Z', 's');
     g.path('M22 62V34Q22 16 50 16Q78 16 78 34V62Z', 'ko');
     for (let i = 0; i < 4; i++) g.line(32 + i * 12, 30, 32 + i * 12, 56, 'pl');
@@ -442,7 +442,7 @@ export default function define({ A, G }) {
     for (const [x, y, r] of [[36, 38, 12], [62, 36, 11], [40, 64, 11], [66, 62, 12], [50, 50, 10]]) g.circle(x, y, r, 'o');
   });
 
-  A('holo-sign', 'Holo sign', S, [1, 1], { placement: 'wall', layer: 'overhead', blocksMovement: false, roomTypes: ['market', 'cantina', 'corridor'], max: 2 }, (g) => {
+  A('holo-sign', 'Holo sign', S, [1, 1], { light: { bright: 0, dim: 2, color: '#59d8ff' }, placement: 'wall', layer: 'overhead', blocksMovement: false, roomTypes: ['market', 'cantina', 'corridor'], max: 2 }, (g) => {
     g.chamfer(6, 0, 88, 34, 10, 'ko');
     g.path('M18 26L28 8L38 26M44 8V26M52 8H66M59 8V26M74 8V26H86', 'pl');
   });
@@ -499,7 +499,7 @@ export default function define({ A, G }) {
     g.star(100, 12, 18, 8, 8, 'ko');
   });
 
-  A('ore-pile', 'Ore pile', S, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['mine', 'cargo-bay', 'workshop'], max: 4 }, (g) => {
+  A('ore-pile', 'Ore pile', S, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['mine', 'cargo-bay', 'workshop'], max: 4, tags: ['difficult terrain'] }, (g) => {
     const stones = [[30, 34, 16], [62, 30, 14], [48, 56, 18], [74, 62, 13], [28, 70, 12]];
     stones.forEach(([x, y, r], i) => g.poly(stoneShape(x, y, r, i * 3 + 1, 6), i % 2 ? 'ko' : 's'));
   });
@@ -510,7 +510,7 @@ export default function define({ A, G }) {
     g.rect(30, 30, 40, 40, 'pl', 2);
   });
 
-  A('work-lamp', 'Work lamp', S, [1, 1], { placement: 'corner', blocksMovement: false, roomTypes: ['mine', 'hangar', 'workshop', 'alien-ruins'], max: 4 }, (g) => {
+  A('work-lamp', 'Work lamp', S, [1, 1], { light: { bright: 3, dim: 6, color: '#fff2c4' }, placement: 'corner', blocksMovement: false, roomTypes: ['mine', 'hangar', 'workshop', 'alien-ruins'], max: 4 }, (g) => {
     g.lines([[50, 50, 22, 78], [50, 50, 78, 78], [50, 50, 50, 14]], 'l');
     g.circle(50, 50, 18, 'ko');
     g.circle(50, 50, 8, 'p');
@@ -538,14 +538,14 @@ export default function define({ A, G }) {
     g.path('M36 36L52 52L46 70M60 30L64 46', 'l');
   });
 
-  A('crystal-cluster', 'Crystal cluster', S, [1, 1], { placement: 'free', roomTypes: ['alien-ruins', 'mine'], max: 5, weight: 2 }, (g) => {
+  A('crystal-cluster', 'Crystal cluster', S, [1, 1], { light: { bright: 0, dim: 3, color: '#8fd9ff', animation: 'pulse' }, placement: 'free', roomTypes: ['alien-ruins', 'mine'], max: 5, weight: 2 }, (g) => {
     for (const [x, y, r, a] of [[40, 40, 26, 0.2], [66, 58, 22, 1.1], [34, 70, 16, 2.2], [68, 28, 14, 0.8]]) {
       g.poly([[x + Math.cos(a) * r, y + Math.sin(a) * r], [x + Math.cos(a + 1.9) * r * 0.5, y + Math.sin(a + 1.9) * r * 0.5], [x - Math.cos(a) * r * 0.6, y - Math.sin(a) * r * 0.6], [x + Math.cos(a - 1.9) * r * 0.5, y + Math.sin(a - 1.9) * r * 0.5]], 'o');
       g.line(x + Math.cos(a) * r, y + Math.sin(a) * r, x - Math.cos(a) * r * 0.6, y - Math.sin(a) * r * 0.6, 't');
     }
   });
 
-  A('artefact-pedestal', 'Artefact pedestal', S, [1, 1], { placement: 'centre', roomTypes: ['alien-ruins', 'lab', 'market'], max: 1 }, (g) => {
+  A('artefact-pedestal', 'Artefact pedestal', S, [1, 1], { light: { bright: 0, dim: 2, color: '#c9a0ff', animation: 'pulse' }, placement: 'centre', roomTypes: ['alien-ruins', 'lab', 'market'], max: 1 }, (g) => {
     g.star(50, 50, 44, 8, 44, 's', Math.PI / 8);
     g.star(50, 50, 30, 8, 30, 'o', Math.PI / 8);
     g.star(50, 50, 16, 5, 7, 'ko');
@@ -553,7 +553,7 @@ export default function define({ A, G }) {
 
   // ---- cloning lab --------------------------------------------------------
 
-  A('cloning-vat', 'Cloning vat', S, [1, 1], { placement: 'free', blocksVision: true, roomTypes: ['cloning-lab', 'lab', 'alien-ruins'], max: 6, weight: 3 }, (g) => {
+  A('cloning-vat', 'Cloning vat', S, [1, 1], { light: { bright: 0, dim: 2, color: '#7dffb0' }, placement: 'free', blocksVision: true, roomTypes: ['cloning-lab', 'lab', 'alien-ruins'], max: 6, weight: 3 }, (g) => {
     g.circle(50, 50, 44, 'ko');
     g.circle(50, 50, 36, 'm');
     figure(g, 50, 50, 0.7, 'o');

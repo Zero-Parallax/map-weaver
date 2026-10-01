@@ -10,6 +10,10 @@
 // A wall's direction applies to all its senses, so a railing is two walls on the same line:
 // one blocks movement both ways, the other blocks sight and light only when looking from the
 // open side (you can see down from the balcony, not up onto it).
+//
+// Also: ambient lights for assets that give light (torches, braziers, screens; asset metadata
+// light {bright, dim in squares, color, animation}) and a "modifyMovementCost" Region per level
+// covering pieces tagged "difficult terrain" (rubble, debris), doubling walking cost.
 
 import { simplify, polylineSegments, projectOnSegment, dist, sub, norm, add, scale, pointInRings } from '../core/geom.js';
 import { hash } from '../core/rng.js';
@@ -200,7 +204,7 @@ export function placementRing(pl, footprint, inset = 0.08) {
  *  imagePath(index)      path of each level's background image inside Foundry's data folder
  *  resolve(placement)    {meta, footprint} for asset walls (optional)
  */
-export function buildFoundryScene(map, { geometry, imagePath, pps = 100, complexity = 'medium', assetWalls = true, resolve = null, flipOneWay = false }) {
+export function buildFoundryScene(map, { geometry, imagePath, pps = 100, complexity = 'medium', assetWalls = true, resolve = null, flipOneWay = false, lights = true, terrain = true }) {
   const tolerance = (COMPLEXITY[complexity] || COMPLEXITY.medium).tolerance;
   const fps = map.feetPerSquare || 5;
   const ids = map.levels.map((lv) => foundryId(map.id, lv.id));
@@ -224,6 +228,8 @@ export function buildFoundryScene(map, { geometry, imagePath, pps = 100, complex
     }
     return levelWalls({ level: lv, geo: geometry(lv), pps, levelId: ids[i], tolerance, assetWalls: rings, flipOneWay });
   });
+  const lightDocs = lights && resolve ? map.levels.flatMap((lv, i) => assetLights(lv, { resolve, pps, fps, levelId: ids[i] })) : [];
+  const regions = terrain && resolve ? map.levels.flatMap((lv, i) => terrainRegions(lv, { resolve, pps, fps, levelId: ids[i] })) : [];
   const ground = map.levels.findIndex((lv) => lv.elevation === 0);
   return {
     name: map.name,
@@ -235,6 +241,82 @@ export function buildFoundryScene(map, { geometry, imagePath, pps = 100, complex
     levels,
     initialLevel: ids[Math.max(0, ground)],
     walls,
+    lights: lightDocs,
+    regions,
     flags: { 'map-weaver': { mapId: map.id, exported: new Date().toISOString(), complexity } },
   };
+}
+
+/** AmbientLight data for placed assets that give light. Ranges in squares become scene units. */
+export function assetLights(level, { resolve, pps, fps, levelId }) {
+  const out = [];
+  for (const pl of level.placements) {
+    const light = resolve(pl)?.meta.light;
+    if (!light) continue;
+    out.push({
+      _id: foundryId(levelId, 'light', pl.id || `${pl.x},${pl.y}`),
+      x: Math.round(pl.x * pps),
+      y: Math.round(pl.y * pps),
+      elevation: level.elevation * fps,
+      levels: [levelId],
+      rotation: 0,
+      walls: true,
+      vision: false,
+      hidden: false,
+      config: {
+        bright: (light.bright || 0) * fps,
+        dim: Math.max(light.dim || 0, light.bright || 0) * fps,
+        color: light.color || null,
+        alpha: 0.35,
+        angle: 360,
+        coloration: 1,
+        attenuation: 0.6,
+        luminosity: 0.5,
+        animation: { type: light.animation || null, speed: 3, intensity: 3, reverse: false },
+      },
+      flags: { 'map-weaver': { asset: pl.asset } },
+    });
+  }
+  return out;
+}
+
+/** One Region per level over pieces tagged "difficult terrain": walking there costs double. */
+export function terrainRegions(level, { resolve, pps, fps, levelId }) {
+  const shapes = [];
+  for (const pl of level.placements) {
+    const r = resolve(pl);
+    if (!r?.meta.tags?.includes('difficult terrain')) continue;
+    const quarter = Math.round((((pl.rot || 0) % 180) + 180) % 180 / 90) === 1;
+    const w = quarter ? r.footprint.h : r.footprint.w;
+    const h = quarter ? r.footprint.w : r.footprint.h;
+    shapes.push({
+      type: 'rectangle',
+      x: Math.round((pl.x - w / 2) * pps),
+      y: Math.round((pl.y - h / 2) * pps),
+      width: Math.round(w * pps),
+      height: Math.round(h * pps),
+      rotation: 0,
+      hole: false,
+      gridBased: false,
+    });
+  }
+  if (!shapes.length) return [];
+  return [{
+    _id: foundryId(levelId, 'terrain'),
+    name: `Difficult terrain (${level.name})`,
+    color: '#b07a3c',
+    shapes,
+    elevation: { bottom: level.elevation * fps, top: (level.elevation + level.height) * fps },
+    levels: [levelId],
+    behaviors: [{
+      _id: foundryId(levelId, 'terrain', 'cost'),
+      name: 'Difficult terrain',
+      type: 'modifyMovementCost',
+      system: { difficulties: { walk: 2, crawl: 2, climb: 2, jump: 2, swim: 2, burrow: 2 } },
+      disabled: false,
+    }],
+    visibility: 0,
+    hidden: false,
+    locked: false,
+  }];
 }

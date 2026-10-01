@@ -23,7 +23,7 @@ export default function define({ A, G }) {
     }
   });
 
-  A('fireplace', 'Fireplace', F, [2, 1], { placement: 'wall', roomTypes: ['tavern', 'great-hall', 'bedroom', 'kitchen', 'library'], max: 1 }, (g) => {
+  A('fireplace', 'Fireplace', F, [2, 1], { light: { bright: 3, dim: 6, color: '#ff8a30', animation: 'torch' }, placement: 'wall', roomTypes: ['tavern', 'great-hall', 'bedroom', 'kitchen', 'library'], max: 1 }, (g) => {
     g.rect(6, 0, 188, 58, 's', 2);
     g.lines([[6, 20, 46, 20], [154, 20, 194, 20], [6, 40, 46, 40], [154, 40, 194, 40], [26, 0, 26, 20], [174, 0, 174, 20], [36, 20, 36, 40], [164, 20, 164, 40]], 't');
     g.rect(46, 0, 108, 44, 'ko');
@@ -45,7 +45,7 @@ export default function define({ A, G }) {
 
   G('kitchen-counter', 'Kitchen counter', F, 'counter', { len: 3, kind: 'kitchen' }, { placement: 'wall', roomTypes: ['kitchen'], max: 2 }, { len: [2, 5] });
 
-  A('cauldron', 'Cauldron', F, [1, 1], { placement: 'centre', roomTypes: ['kitchen', 'cave', 'library'], max: 1 }, (g) => {
+  A('cauldron', 'Cauldron', F, [1, 1], { light: { bright: 1, dim: 2, color: '#ff8a30', animation: 'torch' }, placement: 'centre', roomTypes: ['kitchen', 'cave', 'library'], max: 1 }, (g) => {
     g.lines([[50, 12, 50, 2], [18, 70, 8, 80], [82, 70, 92, 80]], 'l');
     g.circle(50, 50, 38, 'ko');
     g.circle(50, 50, 29, 'm');
@@ -95,7 +95,7 @@ export default function define({ A, G }) {
     g.line(62, 80, 50, 96, 'l');
   });
 
-  A('forge', 'Forge', F, [2, 2], { placement: 'wall', roomTypes: ['smithy'], min: 1, max: 1 }, (g) => {
+  A('forge', 'Forge', F, [2, 2], { light: { bright: 3, dim: 6, color: '#ff6a2a', animation: 'torch' }, placement: 'wall', roomTypes: ['smithy'], min: 1, max: 1 }, (g) => {
     g.rect(60, 0, 80, 22, 'ko', 2); // chimney
     g.rect(8, 16, 184, 140, 's', 6);
     const bricks = [];

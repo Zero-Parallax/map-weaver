@@ -237,7 +237,7 @@ function exportDialog() {
 // ---- Foundry export --------------------------------------------------------
 
 const FOUNDRY_KEY = 'map-weaver.foundry';
-const foundryOpts = { pps: 100, folder: 'worlds/my-world/map-weaver/', complexity: 'medium', assetWalls: true, flipOneWay: false };
+const foundryOpts = { pps: 100, folder: 'worlds/my-world/map-weaver/', complexity: 'medium', assetWalls: true, flipOneWay: false, lights: true, terrain: true };
 try {
   Object.assign(foundryOpts, JSON.parse(localStorage.getItem(FOUNDRY_KEY) || '{}'));
 } catch {
@@ -275,6 +275,7 @@ function foundryDialog() {
       const scene = buildFoundryScene(map, {
         geometry: (lv) => app.geometry(lv), imagePath: (i) => folder + files[i], pps: foundryOpts.pps,
         complexity: foundryOpts.complexity, assetWalls: foundryOpts.assetWalls, resolve: (pl) => assets.resolve(pl), flipOneWay: foundryOpts.flipOneWay,
+        lights: foundryOpts.lights, terrain: foundryOpts.terrain,
       });
       const jsonName = `${slug(map.name)}.foundry-scene.json`;
       const sceneBlob = new Blob([JSON.stringify(scene, null, 1)], { type: 'application/json' });
@@ -306,6 +307,8 @@ function foundryDialog() {
     field('Wall complexity', select(Object.entries(COMPLEXITY).map(([id, c]) => ({ id, name: c.name })), foundryOpts.complexity, (v) => (foundryOpts.complexity = v)),
       'How closely walls follow curves and cave outlines.'),
     checkbox('Walls round pillars, statues and other vision-blocking assets', foundryOpts.assetWalls, (v) => (foundryOpts.assetWalls = v)),
+    checkbox('Lights from torches, fires, braziers and glowing screens', foundryOpts.lights, (v) => (foundryOpts.lights = v)),
+    checkbox('Difficult terrain regions over rubble and debris (double movement cost)', foundryOpts.terrain, (v) => (foundryOpts.terrain = v)),
     checkbox('Flip one-way railing sight (if Foundry blocks the wrong side)', foundryOpts.flipOneWay, (v) => (foundryOpts.flipOneWay = v)),
     status,
     el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, 'Close'), go),

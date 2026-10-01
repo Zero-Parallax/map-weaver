@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
 <title>Cloning vat</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"cloning-vat","name":"Cloning vat","settings":["scifi"],"footprint":{"w":1,"h":1},"roomTypes":["cloning-lab","lab","alien-ruins"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":3,"min":0,"max":6,"tags":[]}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"cloning-vat","name":"Cloning vat","settings":["scifi"],"footprint":{"w":1,"h":1},"roomTypes":["cloning-lab","lab","alien-ruins"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":3,"min":0,"max":6,"tags":[],"light":{"bright":0,"dim":2,"color":"#7dffb0"}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}

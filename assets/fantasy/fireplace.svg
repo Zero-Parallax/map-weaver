@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Fireplace</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"fireplace","name":"Fireplace","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["tavern","great-hall","bedroom","kitchen","library"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"fireplace","name":"Fireplace","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["tavern","great-hall","bedroom","kitchen","library"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[],"light":{"bright":3,"dim":6,"color":"#ff8a30","animation":"torch"}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
