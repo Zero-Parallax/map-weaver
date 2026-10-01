@@ -26,26 +26,33 @@ Hosted as plain files (no `node serve.js`), the app runs in browser-only mode: *
 downloads the map file, **Open** loads one, exports download, and importing your own PNG art is
 switched off. The starter assets come from `assets/index.json`.
 
+## Using it
+
+A new map opens on a start screen: **Generate** one (setting, style, rooms, levels), start a
+**blank map** and draw your own, or **open** a saved one. The top bar has **File**, **Save**,
+**Generate**, **Ruin** and **Export** (PNG or Foundry). After generating, rerolling a room or
+ruining, a bar offers **↻ Try another** and **Undo**.
+
+**Right-click** (or **press and hold** on a phone) with the Select tool for a quick menu: set the
+room's type, reroll it, add doors, clear it, turn or duplicate furniture, change a door's type,
+delete.
+
+The panel has three tabs: **Edit** (the tool's options and whatever is selected), **Levels**
+and **Map**. A selected room shows its type, how much furniture and **Reroll**; name, GM
+notes, clutter, combat-ready, wall look and the rest are under **More…**.
+
 ## Drawing
 
 | Tool | Key | What it does |
 | --- | --- | --- |
-| Select | V | Select a room, wall or door; drag to move; Delete removes |
-| Rectangle | R | Drag a room. Corner rounding in the panel |
-| Circle | C | Drag from the centre |
-| Polygon | P | Click corners at any angle; click the first corner or press Enter to close |
-| Cave | K | Drag freehand; the outline is smoothed and roughened |
-| Floor brush | B | Paint floor squares |
-| Terrain | N | Paint water, deep water, lava, chasms, ice, mud, roads, paving, grass, sand: brush, freehand area, or a river / road along a path. Alt or right-click erases |
+| Select | V | Select a room, wall, door or asset; drag to move; Delete removes; right-click / hold for the quick menu |
+| Room | R | Rect (R), Circle (C), Polygon (P), Cave (K), Paint squares (B), or Set type (T) of a room by clicking in it |
 | Corridor | H | Click along a corridor 1–3 squares wide (straight or 45°); it stops behind the walls of the rooms it reaches. Double-click or Enter to finish |
-| Wall | W | Click grid points to chain walls, including diagonals |
-| Arc wall | A | Centre, start point, then sweep round |
-| Door | D | Click a wall. Door, double, secret, locked, portcullis, sliding, archway, window |
-| Stairs & lifts | S | Stairs (drag foot to top), spiral stairs, ladders, lifts, trapdoors |
-| Balcony edge | G | Click an edge of an open-to-below area: railing, full wall or open drop |
-| Room type | T | Click inside a room to tag it; right-click clears |
+| Wall | W | Straight (W): click grid points to chain walls, including diagonals. Arc (A): centre, start point, then sweep round |
+| Door | D | Click a wall. Door, double, secret, locked, portcullis, sliding, archway, window, breach |
+| Terrain | N | Paint water, deep water, lava, chasms, ice, mud, roads, paving, grass, sand: brush, freehand area, or a river / road along a path. Alt or right-click erases |
+| Stairs & edges | S | Stairs & lifts (S): stairs (drag foot to top), spiral stairs, ladders, lifts, trapdoors. Balcony edges (G): railing, full wall or open drop round open-to-below areas |
 | Assets | Q | Pick from the library and click to place. Right-click or `]` turns 90°, Shift+`[` `]` 15° |
-| Erase | E | Click a door, wall or shape to delete it |
 
 - **Alt** while drawing a shape: cut away floor instead of adding it.
 - **Shift**: snap to half squares. **Ctrl**: no snapping.
@@ -73,7 +80,7 @@ switched off. The starter assets come from `assets/index.json`.
 
 ## Outdoor maps and terrain
 
-Set a level's **Outdoors** ground in the Levels panel (grass, dirt, sand, snow, bare rock,
+Set a level's **Outdoors** ground in the Levels tab (grass, dirt, sand, snow, bare rock,
 deck plating): the whole map becomes walkable ground with a matching texture, its edge is no
 longer a wall, and anything you draw becomes a building standing on it. Tag the open ground
 with an outdoor room type (forest, clearing, campsite, graveyard, farmyard, garden; alien
@@ -86,9 +93,8 @@ stone, metal gantry) and stepping stones are in the asset library to place by ha
 
 ## Generating a level
 
-The **Generate** section of the panel replaces the current level with a new layout: pick a
-style and how many rooms, then **Generate level**. Each click gives a new layout (Undo goes
-back). Rooms are typed from the setting, joined with doors, decorated and given clutter; tick
+**Generate** (top bar, or the start screen) replaces the current level with a new layout: pick
+a setting, a style and how many rooms. **↻ Try another** gives a new layout (Undo goes back). Rooms are typed from the setting, joined with doors, decorated and given clutter; tick
 **Combat-ready rooms** to spread cover too. The map grows if it is too small.
 
 | Setting | Styles |
@@ -113,7 +119,7 @@ setting's `setting.json` (`generator`), so new ones need no code.
 
 ## Ruins
 
-The **Ruin** section turns a finished map into its abandoned version: walls breached, doors
+**Ruin** (top bar) turns a finished map into its abandoned version: walls breached, doors
 broken in or gone, a sinkhole and creeping grass on the ground floor, floors fallen through
 upstairs, most lights out, furniture lost or knocked askew, rubble heaps, fallen beams and
 more clutter. **Ruin this level** or **Ruin all levels** (Undo restores), or **Save a ruined
@@ -131,7 +137,7 @@ they line up.
 
 **Version**: **Player** leaves out secret doors (the wall shows solid) and traps; **GM** shows
 everything, puts a number on each room and adds a room key down the right-hand side with each
-room's name and GM notes (set them in the Room section); **Both** writes both files (`-player`,
+room's name and GM notes (set them under More… when a room is selected); **Both** writes both files (`-player`,
 `-gm`). Corridors aren't numbered. The editor's room labels show the same numbers.
 
 ## Foundry VTT (v14, built-in Scene Levels)
@@ -159,9 +165,9 @@ create a scene, right-click it and choose **Import Data**, then pick the `.found
 
 ## Decorating
 
-Tag a room (Room type tool) and it is furnished straight away; untick "Decorate rooms when
+Tag a room (Room tool, Set type, or the quick menu) and it is furnished straight away; untick "Decorate rooms when
 tagged" to do it by hand. Select a room to change its density (light by default), decorate
-again, **Reroll** for a new layout, or **Clear**. The Levels panel decorates or rerolls every
+again, **Reroll** for a new layout, or **Clear**. The Levels tab decorates or rerolls every
 room on the level. Pieces you place or move by hand are kept when a room is rerolled.
 
 The decorator follows each asset's placement rule, never overlaps pieces, keeps two squares
@@ -179,19 +185,19 @@ Tick **Combat ready** on a room (or when generating) and the decorator adds free
 cover until nearly all open floor is within two squares of something to hide behind. Each
 added piece keeps a clear square all round it, so there are lanes to move through, and the
 room stays fully walkable. Every asset has a cover level: full if it blocks sight, half if it
-blocks movement (or as set in its metadata). The Map section's **Tactical overlay** shows
+blocks movement (or as set in its metadata). The Map tab's **Tactical overlay** shows
 cover and difficult terrain square by square.
 
 ### Automatic doors
 
 Tagging or decorating a room also gives it doors into its neighbours (untick "Add doors to
-neighbouring rooms" in the Room type tool to stop this). Rooms are joined like a tree: each
+neighbouring rooms" in the Room tool's Set type mode to stop this). Rooms are joined like a tree: each
 pair of rooms that can't already reach each other gets one door, so there are no needless
 extra doors. Corridors and halls (and any long, narrow space, tagged or not) are joined
 first, so rooms open onto them rather than into each other. A door goes where the shared wall
 has the most room either side, away from other doors and furniture. Each room gets its doors
-once: delete one you don't want and it stays deleted. **Add doors** (Room section, or the
-Levels panel for every room) runs it again on demand. The door type comes from the setting
+once: delete one you don't want and it stays deleted. **Add doors** (quick menu, a room's More…, or the
+Levels tab for every room) runs it again on demand. The door type comes from the setting
 (sliding doors in sci-fi; portcullises for prisons, locked doors for detention and armouries).
 
 ## Assets

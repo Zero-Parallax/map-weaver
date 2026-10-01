@@ -430,9 +430,14 @@ export class App {
     this.tool = tool;
     this.hoverItem = null;
     this.hoverRegion = -1;
-    this.canvas.dataset.tool = tool.id;
+    this.canvas.dataset.tool = this.innerTool().id;
     this.onChange('tool');
     this.requestRender();
+  }
+
+  /** The tool doing the work: a grouped tool's current mode, or the tool itself. */
+  innerTool() {
+    return this.tool?.inner ? this.tool.inner(this) : this.tool;
   }
 
   status(message) {
@@ -673,10 +678,29 @@ export class App {
     let toolActive = false; // the tool has seen a pointerdown
     let ignoreUntilClear = false; // after a gesture, ignore fingers until all are lifted
 
+    let hold = null; // a finger held still with the select tool opens the context menu
     const startTool = (e) => {
       toolActive = true;
       this.tool.down?.(this, this.makeEvent(e));
       this.requestRender();
+      if (e.pointerType === 'touch' && this.tool.id === 'select' && this.onContextMenu) {
+        clearTimeout(hold?.timer);
+        hold = {
+          x: e.clientX,
+          y: e.clientY,
+          timer: setTimeout(() => {
+            hold = null;
+            this.tool.cancel?.(this);
+            toolActive = false;
+            ignoreUntilClear = true;
+            this.onContextMenu(this.makeEvent(e));
+          }, 520),
+        };
+      }
+    };
+    const dropHold = () => {
+      clearTimeout(hold?.timer);
+      hold = null;
     };
     const flushPending = () => {
       if (!pending) return;
@@ -697,6 +721,7 @@ export class App {
       if (e.pointerType === 'touch') {
         touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
         if (ignoreUntilClear) return;
+        if (touches.size === 2) dropHold();
         if (touches.size === 2 && !toolActive) {
           if (pending) clearTimeout(pending.timer);
           pending = null;
@@ -708,6 +733,10 @@ export class App {
           const snapshot = { clientX: e.clientX, clientY: e.clientY, button: 0, pointerType: 'touch', shiftKey: false, altKey: false, ctrlKey: false, metaKey: false };
           pending = { e: snapshot, x: e.clientX, y: e.clientY, timer: setTimeout(flushPending, 120) };
         }
+        return;
+      }
+      if (e.button === 2 && this.tool.id === 'select' && this.onContextMenu) {
+        this.onContextMenu(this.makeEvent(e));
         return;
       }
       if (e.button === 1 || (e.button === 0 && this.spaceDown)) {
@@ -733,6 +762,7 @@ export class App {
           this.requestRender();
           return;
         }
+        if (hold && Math.hypot(e.clientX - hold.x, e.clientY - hold.y) > 8) dropHold();
         if (ignoreUntilClear) return;
         if (pending && Math.hypot(e.clientX - pending.x, e.clientY - pending.y) > 8) flushPending();
         if (pending) return;
@@ -750,6 +780,7 @@ export class App {
     });
     const end = (e) => {
       if (e.pointerType === 'touch') {
+        dropHold();
         touches.delete(e.pointerId);
         if (gesture) {
           gesture = null;
@@ -838,7 +869,16 @@ export class App {
     if (e.key === 'PageDown') return this.setLevel(this.levelIndex - 1), true;
     if (e.key === '+' || e.key === '=') return this.zoomAt(this.canvas.clientWidth / 2, this.canvas.clientHeight / 2, 1.25), true;
     if (e.key === '-') return this.zoomAt(this.canvas.clientWidth / 2, this.canvas.clientHeight / 2, 0.8), true;
-    const tool = this.tools.find((t) => t.key === e.key.toLowerCase());
+    // A mode's own key (C for circle) picks the grouped tool and that mode.
+    const k = e.key.toLowerCase();
+    for (const t of this.tools) {
+      const mode = t.modes?.find((m) => m.key === k);
+      if (!mode) continue;
+      this.setTool(t);
+      t.setMode(this, mode.id);
+      return true;
+    }
+    const tool = this.tools.find((t) => t.key === k);
     if (tool) return this.setTool(tool), true;
     return false;
   }
@@ -959,7 +999,7 @@ export class App {
 
   drawRoomOverlays(ctx, geo, style) {
     const paths = levelPaths(geo, style, this.map);
-    const showTypes = this.tool.id === 'room';
+    const showTypes = this.tool.id === 'rooms';
     ctx.save();
     ctx.clip(paths.floor, 'evenodd');
     if (showTypes) {

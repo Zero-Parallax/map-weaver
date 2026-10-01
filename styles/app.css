@@ -582,13 +582,7 @@ dialog menu {
   }
 
   .panel-close {
-    display: flex;
-    justify-content: flex-end;
-    position: sticky;
-    top: 0;
-    padding: 6px 10px;
-    background: var(--panel);
-    z-index: 1;
+    display: block;
   }
 
   .action-bar {
@@ -640,4 +634,138 @@ dialog menu {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* ---- simpler interface: tabs, menus, More…, Try another, start screen ---- */
+
+.panel-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  margin: -1px 0 0;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-tabs .segmented {
+  flex: 1;
+}
+
+details.more {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+details.more > summary {
+  cursor: pointer;
+  color: var(--muted);
+  padding: 4px 0;
+  user-select: none;
+}
+
+details.more[open] > summary {
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+details.more section {
+  padding: 0;
+  border: 0;
+}
+
+.menu-pop {
+  position: fixed;
+  z-index: 50;
+  min-width: 180px;
+  max-width: min(280px, 92vw);
+  max-height: 70dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+.menu-pop button {
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 8px 10px;
+  border-radius: 5px;
+}
+
+.menu-pop button:hover,
+.menu-pop button.on {
+  background: var(--line);
+}
+
+.menu-pop button.danger {
+  color: #ff7b7b;
+}
+
+.menu-heading {
+  padding: 6px 10px 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#topbar button.accent {
+  border-color: var(--accent);
+  color: #fff;
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.again-bar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px 6px 12px;
+  background: rgba(29, 31, 35, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  max-width: calc(100% - 16px);
+  white-space: nowrap;
+}
+
+.again-bar[hidden] {
+  display: none;
+}
+
+.again-bar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+
+.start-dialog {
+  width: min(460px, 95vw);
+}
+
+.start-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+}
+
+.start-card h3 {
+  margin: 0 0 8px;
+}
+
+.start-card .actions {
+  flex-wrap: wrap;
 }

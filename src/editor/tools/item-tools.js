@@ -225,23 +225,3 @@ export const selectTool = {
     if (dx || dy) app.drawItemOutline(ctx, this.drag.hit, dx, dy, '#2a9df4');
   },
 };
-
-// ---- erase ---------------------------------------------------------------
-
-export const eraseTool = {
-  id: 'erase',
-  label: 'Erase',
-  key: 'e',
-  hint: 'Click a door, wall or shape to delete it.',
-  options: null,
-  move(app, ev) {
-    app.hoverItem = app.hitTest(ev.world);
-    app.requestRender();
-  },
-  down(app, ev) {
-    if (ev.button !== 0) return;
-    const hit = app.hitTest(ev.world);
-    if (hit) app.deleteItem(hit);
-    app.hoverItem = app.hitTest(ev.world);
-  },
-};

@@ -386,14 +386,21 @@ function corridorPoint(ev, width, last) {
   return p;
 }
 
+/** Room type for new corridors: 'corridor' if the setting has it, until the user picks another. */
+function corridorType(app) {
+  if (app.opts.corridorType === undefined) {
+    app.opts.corridorType = (app.setting?.roomTypes || []).some((t) => t.id === 'corridor') ? 'corridor' : '';
+  }
+  return app.opts.corridorType;
+}
+
 export const corridorTool = {
   id: 'corridor',
   label: 'Corridor',
   key: 'h',
   hint: 'Click along the corridor (straight or 45°); it stops at the rooms it reaches. Double-click, Enter or right-click to finish. Ctrl: free angles.',
   options: (app) => {
-    const types = app.setting?.roomTypes || [];
-    if (app.opts.corridorType === undefined) app.opts.corridorType = types.some((t) => t.id === 'corridor') ? 'corridor' : '';
+    corridorType(app);
     return el('div', {},
       field('Width', segmented(CORRIDOR_WIDTHS, app.opts.corridorWidth, (v) => app.setOpt('corridorWidth', v))),
       roomTypeField(app, 'corridorType'));
@@ -439,7 +446,7 @@ export const corridorTool = {
         for (let k = 0; k <= n; k++) samples.push(lerp(pts[i - 1], pts[i], k / n));
       }
       const fresh = samples.map((p) => [p[0] + 0.013, p[1] + 0.017]).filter((p) => !pointInRings(p, before));
-      tagNewRooms(app, map, level, fresh, app.opts.corridorType, { minVotes: 4 });
+      tagNewRooms(app, map, level, fresh, corridorType(app), { minVotes: 4 });
     });
   },
   cancel() {

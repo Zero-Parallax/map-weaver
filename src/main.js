@@ -16,18 +16,46 @@ import { AssetLibrary } from './assets/library.js';
 import { ask, askText, notice } from './editor/ask.js';
 import { regionAt } from './core/rooms.js';
 import { DENSITY, DEFAULT_DENSITY, CLUTTER, DEFAULT_CLUTTER } from './decorator/decorate.js';
-import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
+import { selectTool, doorTool, roomTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, joinControl } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
 import { terrainTool } from './editor/tools/terrain-tool.js';
+import { groupedTool } from './editor/tools/grouped.js';
 import { GROUNDS } from './core/terrain.js';
 
+// Eight tools. Related ones share a button as modes; their old keys still pick the mode.
+const roomsTool = groupedTool({
+  id: 'rooms', label: 'Room', key: 'r', optKey: 'roomShape',
+  hint: 'Draw rooms (rectangle, circle, polygon, cave, painted squares) or set the type of a room.',
+  modes: [
+    { id: 'rect', name: 'Rect', tool: rectTool, key: 'r' },
+    { id: 'circle', name: 'Circle', tool: circleTool, key: 'c' },
+    { id: 'poly', name: 'Polygon', tool: polyTool, key: 'p' },
+    { id: 'cave', name: 'Cave', tool: caveTool, key: 'k' },
+    { id: 'paint', name: 'Paint', tool: brushTool, key: 'b' },
+    { id: 'type', name: 'Set type', tool: roomTool, key: 't' },
+  ],
+});
+const wallsTool = groupedTool({
+  id: 'walls', label: 'Wall', key: 'w', optKey: 'wallMode',
+  hint: 'Draw walls: straight between grid points, or arcs.',
+  modes: [
+    { id: 'line', name: 'Straight', tool: wallTool, key: 'w' },
+    { id: 'arc', name: 'Arc', tool: arcTool, key: 'a' },
+  ],
+});
+const levelsTool = groupedTool({
+  id: 'levels', label: 'Stairs & edges', key: 's', optKey: 'levelMode',
+  hint: 'Stairs, ladders and lifts between levels; railings, walls or drops round open areas.',
+  modes: [
+    { id: 'link', name: 'Stairs & lifts', tool: linkTool, key: 's' },
+    { id: 'edge', name: 'Balcony edges', tool: edgeTool, key: 'g' },
+  ],
+});
 const TOOL_GROUPS = [
   [selectTool],
-  [rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, terrainTool],
-  [wallTool, arcTool, doorTool],
-  [linkTool, edgeTool],
-  [roomTool, assetTool, eraseTool],
+  [roomsTool, corridorTool, wallsTool, doorTool],
+  [terrainTool, levelsTool, assetTool],
 ];
 const $ = (id) => document.getElementById(id);
 
@@ -321,16 +349,21 @@ function foundryDialog() {
 }
 
 $('file-buttons').append(
-  ...[
-    el('button', { onclick: async () => (await confirmDiscard()) && app.newMap(app.map.setting), title: 'New map' }, 'New'),
-    el('button', { onclick: openDialog, title: 'Open (Ctrl+O)' }, 'Open'),
-    el('button', { onclick: () => save(), title: server ? 'Save (Ctrl+S)' : 'Download the map file (Ctrl+S)' }, 'Save'),
-    server && el('button', { onclick: () => save(true) }, 'Save as'),
-    server && el('button', { onclick: download, title: 'Download the map file' }, 'Download'),
-    server && el('button', { onclick: importFile, title: 'Load a map file from disk' }, 'Import'),
-    el('button', { onclick: () => exportDialog(), title: 'Export levels as PNG images (Ctrl+E)' }, 'Export PNG'),
-    el('button', { onclick: () => foundryDialog(), title: 'Export a Foundry VTT v14 scene with levels and walls' }, 'Foundry'),
-  ].filter(Boolean),
+  menuButton('File', () => [
+    { label: 'New map…', run: () => startDialog('new') },
+    { label: 'Open…', run: openDialog },
+    { label: server ? 'Save' : 'Save (download)', run: () => save() },
+    server && { label: 'Save as…', run: () => save(true) },
+    server && { label: 'Download map file', run: download },
+    server && { label: 'Import map file…', run: importFile },
+  ]),
+  el('button', { onclick: () => save(), title: server ? 'Save (Ctrl+S)' : 'Download the map file (Ctrl+S)' }, 'Save'),
+  el('button', { class: 'accent', onclick: () => startDialog('generate'), title: 'Generate rooms, corridors, doors and decoration' }, 'Generate'),
+  el('button', { onclick: ruinDialog, title: 'Turn this map into its ruined version' }, 'Ruin'),
+  menuButton('Export', () => [
+    { label: 'PNG image…', run: exportDialog },
+    { label: 'Foundry VTT scene…', run: foundryDialog },
+  ]),
 );
 const undoBtn = el('button', { onclick: () => app.undo(), title: 'Undo (Ctrl+Z)' }, 'Undo');
 const redoBtn = el('button', { onclick: () => app.redo(), title: 'Redo (Ctrl+Y)' }, 'Redo');
@@ -387,8 +420,132 @@ function section(title, ...children) {
 
 function toolSection() {
   const t = app.tool;
-  return section(t.label, el('p', { class: 'hint' }, t.hint), t.options?.(app));
+  // With something selected, the select tool's instructions only get in the way.
+  if (t.id === 'select' && app.selection) return null;
+  return section(t.label, t.options?.(app), el('p', { class: 'hint' }, t.hintFor ? t.hintFor(app) : t.hint));
 }
+
+// ---- menus (top bar and right-click / long-press) ---------------------------
+
+let openPop = null;
+function closeMenu() {
+  openPop?.remove();
+  openPop = null;
+  for (const b of document.querySelectorAll('.menu-button[data-open]')) delete b.dataset.open;
+}
+/** A small menu at screen x, y. items: {label, run, danger, heading} (falsy entries skipped). */
+function openMenu(x, y, items) {
+  closeMenu();
+  const pop = el('div', { class: 'menu-pop', role: 'menu' });
+  const fill = (list) => pop.replaceChildren(...list.filter(Boolean).map((it) => (it.heading
+    ? el('div', { class: 'menu-heading' }, it.heading)
+    : el('button', {
+      type: 'button', class: it.danger ? 'danger' : it.on ? 'on' : '', disabled: !!it.disabled,
+      onclick: () => {
+        if (it.sub) return fill([{ heading: it.label.replace(/ ▸$/, '') }, ...it.sub()]);
+        closeMenu();
+        it.run?.();
+      },
+    }, it.label))));
+  fill(items);
+  document.body.append(pop);
+  const r = pop.getBoundingClientRect();
+  pop.style.left = `${Math.max(8, Math.min(x, innerWidth - r.width - 8))}px`;
+  pop.style.top = `${Math.max(8, Math.min(y, innerHeight - r.height - 8))}px`;
+  openPop = pop;
+}
+addEventListener('pointerdown', (e) => {
+  if (openPop && !openPop.contains(e.target) && !e.target.closest?.('.menu-button')) closeMenu();
+}, true);
+addEventListener('keydown', (e) => e.key === 'Escape' && closeMenu());
+
+function menuButton(label, items) {
+  const b = el('button', {
+    type: 'button', class: 'menu-button',
+    onclick: () => {
+      if (openPop && b.dataset.open) {
+        delete b.dataset.open;
+        return closeMenu();
+      }
+      const r = b.getBoundingClientRect();
+      openMenu(r.left, r.bottom + 4, items());
+      b.dataset.open = '1';
+    },
+  }, `${label} ▾`);
+  return b;
+}
+
+// ---- "Try another" after generating, rerolling or ruining -------------------
+
+const againBar = el('div', { class: 'again-bar', hidden: true });
+let againRev = -1;
+function hideAgain() {
+  againBar.hidden = true;
+}
+/** Show a floating bar to repeat the last action with a new roll, or undo it. */
+function offerAgain(label, again) {
+  againBar.replaceChildren(
+    el('span', {}, label),
+    el('button', { type: 'button', class: 'primary', onclick: again }, '↻ Try another'),
+    el('button', { type: 'button', onclick: () => { app.undo(); hideAgain(); } }, 'Undo'),
+    el('button', { type: 'button', title: 'Keep it', onclick: hideAgain }, '✓'),
+  );
+  againBar.hidden = false;
+  againRev = app.rev;
+}
+
+function rerollRoom(tagId) {
+  app.decorate([tagId], { reroll: true });
+  offerAgain('New layout for this room.', () => rerollRoom(tagId));
+}
+
+// ---- context menu ------------------------------------------------------------
+
+app.onContextMenu = (ev) => {
+  const hit = app.hitTest(ev.world);
+  app.select(hit ? { ...hit, at: ev.world } : null);
+  const r = app.canvas.getBoundingClientRect();
+  const x = r.left + ev.screen[0];
+  const y = r.top + ev.screen[1];
+  const del = { label: 'Delete', danger: true, run: () => app.deleteSelection() };
+  if (!hit) return openMenu(x, y, [{ label: 'Generate…', run: () => startDialog('generate') }, { label: 'Fit map', run: () => app.fitView() }]);
+  // Room actions for the room under the pointer, whatever was clicked in it.
+  const rooms = app.geometry().rooms;
+  const index = regionAt(rooms, ev.world);
+  const tag = rooms.regions[index]?.tag;
+  const types = app.setting?.roomTypes || [];
+  const roomItems = index < 0 ? [] : [
+    { label: `${tag ? app.roomTypeName(tag.type) : 'Set room type'} ▸`, sub: () => types.map((t) => ({ label: t.name, on: t.id === tag?.type, run: () => app.commit('Tag room', (map, level) => {
+      const nt = tagRegion(level, rooms, index, t.id, ev.world);
+      app.tagged(map, level, [nt.id]);
+    }) })) },
+    tag && { label: 'Reroll layout', run: () => rerollRoom(tag.id) },
+    tag && { label: 'Add doors', run: () => app.addDoors([tag.id]) },
+    tag && { label: 'Clear decoration', run: () => app.clearDecoration([tag.id]) },
+  ];
+  if (hit.kind === 'placement') {
+    return openMenu(x, y, [
+      { label: 'Turn left', run: () => app.rotateSelection(-90) },
+      { label: 'Turn right', run: () => app.rotateSelection(90) },
+      { label: 'Duplicate', run: () => app.duplicateSelection() },
+      del,
+      roomItems.length && { heading: 'Room' },
+      ...roomItems,
+    ]);
+  }
+  if (hit.kind === 'door') {
+    const door = app.findItem(app.level, hit);
+    return openMenu(x, y, [
+      { label: 'Door type ▸', sub: () => DOOR_TYPES.map((t) => ({ label: t.name, on: t.id === door?.type, run: () => app.commit('Door type', (map, level) => {
+        const d = level.doors.find((q) => q.id === hit.id);
+        if (d) d.type = t.id;
+      }) })) },
+      del,
+    ]);
+  }
+  if (hit.kind !== 'shape') return openMenu(x, y, [del]);
+  openMenu(x, y, [...roomItems, { label: 'Delete shape', danger: true, run: () => app.deleteSelection() }]);
+};
 
 function shapeSection(shape) {
   const edit = (label, fn) => app.commit(label, (map, level) => {
@@ -493,6 +650,16 @@ function wallSection(wall) {
   );
 }
 
+// Collapsed "More…" groups remember whether they were open across panel redraws.
+const openMore = new Set();
+function more(key, label, ...children) {
+  const d = el('details', { class: 'more' }, el('summary', {}, label), ...children);
+  d.open = openMore.has(key);
+  d.addEventListener('toggle', () => (d.open ? openMore.add(key) : openMore.delete(key)));
+  return d;
+}
+
+/** The selected room: type, density and Reroll up front; everything else under More. */
 function roomSection() {
   const at = app.selection?.at;
   if (!at) return null;
@@ -503,24 +670,18 @@ function roomSection() {
   const types = [{ id: '', name: '— untagged —' }, ...(app.setting?.roomTypes || [])];
   if (region.tag && !types.some((t) => t.id === region.tag.type)) types.push({ id: region.tag.type, name: app.roomTypeName(region.tag.type) });
   const tag = region.tag;
-  const density = tag?.density ?? DEFAULT_DENSITY;
-  const setDensity = (d) => app.commit('Room density', (map, level) => {
+  const edit = (label, fn) => app.commit(label, (map, level) => {
     const t = level.rooms.find((r) => r.id === tag.id);
     if (!t) return;
-    t.density = d;
+    fn(t);
     app.decorateIn(map, level, [t.id]);
   });
+  const density = tag?.density ?? DEFAULT_DENSITY;
   const preset = Object.entries(DENSITY).find(([, v]) => Math.abs(v - density) < 0.01)?.[0] || '';
   const clutter = tag?.clutter ?? DEFAULT_CLUTTER;
   const clutterPreset = Object.entries(CLUTTER).find(([, v]) => Math.abs(v - clutter) < 0.01)?.[0] || '';
-  const setClutter = (c) => app.commit('Room clutter', (map, level) => {
-    const t = level.rooms.find((r) => r.id === tag.id);
-    if (!t) return;
-    t.clutter = c;
-    app.decorateIn(map, level, [t.id]);
-  });
   return section(
-    'Room',
+    tag?.name?.trim() || 'Room',
     field('Type', select(types, tag?.type || '', (v) => {
       if (!v) {
         app.commit('Clear room type', (map, level) => {
@@ -534,42 +695,35 @@ function roomSection() {
         });
       }
     })),
-    tag && field('Name', el('input', {
-      type: 'text', value: tag.name || '', placeholder: app.roomTypeName(tag.type),
-      onchange: (e) => app.commit('Name room', (map, level) => {
-        const t = level.rooms.find((r) => r.id === tag.id);
-        if (t) t.name = e.target.value.trim() || undefined;
-      }, { prune: false }),
-    })),
-    tag && field('GM notes', el('textarea', {
-      rows: 3, placeholder: 'Shown in the room key of the GM export',
-      onchange: (e) => app.commit('Room notes', (map, level) => {
-        const t = level.rooms.find((r) => r.id === tag.id);
-        if (t) t.notes = e.target.value.trim() || undefined;
-      }, { prune: false }),
-    }, tag.notes || '')),
-    el('p', { class: 'hint' }, `${region.cells.length} full squares, about ${Math.round(region.area)} sq in all.`),
-    wallLookField(region, index, rooms, at),
-    tag && field('Density',
-      el('div', {},
-        segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => setDensity(DENSITY[v])),
-        el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: density, onchange: (e) => setDensity(Number(e.target.value)) }))),
-    tag && checkbox('Combat ready: spread cover over the floor, keep lanes open', !!tag.combat, (v) => app.commit('Combat ready', (map, level) => {
-      const t = level.rooms.find((r) => r.id === tag.id);
-      if (!t) return;
-      t.combat = v || undefined;
-      app.decorateIn(map, level, [t.id]);
-    })),
-    tag && field('Clutter',
-      segmented([{ id: 'none', name: 'None' }, { id: 'light', name: 'Light' }, { id: 'heavy', name: 'Heavy' }], clutterPreset, (v) => setClutter(CLUTTER[v])),
-      'Cracks, stains, papers, cobwebs: small floor details.'),
+    !tag && el('p', { class: 'hint' }, 'Give the room a type to furnish it.'),
+    tag && field('Furniture', segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => edit('Room density', (t) => (t.density = DENSITY[v])))),
     tag && el('div', { class: 'actions' },
-      el('button', { onclick: () => app.decorate([tag.id]), title: 'Replace this room\'s automatic pieces (same layout)' }, 'Decorate'),
-      el('button', { onclick: () => app.decorate([tag.id], { reroll: true }), title: 'A new random layout' }, 'Reroll'),
-      el('button', { onclick: () => app.clearDecoration([tag.id]), title: 'Remove automatic pieces; hand-placed ones stay' }, 'Clear'),
-      el('button', { onclick: () => app.addDoors([tag.id]), title: 'Door into each neighbouring room that can\'t be reached yet' }, 'Add doors'),
-    ),
-    !tag && el('p', { class: 'hint' }, 'Give the room a type to decorate it.'),
+      el('button', { class: 'primary', onclick: () => rerollRoom(tag.id), title: 'A new random layout' }, '↻ Reroll')),
+    more('room', 'More…',
+      tag && field('Name', el('input', {
+        type: 'text', value: tag.name || '', placeholder: app.roomTypeName(tag.type),
+        onchange: (e) => app.commit('Name room', (map, level) => {
+          const t = level.rooms.find((r) => r.id === tag.id);
+          if (t) t.name = e.target.value.trim() || undefined;
+        }, { prune: false }),
+      })),
+      tag && field('GM notes', el('textarea', {
+        rows: 3, placeholder: 'Shown in the room key of the GM export',
+        onchange: (e) => app.commit('Room notes', (map, level) => {
+          const t = level.rooms.find((r) => r.id === tag.id);
+          if (t) t.notes = e.target.value.trim() || undefined;
+        }, { prune: false }),
+      }, tag.notes || '')),
+      tag && field('Clutter', segmented([{ id: 'none', name: 'None' }, { id: 'light', name: 'Light' }, { id: 'heavy', name: 'Heavy' }], clutterPreset, (v) => edit('Room clutter', (t) => (t.clutter = CLUTTER[v]))),
+        'Cracks, stains, papers, cobwebs: small floor details.'),
+      tag && checkbox('Combat ready: spread cover over the floor, keep lanes open', !!tag.combat, (v) => edit('Combat ready', (t) => (t.combat = v || undefined))),
+      tag && field('Exact furniture amount', el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: density, onchange: (e) => edit('Room density', (t) => (t.density = Number(e.target.value))) })),
+      wallLookField(region, index, rooms, at),
+      tag && el('div', { class: 'actions' },
+        el('button', { onclick: () => app.decorate([tag.id]), title: 'Replace this room\'s automatic pieces (same layout)' }, 'Decorate again'),
+        el('button', { onclick: () => app.clearDecoration([tag.id]), title: 'Remove automatic pieces; hand-placed ones stay' }, 'Clear'),
+        el('button', { onclick: () => app.addDoors([tag.id]), title: 'Door into each neighbouring room that can\'t be reached yet' }, 'Add doors')),
+      el('p', { class: 'hint' }, `${region.cells.length} full squares, about ${Math.round(region.area)} sq in all.`)),
   );
 }
 
@@ -612,7 +766,7 @@ function selectionSections() {
   if (!sel) return [];
   const item = app.findItem(app.level, sel);
   if (!item) return [];
-  if (sel.kind === 'shape') return [roomSection(), shapeSection(item)];
+  if (sel.kind === 'shape') return [roomSection(), el('section', {}, more('shape', 'Shape…', shapeSection(item)))];
   if (sel.kind === 'door') return [doorSection(item)];
   if (sel.kind === 'wall') return [wallSection(item)];
   if (sel.kind === 'link') return [linkSection(item)];
@@ -719,19 +873,36 @@ function levelSection() {
 
 const RUIN_AMOUNTS = [{ id: 0.35, name: 'Light' }, { id: 0.7, name: 'Heavy' }];
 
-function ruinSection() {
+function ruinDialog() {
   app.opts.ruinAmount ??= 0.7;
-  const amount = () => app.opts.ruinAmount;
-  return section(
-    'Ruin',
-    field('Ruin', segmented(RUIN_AMOUNTS, app.opts.ruinAmount, (v) => app.setOpt('ruinAmount', v))),
-    el('div', { class: 'actions' },
-      el('button', { onclick: () => app.ruin(amount()), title: 'Breached walls, broken doors, collapsed floor, rubble, lights out' }, 'Ruin this level'),
-      app.map.levels.length > 1 && el('button', { onclick: () => app.ruin(amount(), { all: true }) }, 'Ruin all levels'),
-      el('button', { onclick: saveRuinedCopy, title: 'Save the whole map ruined as a new file; this one stays as it is' }, 'Save a ruined copy…'),
-    ),
-    el('p', { class: 'hint' }, 'The same design, abandoned: two maps from one. Rooms remember the ruin, so rerolling keeps it.'),
+  const dialog = el('dialog', { class: 'export-dialog' });
+  const run = (all) => {
+    dialog.close();
+    const go = () => {
+      app.ruin(app.opts.ruinAmount, { all });
+      offerAgain('Ruined.', () => {
+        app.undo();
+        go();
+      });
+    };
+    go();
+  };
+  dialog.append(
+    el('h2', {}, 'Ruin'),
+    el('p', { class: 'hint' }, 'The same design, abandoned: breached walls, broken doors, collapsed floor, rubble, lights out. Rooms remember it, so rerolling keeps it.'),
+    field('How ruined', segmented(RUIN_AMOUNTS, app.opts.ruinAmount, (v) => (app.opts.ruinAmount = v))),
+    el('menu', {},
+      el('button', { type: 'button', onclick: () => dialog.close() }, 'Cancel'),
+      el('button', { type: 'button', onclick: () => {
+        dialog.close();
+        saveRuinedCopy();
+      }, title: 'Save the whole map ruined as a new file; this one stays as it is' }, 'Save a ruined copy…'),
+      app.map.levels.length > 1 && el('button', { type: 'button', onclick: () => run(true) }, 'Ruin all levels'),
+      el('button', { type: 'button', class: 'primary', onclick: () => run(false) }, 'Ruin this level')),
   );
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 async function saveRuinedCopy() {
@@ -754,51 +925,108 @@ async function saveRuinedCopy() {
   }
 }
 
-function generateSection() {
-  const styles = app.setting?.generator || [];
-  if (!styles.length) return null;
-  if (!styles.some((g) => g.id === app.opts.genStyle)) app.opts.genStyle = styles[0].id;
-  app.opts.genRooms ??= 8;
-  const count = el('output', {}, String(app.opts.genRooms));
-  return section(
-    'Generate',
-    field('Style', select(styles, app.opts.genStyle, (v) => app.setOpt('genStyle', v))),
-    field('Rooms', el('div', { class: 'row' },
-      el('input', {
-        type: 'range', min: 3, max: 24, step: 1, value: app.opts.genRooms,
-        oninput: (e) => {
-          app.opts.genRooms = Number(e.target.value);
-          count.textContent = e.target.value;
-        },
-      }),
-      count)),
-    styles.find((g) => g.id === app.opts.genStyle)?.layout !== 'outdoor' && field('Levels', segmented([1, 2, 3, 4, 5].map((n) => ({ id: n, name: String(n) })), app.opts.genLevels ?? 1, (v) => app.setOpt('genLevels', v)),
-      'More than one replaces the whole map, joined by stairs, ladders or lifts.'),
-    checkbox('Combat-ready rooms (cover spread over the floor)', !!app.opts.genCombat, (v) => (app.opts.genCombat = v)),
-    el('div', { class: 'actions' },
-      el('button', {
-        class: 'primary',
-        title: 'Replace this level with a new layout: rooms, corridors, doors and decoration',
-        onclick: async () => {
-          const multi = (app.opts.genLevels ?? 1) > 1 && styles.find((g) => g.id === app.opts.genStyle)?.layout !== 'outdoor';
-          const empty = app.map.levels.every((lv) => !lv.shapes.length) || (!multi && !app.level.shapes.length);
-          const what = multi ? 'Replace the whole map (every level) with generated levels?' : 'Replace everything on this level with a generated layout?';
-          if (!empty && app.generatedRev !== app.rev && !(await ask(`${what} (Undo brings it back.)`, { ok: 'Generate', danger: true }))) return;
-          app.generateLevel({ styleId: app.opts.genStyle, count: app.opts.genRooms, combat: app.opts.genCombat, levels: multi ? app.opts.genLevels : 1 });
-        },
-      }, app.generatedRev === app.rev ? 'Generate another' : 'Generate level')),
-    el('p', { class: 'hint' }, 'Every click gives a new layout. Edit it like any map afterwards.'),
+/**
+ * The start screen ('new': generate, blank map or open) and the Generate dialog ('generate').
+ */
+function startDialog(mode = 'generate') {
+  const dialog = el('dialog', { class: 'export-dialog start-dialog' });
+  let settingId = app.map.setting;
+  const gen = { style: app.opts.genStyle, rooms: app.opts.genRooms ?? 8, levels: app.opts.genLevels ?? 1, combat: !!app.opts.genCombat };
+  const body = el('div');
+  const render = () => {
+    const setting = catalog.settings.get(settingId);
+    const styles = setting?.generator || [];
+    if (!styles.some((g) => g.id === gen.style)) gen.style = styles[0]?.id;
+    const style = styles.find((g) => g.id === gen.style);
+    const count = el('output', {}, String(gen.rooms));
+    const generate = async () => {
+      const replacing = mode === 'generate' && app.map.levels.some((lv) => lv.shapes.length) && app.generatedRev !== app.rev;
+      if (mode === 'new' && !(await confirmDiscard())) return;
+      if (replacing && !(await ask(gen.levels > 1 && style.layout !== 'outdoor' ? 'Replace the whole map with generated levels? (Undo brings it back.)' : 'Replace everything on this level? (Undo brings it back.)', { ok: 'Generate', danger: true }))) return;
+      dialog.close();
+      Object.assign(app.opts, { genStyle: gen.style, genRooms: gen.rooms, genLevels: gen.levels, genCombat: gen.combat });
+      if (mode === 'new') app.newMap(settingId);
+      else if (settingId !== app.map.setting) {
+        const s2 = catalog.settings.get(settingId);
+        app.commit('Change setting', (map) => {
+          map.setting = settingId;
+          if (s2?.defaults) Object.assign(map.style, s2.defaults);
+        }, { prune: false });
+      }
+      const go = () => {
+        app.generateLevel({ styleId: gen.style, count: gen.rooms, combat: gen.combat, levels: style.layout === 'outdoor' ? 1 : gen.levels });
+        app.fitView();
+        offerAgain(`${style.name} generated.`, go);
+      };
+      go();
+    };
+    body.replaceChildren(
+      field('Setting', select([...catalog.settings.values()], settingId, (v) => {
+        settingId = v;
+        render();
+      })),
+      el('section', { class: 'start-card' },
+        el('h3', {}, 'Generate'),
+        field('Style', select(styles, gen.style, (v) => {
+          gen.style = v;
+          render();
+        })),
+        field('Rooms', el('div', { class: 'row' },
+          el('input', { type: 'range', min: 3, max: 24, step: 1, value: gen.rooms, oninput: (e) => {
+            gen.rooms = Number(e.target.value);
+            count.textContent = e.target.value;
+          } }),
+          count)),
+        style?.layout !== 'outdoor' && field('Levels', segmented([1, 2, 3, 4, 5].map((n) => ({ id: n, name: String(n) })), gen.levels, (v) => {
+          gen.levels = v;
+          render();
+        })),
+        checkbox('Combat-ready rooms (cover spread over the floor)', gen.combat, (v) => (gen.combat = v)),
+        el('div', { class: 'actions' }, el('button', { type: 'button', class: 'primary', onclick: generate }, 'Generate'))),
+      mode === 'new' && el('section', { class: 'start-card' },
+        el('h3', {}, 'Or'),
+        el('div', { class: 'actions' },
+          el('button', { type: 'button', onclick: async () => {
+            if (!(await confirmDiscard())) return;
+            dialog.close();
+            app.newMap(settingId);
+            app.setTool('rooms');
+            app.status('Blank map. Draw rooms with the Room tool (R).');
+          } }, 'Blank map: draw your own'),
+          el('button', { type: 'button', onclick: () => {
+            dialog.close();
+            openDialog();
+          } }, 'Open a saved map'))),
+    );
+  };
+  render();
+  dialog.append(
+    el('h2', {}, mode === 'new' ? 'New map' : 'Generate'),
+    body,
+    el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, mode === 'new' ? 'Close' : 'Cancel')),
   );
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 let panelTimer = null;
+// The panel shows one thing at a time: what you're editing, the levels, or the map's look.
+const PANEL_TABS = [{ id: 'edit', name: 'Edit' }, { id: 'level', name: 'Levels' }, { id: 'map', name: 'Map' }];
+let panelTab = 'edit';
 function renderPanel() {
   panelTimer = null;
   const panel = $('panel');
   const scroll = panel.scrollTop;
+  const content = panelTab === 'level' ? [levelSection()] : panelTab === 'map' ? [mapSection()] : [toolSection(), ...selectionSections()].filter(Boolean);
   panel.replaceChildren(
-    el('div', { class: 'panel-close' }, el('button', { type: 'button', onclick: () => document.body.classList.remove('panel-open') }, 'Close ✕')),
-    toolSection(), ...selectionSections().filter(Boolean), levelSection(), generateSection(), ruinSection(), mapSection());
+    el('div', { class: 'panel-tabs' },
+      segmented(PANEL_TABS, panelTab, (v) => {
+        panelTab = v;
+        renderPanel();
+      }),
+      el('button', { type: 'button', class: 'panel-close', onclick: () => document.body.classList.remove('panel-open') }, '✕')),
+    ...content);
   panel.scrollTop = scroll;
 }
 
@@ -821,13 +1049,16 @@ function update(reason) {
     $('status-message').textContent = app.statusMessage || '';
     return;
   }
+  if (reason === 'selection' || reason === 'tool') panelTab = 'edit';
+  if (!againBar.hidden && app.rev !== againRev) hideAgain();
   for (const [id, b] of toolButtons) b.classList.toggle('on', id === app.tool?.id);
   const placementSelected = app.selection?.kind === 'placement';
   actions.undo.disabled = !app.undoStack.length;
   actions.redo.disabled = !app.redoStack.length;
   actions.del.disabled = !app.selection;
   actions.left.disabled = actions.right.disabled = !(placementSelected || app.tool?.id === 'asset');
-  actions.done.hidden = !['poly', 'wall', 'arc'].includes(app.tool?.id);
+  const inner = app.innerTool();
+  actions.done.hidden = !(['poly', 'wall', 'arc', 'corridor'].includes(inner?.id) || (inner?.id === 'terrain' && app.opts.terrainMethod === 'path'));
   actions.snap.textContent = SNAP_MODES.find((m) => m.id === app.snapMode).name;
   undoBtn.disabled = !app.undoStack.length;
   redoBtn.disabled = !app.redoStack.length;
@@ -867,6 +1098,8 @@ window.addEventListener('beforeunload', (e) => {
 });
 
 ready = true;
+$('stage').append(againBar);
 if (app.recoverAutosave()) app.status('Restored your last session (autosave).');
+else startDialog('new');
 requestAnimationFrame(() => app.fitView());
 update('init');

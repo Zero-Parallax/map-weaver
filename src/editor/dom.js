@@ -34,7 +34,13 @@ export function segmented(options, value, onChange) {
     'div',
     { class: 'segmented' },
     options.map((o) =>
-      el('button', { type: 'button', class: o.id === value ? 'on' : '', title: o.title || '', onclick: () => onChange(o.id) }, o.name),
+      el('button', {
+        type: 'button', class: o.id === value ? 'on' : '', title: o.title || '',
+        onclick: (e) => {
+          for (const b of e.currentTarget.parentNode.children) b.classList.toggle('on', b === e.currentTarget);
+          onChange(o.id);
+        },
+      }, o.name),
     ),
   );
 }
