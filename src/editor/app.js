@@ -29,7 +29,7 @@ export class App {
       mode: 'add', walled: true, radius: 0, roughness: 0.5, brush: 1, doorType: 'door', doorWidth: 1, roomType: null,
       linkType: 'stairs', linkSpan: 1, spiralSize: 2, edgeKind: 'wall',
       asset: null, assetParams: null, assetRoom: null, assetSearch: '',
-      autoDecorate: true, autoDoors: true,
+      autoDecorate: true, autoDoors: true, drawType: '', corridorWidth: 2,
     };
     this.showBelow = true;
     this.view = { scale: 32, ox: 40, oy: 40 };

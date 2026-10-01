@@ -16,12 +16,12 @@ import { ask, askText, notice } from './editor/ask.js';
 import { regionAt } from './core/rooms.js';
 import { DENSITY, DEFAULT_DENSITY } from './decorator/decorate.js';
 import { selectTool, doorTool, roomTool, eraseTool, tagRegion } from './editor/tools/item-tools.js';
-import { rectTool, circleTool, polyTool, caveTool, brushTool, joinControl } from './editor/tools/shape-tools.js';
+import { rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, joinControl } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
 
 const TOOL_GROUPS = [
   [selectTool],
-  [rectTool, circleTool, polyTool, caveTool, brushTool],
+  [rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool],
   [wallTool, arcTool, doorTool],
   [linkTool, edgeTool],
   [roomTool, assetTool, eraseTool],
@@ -379,17 +379,21 @@ function shapeSection(shape) {
     const s = level.shapes.find((x) => x.id === shape.id);
     if (s) fn(s, level);
   });
-  const kindName = { rect: 'Rectangle', circle: 'Circle', poly: 'Polygon', cave: 'Cave', cells: 'Painted floor' }[shape.kind];
+  const kindName = { rect: 'Rectangle', circle: 'Circle', poly: 'Polygon', cave: 'Cave', cells: 'Painted floor', path: 'Corridor' }[shape.kind];
   const radii = [0, 0.5, 1, 1.5, 2, 3, 4].map((r) => ({ id: String(r), name: r ? `${r} sq` : 'Square' }));
   return section(
     `Shape: ${kindName}`,
     field('Mode', segmented([{ id: 'add', name: 'Floor' }, { id: 'subtract', name: 'Cut away' }, { id: 'void', name: 'Open to below' }], shape.op, (v) => edit('Change mode', (s) => (s.op = v)))),
     shape.op === 'add' && shape.kind !== 'cells' &&
-      field('Rooms', joinControl(shape.walled ? (shape.overlap ? 'overlap' : 'top') : 'merge', (v) => edit('Change room joining', (s) => {
+      field('Rooms', joinControl(shape.walled ? (shape.overlap ? 'overlap' : shape.under ? 'under' : 'top') : 'merge', (v) => edit('Change room joining', (s) => {
         s.walled = v !== 'merge';
+        delete s.overlap;
+        delete s.under;
         if (v === 'overlap') s.overlap = true;
-        else delete s.overlap;
+        if (v === 'under') s.under = true;
       }))),
+    shape.kind === 'path' &&
+      field('Width', segmented([1, 2, 3].map((n) => ({ id: n, name: `${n} sq` })), shape.width, (v) => edit('Corridor width', (s) => (s.width = v)))),
     (shape.kind === 'rect' || shape.kind === 'poly') &&
       field('Corner rounding', select(radii, String(shape.radius || 0), (v) => edit('Round corners', (s) => (s.radius = Number(v))))),
     shape.kind === 'cave' &&

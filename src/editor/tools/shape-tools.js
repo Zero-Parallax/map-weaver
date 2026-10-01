@@ -1,10 +1,13 @@
-// Tools that add or cut floor: rectangle, circle, polygon, cave, brush.
+// Tools that add or cut floor: rectangle, circle, polygon, cave, brush, corridor.
 // Alt while drawing flips add <-> subtract. Shift snaps to half squares, Ctrl turns snapping off.
 
 import { el, segmented, checkbox, field, select } from '../dom.js';
 import { newId, newSeed } from '../../core/model.js';
-import { roundPolygon, circlePoints, dist, snap, simplify } from '../../core/geom.js';
-import { rectRing, caveRing } from '../../core/shapes.js';
+import { roundPolygon, circlePoints, dist, snap, simplify, pointInRings, bbox, lerp } from '../../core/geom.js';
+import { rectRing, caveRing, shapeRings } from '../../core/shapes.js';
+import { strokePath } from '../../core/clip.js';
+import { computeLevelGeometry } from '../../core/level-geometry.js';
+import { tagNewRooms } from './item-tools.js';
 
 const RADII = [0, 0.5, 1, 1.5, 2, 3, 4].map((r) => ({ id: String(r), name: r ? `${r} sq` : 'Square' }));
 
@@ -25,19 +28,40 @@ function modeOptions(app, { walled = true, radius = false, extra = [] } = {}) {
         (v) => app.setOpt('mode', v),
       ),
     ),
-    walled && o.mode === 'add' && field('Rooms', joinControl(o.walled ? (o.overlap ? 'overlap' : 'top') : 'merge', (v) => {
+    walled && o.mode === 'add' && field('Rooms', joinControl(o.walled ? (o.overlap ? 'overlap' : o.under ? 'under' : 'top') : 'merge', (v) => {
       app.opts.overlap = v === 'overlap';
+      app.opts.under = v === 'under';
       app.setOpt('walled', v !== 'merge');
     })),
     radius && field('Corner rounding', select(RADII, String(o.radius), (v) => app.setOpt('radius', Number(v)))),
+    walled && o.mode === 'add' && roomTypeField(app, 'drawType'),
     ...extra,
   );
+}
+
+/** Room type given to rooms as they are drawn (doors and decoration follow). */
+function roomTypeField(app, key) {
+  const types = [{ id: '', name: '— none —' }, ...(app.setting?.roomTypes || [])];
+  const value = types.some((t) => t.id === app.opts[key]) ? app.opts[key] : '';
+  return field('Room type', select(types, value, (v) => app.setOpt(key, v)));
+}
+
+/** Sample points inside rings, every half square. */
+function samplesIn(rings) {
+  if (!rings.length) return [];
+  const b = bbox(rings.flat());
+  const out = [];
+  for (let y = Math.floor(b.minY) + 0.27; y < b.maxY; y += 0.5) {
+    for (let x = Math.floor(b.minX) + 0.23; x < b.maxX; x += 0.5) if (pointInRings([x, y], rings)) out.push([x, y]);
+  }
+  return out;
 }
 
 export const JOIN_MODES = [
   { id: 'merge', name: 'Merge', title: 'No walls of its own: joins the floor it touches into one room' },
   { id: 'top', name: 'On top', title: 'Its own walls; walls of earlier rooms inside it are removed' },
   { id: 'overlap', name: 'Overlap', title: 'Its own walls and earlier rooms keep theirs: where they cross becomes its own space' },
+  { id: 'under', name: 'Behind', title: 'Its own walls only outside earlier floor; earlier rooms keep theirs (corridors)' },
 ];
 
 /** Merge / On top / Overlap picker. */
@@ -78,9 +102,11 @@ function strokePreview(ctx, app, rings, op) {
 
 function addShape(app, shape, op) {
   const walled = op === 'add' && app.opts.walled && shape.kind !== 'cells';
-  const overlap = walled && app.opts.overlap ? { overlap: true } : {};
+  const overlap = walled && app.opts.overlap ? { overlap: true } : walled && app.opts.under ? { under: true } : {};
   app.commit({ add: 'Add floor', subtract: 'Cut floor', void: 'Open to below' }[op], (map, level) => {
-    level.shapes.push({ id: newId('s'), op, walled, ...overlap, ...shape });
+    const s = { id: newId('s'), op, walled, ...overlap, ...shape };
+    level.shapes.push(s);
+    if (op === 'add' && walled && app.opts.drawType) tagNewRooms(app, map, level, samplesIn(shapeRings(s)), app.opts.drawType, { one: true });
   });
 }
 
@@ -332,5 +358,99 @@ export const brushTool = {
       ctx.strokeRect(x0, y0, n, n);
     }
     ctx.restore();
+  },
+};
+
+// ---- corridors -------------------------------------------------------------
+
+const CORRIDOR_WIDTHS = [1, 2, 3].map((n) => ({ id: n, name: `${n} sq` }));
+
+/** Corridor centre points sit on grid points for even widths, mid-square for odd ones. */
+function corridorPoint(ev, width, last) {
+  if (ev.ctrl) return ev.world;
+  const off = width % 2 ? 0.5 : 0;
+  let p = [Math.round(ev.world[0] - off) + off, Math.round(ev.world[1] - off) + off];
+  if (last) {
+    // Straight or 45° runs.
+    const dx = p[0] - last[0];
+    const dy = p[1] - last[1];
+    const ax = Math.abs(dx);
+    const ay = Math.abs(dy);
+    if (ax > 2 * ay) p = [p[0], last[1]];
+    else if (ay > 2 * ax) p = [last[0], p[1]];
+    else {
+      const d = Math.round((ax + ay) / 2);
+      p = [last[0] + Math.sign(dx) * d, last[1] + Math.sign(dy) * d];
+    }
+  }
+  return p;
+}
+
+export const corridorTool = {
+  id: 'corridor',
+  label: 'Corridor',
+  key: 'h',
+  hint: 'Click along the corridor (straight or 45°); it stops at the rooms it reaches. Double-click, Enter or right-click to finish. Ctrl: free angles.',
+  options: (app) => {
+    const types = app.setting?.roomTypes || [];
+    if (app.opts.corridorType === undefined) app.opts.corridorType = types.some((t) => t.id === 'corridor') ? 'corridor' : '';
+    return el('div', {},
+      field('Width', segmented(CORRIDOR_WIDTHS, app.opts.corridorWidth, (v) => app.setOpt('corridorWidth', v))),
+      roomTypeField(app, 'corridorType'));
+  },
+  points: [],
+  down(app, ev) {
+    if (ev.button !== 0) return this.finish(app);
+    const last = this.points[this.points.length - 1];
+    const p = corridorPoint(ev, app.opts.corridorWidth, last);
+    if (last && dist(last, p) < 1e-6) return this.finish(app);
+    this.points.push(p);
+    app.requestRender();
+  },
+  dblclick(app) {
+    this.finish(app);
+  },
+  move(app, ev) {
+    this.hover = corridorPoint(ev, app.opts.corridorWidth, this.points[this.points.length - 1]);
+    app.requestRender();
+  },
+  onKey(app, e) {
+    if (e.key === 'Enter') return this.finish(app), true;
+    if (e.key === 'Backspace' && this.points.length) {
+      this.points.pop();
+      app.requestRender();
+      return true;
+    }
+    return false;
+  },
+  finish(app) {
+    const pts = this.points.filter((p, i, all) => i === 0 || dist(p, all[i - 1]) > 1e-6);
+    this.points = [];
+    app.requestRender();
+    if (pts.length < 2) return;
+    const width = app.opts.corridorWidth;
+    app.commit('Add corridor', (map, level) => {
+      const before = computeLevelGeometry(level, map).floor;
+      level.shapes.push({ id: newId('s'), kind: 'path', op: 'add', walled: true, under: true, points: pts, width });
+      // Tag the new stretches (not the bits inside rooms it runs into).
+      const samples = [];
+      for (let i = 1; i < pts.length; i++) {
+        const n = Math.max(1, Math.round(dist(pts[i - 1], pts[i]) * 4));
+        for (let k = 0; k <= n; k++) samples.push(lerp(pts[i - 1], pts[i], k / n));
+      }
+      const fresh = samples.map((p) => [p[0] + 0.013, p[1] + 0.017]).filter((p) => !pointInRings(p, before));
+      tagNewRooms(app, map, level, fresh, app.opts.corridorType, { minVotes: 4 });
+    });
+  },
+  cancel() {
+    this.points = [];
+  },
+  overlay(app, ctx) {
+    const pts = [...this.points];
+    if (this.hover) pts.push(this.hover);
+    if (pts.length >= 2) strokePreview(ctx, app, strokePath(pts, app.opts.corridorWidth), 'add');
+    ctx.fillStyle = '#2a9df4';
+    for (const p of pts) ctx.fillRect(p[0] - 3 / app.view.scale, p[1] - 3 / app.view.scale, 6 / app.view.scale, 6 / app.view.scale);
+    if (this.points.length && this.hover) app.drawLabel(ctx, this.hover, `${dist(this.points[this.points.length - 1], this.hover).toFixed(0)} sq`);
   },
 };

@@ -4,6 +4,7 @@ import { el, segmented, field, select, checkbox } from '../dom.js';
 import { newId, newSeed, DOOR_TYPES } from '../../core/model.js';
 import { nearestWall, snapDoor, doorsOverlap } from '../../core/doors.js';
 import { regionAt } from '../../core/rooms.js';
+import { computeLevelGeometry } from '../../core/level-geometry.js';
 import { dist, sub } from '../../core/geom.js';
 import { drawDoor } from '../../render/renderer.js';
 
@@ -113,6 +114,26 @@ function currentRoomType(app) {
   const types = app.setting?.roomTypes || [];
   if (!types.some((t) => t.id === app.opts.roomType)) app.opts.roomType = types[0]?.id ?? null;
   return app.opts.roomType;
+}
+
+/**
+ * Tag the untagged rooms that newly drawn floor makes (call inside commit, after the shape is
+ * added). points: samples inside the new floor. Rooms need minVotes samples; with `one`, only
+ * the room with the most. Adds doors and decoration as the room tool's options say.
+ */
+export function tagNewRooms(app, map, level, points, type, { minVotes = 1, one = false } = {}) {
+  if (!type) return [];
+  const rooms = computeLevelGeometry(level, map).rooms;
+  const votes = new Map();
+  for (const p of points) {
+    const index = regionAt(rooms, p);
+    if (index >= 0 && !rooms.regions[index].tag) votes.set(index, [...(votes.get(index) || []), p]);
+  }
+  let picked = [...votes].filter(([, ps]) => ps.length >= minVotes).sort((a, b) => b[1].length - a[1].length);
+  if (one) picked = picked.slice(0, 1);
+  const ids = picked.map(([index, ps]) => tagRegion(level, rooms, index, type, ps[Math.floor(ps.length / 2)]).id);
+  if (ids.length) app.tagged(map, level, ids);
+  return ids;
 }
 
 /** Set the type of the room at region index (creating a tag if needed). */

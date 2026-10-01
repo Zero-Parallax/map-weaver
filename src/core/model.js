@@ -16,7 +16,7 @@
 export const FORMAT = 'map-weaver/map';
 export const VERSION = 1;
 
-export const SHAPE_KINDS = ['rect', 'circle', 'poly', 'cave', 'cells'];
+export const SHAPE_KINDS = ['rect', 'circle', 'poly', 'cave', 'cells', 'path'];
 export const SHAPE_OPS = ['add', 'subtract', 'void'];
 export const EDGE_KINDS = [
   { id: 'railing', name: 'Railing' },

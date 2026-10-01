@@ -14,6 +14,9 @@
 //       on top  (walled true)                  own walls; earlier walls inside it are removed
 //       overlap (walled true, overlap true)    own walls; earlier walls inside it are kept, so
 //                                              where two rooms cross becomes a third space
+//       under   (walled true, under true)      own walls only outside the floor drawn before
+//                                              it; earlier walls are kept. Corridors: they
+//                                              stop at the rooms they reach, behind a wall.
 //     Drawing a walled room next to another leaves a single shared wall.
 //  3. Walls drawn by hand (lines and arcs).
 // Only parts of 2 and 3 strictly inside the floor are kept.
@@ -32,7 +35,7 @@ const ringCache = new Map();
 const CORNER_COS = Math.cos((35 * Math.PI) / 180);
 
 export function cachedShapeRings(shape) {
-  const key = JSON.stringify(shape, (k, v) => (k === 'id' || k === 'walled' || k === 'op' || k === 'overlap' ? undefined : v));
+  const key = JSON.stringify(shape, (k, v) => (k === 'id' || k === 'walled' || k === 'op' || k === 'overlap' || k === 'under' ? undefined : v));
   let rings = ringCache.get(key);
   if (!rings) {
     if (ringCache.size > 4000) ringCache.clear();
@@ -73,18 +76,23 @@ export function computeAreas(level, openings = { rings: [], gaps: [] }) {
 
 export function computeInnerWalls(level, shapeRings, floor) {
   let inner = [];
+  const trackFloor = level.shapes.some((s) => s.under);
+  let before = []; // floor drawn so far, for 'under' shapes
   level.shapes.forEach((s, i) => {
     const rings = shapeRings[i];
     if (!rings.length) return;
-    const keepEarlier = s.op === 'add' && s.walled && s.overlap;
+    const keepEarlier = s.op === 'add' && s.walled && (s.overlap || s.under);
     if (inner.length && !keepEarlier) {
       inner = classifySegments(inner, rings)
         .filter((p) => p.where === 'outside')
         .map((p) => [p.a, p.b]);
     }
     if (s.op === 'add' && s.walled) {
-      for (const ring of rings) inner.push(...polylineSegments(ring, true));
+      let own = rings.flatMap((ring) => polylineSegments(ring, true));
+      if (s.under && before.length) own = classifySegments(own, before).filter((p) => p.where === 'outside').map((p) => [p.a, p.b]);
+      inner.push(...own);
     }
+    if (trackFloor) before = s.op === 'add' ? union(before, rings) : difference(before, rings);
   });
   for (const w of level.walls) inner.push(...polylineSegments(wallPolyline(w)));
   if (!floor.length || !inner.length) return [];

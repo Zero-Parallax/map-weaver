@@ -255,3 +255,19 @@ test('a long outer wall is split where the room beside it changes', () => {
   const maxX = Math.max(...topStone.flat().map((p) => p[0]));
   assert.ok(Math.abs(maxX - 5) < 0.51, `stone top edge ends near x = 5, got ${maxX}`);
 });
+
+test('a corridor stops behind the walls of the rooms it reaches', () => {
+  const map = createMap({ setting: 'classic', size: { w: 30, h: 30 } });
+  const lv = map.levels[0];
+  lv.shapes = [
+    { id: 'a', kind: 'rect', op: 'add', walled: true, x: 2, y: 2, w: 5, h: 5 },
+    { id: 'b', kind: 'rect', op: 'add', walled: true, x: 14, y: 2, w: 5, h: 5 },
+    { id: 'c', kind: 'path', op: 'add', walled: true, under: true, points: [[4, 4], [16, 4]], width: 2 },
+  ];
+  const geo = computeLevelGeometry(lv, map);
+  assert.equal(geo.rooms.regions.length, 3); // two rooms and the corridor between them
+  // The rooms keep their walls where the corridor meets them; no stubs inside the rooms.
+  const walls = geo.inner.map(([a, b]) => [a, b].map((p) => p.map((v) => +v.toFixed(3))));
+  assert.equal(walls.length, 2);
+  assert.ok(walls.every(([a, b]) => a[0] === b[0] && [7, 14].includes(a[0])));
+});

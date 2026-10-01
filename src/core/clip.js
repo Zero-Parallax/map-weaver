@@ -54,3 +54,13 @@ export function offset(rings, delta, arcTolerance = 0.02) {
   co.Execute(out, delta * SCALE);
   return out.map(fromPath).filter((r) => r.length >= 3);
 }
+
+/** Outline of an open polyline drawn `width` wide: square corners, flat ends (corridors). */
+export function strokePath(points, width) {
+  if (points.length < 2 || !(width > 0)) return [];
+  const co = new CL.ClipperOffset(2, 0.02 * SCALE);
+  co.AddPath(toPath(points), CL.JoinType.jtMiter, CL.EndType.etOpenButt);
+  const out = new CL.Paths();
+  co.Execute(out, (width / 2) * SCALE);
+  return normalize(out.map(fromPath).filter((r) => r.length >= 3));
+}

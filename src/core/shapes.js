@@ -5,9 +5,10 @@
 // poly   {points: [[x,y]...], radius}   any angles, optional rounded corners
 // cave   {points, roughness, seed}      freehand outline, smoothed then roughened
 // cells  {cells: [[x,y]...]}            painted squares
+// path   {points, width}                a corridor: the centre line drawn width squares wide
 
 import { roundPolygon, circlePoints, chaikin, densify, simplify, signedArea, add, sub, scale, norm, perp, bbox } from './geom.js';
-import { normalize } from './clip.js';
+import { normalize, strokePath } from './clip.js';
 import { rng, hash } from './rng.js';
 
 const TOL = 0.004;
@@ -70,6 +71,8 @@ export function shapeRings(shape) {
       return normalize([caveRing(shape.points || [], shape.roughness ?? 0.5, shape.seed ?? 1)].filter((r) => r.length >= 3));
     case 'cells':
       return normalize(cellRings(shape.cells || []));
+    case 'path':
+      return strokePath(shape.points || [], shape.width || 1);
     default:
       return [];
   }
@@ -90,6 +93,7 @@ export function translateShape(shape, dx, dy) {
       break;
     case 'poly':
     case 'cave':
+    case 'path':
       s.points = s.points.map(move);
       break;
     case 'cells':
