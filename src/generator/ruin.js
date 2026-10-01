@@ -46,10 +46,12 @@ export function ruinLevel(map, level, { amount = 0.5, seed = 1 } = {}) {
   // Breaches in shared walls, away from doors.
   const spans = [...doorOptions(geo, 1).values()].flatMap((e) => e.options.filter((o) => o.clear >= 1));
   const want = Math.round(amount * (level.rooms.length * 0.7 + 1));
-  for (let i = 0; i < want && spans.length; i++) {
+  // Keep trying spots until enough walls are breached or none are left clear of doors.
+  for (let made = 0; made < want && spans.length;) {
     const o = spans.splice(Math.floor(random() * spans.length), 1)[0];
     if (level.doors.some((d) => dist(mid(d), lerp(o.a, o.b, 0.5)) < 2)) continue;
     level.doors.push({ id: newId('d'), type: 'breach', a: o.a, b: o.b });
+    made++;
   }
 
   // Collapsed floor: inside rooms, clear of stairs and doors.

@@ -206,3 +206,20 @@ test('combat-ready rooms spread cover over the open floor and stay walkable', ()
     assert.ok(near.length >= open.length * 0.75, `${setting}: ${near.length}/${open.length} squares near cover`);
   }
 });
+
+test('cracks only in old and rough places: never on a ship or in a tavern or bedroom', () => {
+  const cracked = (setting, type) => {
+    const s = setup({ setting, type, density: DENSITY.heavy });
+    s.tag.clutter = 1;
+    let n = 0;
+    for (const seed of [1, 2, 3, 4, 5]) {
+      s.tag.seed = seed;
+      n += run(s).placements.filter((p) => p.asset === 'cracks' || p.asset === 'cracked-floor').length;
+    }
+    return n;
+  };
+  for (const type of ['bridge', 'engine-room', 'crew-quarters', 'mess-hall', 'corridor', 'lab', 'apartment']) assert.equal(cracked('scifi', type), 0, `scifi ${type}`);
+  for (const type of ['tavern', 'bedroom', 'shop', 'library', 'kitchen', 'corridor', 'great-hall']) assert.equal(cracked('fantasy', type), 0, `fantasy ${type}`);
+  assert.ok(cracked('fantasy', 'crypt') > 0, 'crypts still crack');
+  assert.ok(cracked('scifi', 'mine') > 0, 'mines still crack');
+});

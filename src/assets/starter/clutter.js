@@ -22,13 +22,17 @@ function splat(g, cx, cy, r, cls) {
   for (const [dx, dy, s] of [[1.5, -0.6, 0.18], [-1.4, 0.9, 0.14], [0.9, 1.3, 0.12], [-0.6, -1.5, 0.1]]) g.circle(cx + dx * r, cy + dy * r, r * s, cls);
 }
 
+function drawCracks(g) {
+  g.path('M14 30L34 42L44 38L58 56L82 60', 'l');
+  g.path('M44 38L48 22L56 14', 't');
+  g.path('M58 56L54 74L62 88', 't');
+  g.path('M34 42L28 60', 't');
+}
+
 export default function define({ A }) {
-  A('cracks', 'Floor cracks', ALL, [1, 1], opts(['*'], { weight: 2 }), (g) => {
-    g.path('M14 30L34 42L44 38L58 56L82 60', 'l');
-    g.path('M44 38L48 22L56 14', 't');
-    g.path('M58 56L54 74L62 88', 't');
-    g.path('M34 42L28 60', 't');
-  });
+  // Cracks belong in old stone and rough places, never on a ship or in a lived-in home.
+  A('cracks', 'Floor cracks', CF, [1, 1], opts(['chamber', 'throne-room', 'temple', 'crypt', 'storeroom', 'prison', 'cellar', 'cave', 'ruin'], { weight: 2 }), drawCracks);
+  A('cracked-floor', 'Cracked floor', S, [1, 1], opts(['alien-ruins', 'mine', 'ruin'], { weight: 2 }), drawCracks);
 
   A('puddle', 'Puddle', ALL, [1, 1], opts(['cave', 'cellar', 'crypt', 'prison', 'corridor', 'mine', 'hangar', 'landing-pad', 'hydroponics-bay', 'kitchen', 'engine-room', 'alien-ruins', 'forest', 'farmyard', 'jungle', 'clearing', 'ruin']), (g) => {
     splat(g, 48, 52, 28, 'h');
