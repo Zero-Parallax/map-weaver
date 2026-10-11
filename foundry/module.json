@@ -1,0 +1,26 @@
+{
+  "id": "map-weaver",
+  "title": "Map Weaver",
+  "description": "Battle maps that furnish themselves, inside Foundry. Generate or draw a map in the Map Weaver editor and send it straight to a scene, with walls, doors, lights, a room key in the journal and GM-only pins for every room, secret and trap.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.368"
+  },
+  "authors": [
+    {
+      "name": "AJBuc"
+    }
+  ],
+  "esmodules": [
+    "scripts/map-weaver.js"
+  ],
+  "styles": [
+    "styles/map-weaver.css"
+  ],
+  "readme": "https://github.com/Zero-Parallax/map-weaver#foundry-vtt-module",
+  "url": "https://github.com/Zero-Parallax/map-weaver",
+  "bugs": "https://github.com/Zero-Parallax/map-weaver/issues",
+  "manifest": "https://github.com/Zero-Parallax/map-weaver/releases/latest/download/module.json",
+  "download": "https://github.com/Zero-Parallax/map-weaver/releases/download/v0.1.0/map-weaver.zip"
+}

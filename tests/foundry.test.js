@@ -144,3 +144,18 @@ test('lights come from light-giving assets and difficult terrain becomes a movem
   const bare = buildFoundryScene(map, { geometry: geometry(map), imagePath: () => 'x.png', resolve: (pl) => metas[pl.asset], lights: false, terrain: false });
   assert.deepEqual([bare.lights.length, bare.regions.length], [0, 0]);
 });
+
+test('one-file bundle: room key and GM-only secrets for the Foundry module', async () => {
+  const { journalData, makeBundle, imageRef, BUNDLE_FORMAT } = await import('../src/export/foundry-bundle.js');
+  const map = createMap({ setting: 'fantasy' });
+  const level = map.levels[0];
+  level.placements.push({ id: 'p1', asset: 'hidden-stash', x: 3.5, y: 4.5, rot: 0, room: 't1' }, { id: 'p2', asset: 'chest', x: 5.5, y: 4.5, rot: 0, room: 't1' });
+  const metas = { 'hidden-stash': { name: 'Hidden stash', gmOnly: true, tags: ['secret'] }, chest: { name: 'Chest', gmOnly: false, tags: [] } };
+  const key = [{ n: 1, levelIndex: 0, tag: { id: 't1', hidden: true }, at: [4, 4], title: 'Secret study (hidden)', notes: 'Dusty.' }];
+  const journal = journalData(map, { key, resolve: (p) => ({ meta: metas[p.asset] }), pps: 100 });
+  assert.deepEqual(journal.rooms, [{ n: 1, title: 'Secret study (hidden)', notes: 'Dusty.', hidden: true, level: 0, x: 400, y: 400 }]);
+  assert.deepEqual(journal.secrets, [{ name: 'Hidden stash', kind: 'secret', level: 0, x: 350, y: 450, room: 1 }]);
+  const bundle = makeBundle({ slug: 'm', scene: { levels: [{ background: { src: imageRef('a.png') } }] }, images: [], journal });
+  assert.equal(bundle.format, BUNDLE_FORMAT);
+  assert.equal(bundle.scene.levels[0].background.src, '@image/a.png');
+});
