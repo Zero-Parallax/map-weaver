@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<g transform="rotate(-20 40 40)"><rect class="o" x="16" y="30" width="50" height="14" rx="2"/></g><g transform="rotate(35 62 62)"><rect class="s" x="40" y="56" width="46" height="12" rx="2"/></g><path class="l" d="M22 70L36 84M70 22L84 30M30 52L22 58"/>
+<g transform="rotate(-20 40 40)"><rect class="o" x="16" y="30" width="50" height="16" rx="2"/><line class="t" x1="20" y1="38" x2="62" y2="38"/><path class="l" d="M66 30l6 4l-4 4l6 4l-8 4"/></g><g transform="rotate(35 62 62)"><rect class="s" x="40" y="56" width="46" height="12" rx="2"/></g><path class="l" d="M22 70L36 84M70 22L84 30M30 52L22 58"/><line class="t" x1="50" y1="26" x2="55" y2="29"/><line class="t" x1="16" y1="46" x2="21" y2="49"/><line class="t" x1="80" y1="82" x2="85" y2="85"/><line class="t" x1="56" y1="86" x2="61" y2="89"/>
 </svg>

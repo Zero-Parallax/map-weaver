@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" width="100" height="200">
 <title>Med bed</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"med-bed","name":"Med bed","settings":["scifi"],"footprint":{"w":1,"h":2},"roomTypes":["med-bay","clinic","cloning-lab"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":6,"tags":[]}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"med-bed","name":"Med bed","settings":["scifi"],"footprint":{"w":1,"h":2},"roomTypes":["med-bay","clinic","cloning-lab"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":3,"min":0,"max":6,"tags":[],"height":"low","generator":{"id":"medbed","params":{},"sizes":null}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="2" dy="3" stdDeviation="2" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.3"/></filter></defs>
 <g filter="url(#sh)">
-<polygon class="s" points="24,4 76,4 92,20 92,180 76,196 24,196 8,180 8,20"/><polygon class="o" points="32,30 68,30 82,44 82,172 68,186 32,186 18,172 18,44"/><polygon class="ko" points="28,6 72,6 76,10 76,22 72,26 28,26 24,22 24,10"/><path class="pl" d="M28.4 21.6L42.2 15L52.6 19L71.6 10.4"/><ellipse class="h" cx="50" cy="74.5" rx="22.5" ry="12"/><circle class="h" cx="50" cy="70" r="9.8"/><ellipse class="h" cx="27.5" cy="76" rx="5.3" ry="8.3"/><ellipse class="h" cx="72.5" cy="76" rx="5.3" ry="8.3"/><line class="t" x1="30" y1="120" x2="70" y2="120"/>
+<polygon class="s" points="14,4 86,4 92,10 92,24 86,30 14,30 8,24 8,10"/><polygon class="ko" points="17.6,8 58.4,8 62,11.6 62,22.4 58.4,26 17.6,26 14,22.4 14,11.6"/><path class="pl" d="M18 14L34 14"/><circle class="h" cx="70" cy="12" r="2.6"/><circle class="p" cx="70" cy="21" r="2.6"/><circle class="p" cx="79" cy="12" r="2.6"/><circle class="h" cx="79" cy="21" r="2.6"/><polygon class="s" points="22,32 78,32 90,44 90,182 78,194 22,194 10,182 10,44"/><rect class="o" x="18" y="38" width="64" height="150" rx="10"/><rect class="o" x="28" y="44" width="44" height="22" rx="9"/><path class="s" d="M18 118Q40 104 62 116T82 112V188H18Z"/><path class="o" d="M82 112L52 112L82 140Z"/><path class="t" d="M28 150q18 10 40 2"/><rect class="ko" x="91" y="70" width="6" height="60" rx="2"/><circle class="ko" cx="94" cy="44" r="6"/><rect class="o" x="87" y="34" width="14" height="12" rx="3"/>
 </g>
 </svg>

@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<path class="l" d="M14 30L34 42L44 38L58 56L82 60"/><path class="t" d="M44 38L48 22L56 14"/><path class="t" d="M58 56L54 74L62 88"/><path class="t" d="M34 42L28 60"/>
+<path class="l" d="M10 30L30 42L44 38L58 56L74 58L90 66"/><path class="t" d="M44 38L48 22L58 12"/><path class="t" d="M58 56L54 72L62 88"/><path class="t" d="M30 42L26 58L18 64"/><polygon class="hm" points="42,36 48,34 50,40 44,42"/>
 </svg>

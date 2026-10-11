@@ -9,8 +9,25 @@ async function json(res) {
 
 let serverAvailable = null;
 
+/**
+ * Map Weaver opened inside Foundry by the companion module: its API on the parent page (same
+ * origin), or null. Maps and exports are then kept in the Foundry world's files.
+ */
+export const foundryHost = (() => {
+  try {
+    return window.parent !== window ? window.parent.MapWeaverFoundry || null : null;
+  } catch {
+    return null;
+  }
+})();
+
 /** True when serve.js is behind the page; false when it is hosted as plain files. */
 export async function hasServer() {
+  // serve.js runs on your own machine or network; anywhere else (itch.io, a claude.ai artifact)
+  // the page is plain files, so don't even ask (it only leaves an error in the console).
+  const host = location.hostname;
+  const local = location.protocol.startsWith('http') && (host === 'localhost' || host === '[::1]' || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host) || host.endsWith('.local'));
+  if (!local || foundryHost) serverAvailable = false;
   if (serverAvailable === null) {
     try {
       const res = await fetch('api/maps');
@@ -23,14 +40,17 @@ export async function hasServer() {
 }
 
 export async function listMaps() {
+  if (foundryHost) return foundryHost.listMaps();
   return json(await fetch('api/maps'));
 }
 
 export async function loadMapFile(name) {
+  if (foundryHost) return foundryHost.loadMap(name);
   return json(await fetch('api/maps/' + encodeURIComponent(name)));
 }
 
 export async function saveMapFile(name, text) {
+  if (foundryHost) return foundryHost.saveMap(name, text);
   return json(
     await fetch('api/maps/' + encodeURIComponent(name), {
       method: 'PUT',
@@ -41,6 +61,7 @@ export async function saveMapFile(name, text) {
 }
 
 export async function saveExport(name, blob) {
+  if (foundryHost) return foundryHost.saveExport(name, blob);
   const type = name.endsWith('.json') ? 'application/json' : 'image/png';
   return json(await fetch('api/exports/' + encodeURIComponent(name), { method: 'PUT', headers: { 'Content-Type': type }, body: blob }));
 }

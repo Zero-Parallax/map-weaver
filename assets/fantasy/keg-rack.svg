@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Keg rack</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"keg-rack","name":"Keg rack","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["tavern","cellar"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":2,"tags":[]}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"keg-rack","name":"Keg rack","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["tavern","cellar"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":2,"tags":[],"height":"tall"}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="5" dy="8" stdDeviation="4" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.42"/></filter></defs>
 <g filter="url(#sh)">
-<rect class="ko" x="4" y="4" width="192" height="64" rx="3"/><ellipse class="o" cx="52" cy="36" rx="42" ry="24"/><path class="l" d="M26 14L26 58M78 14L78 58"/><rect class="ko" x="47" y="60" width="10" height="12" rx="2"/><ellipse class="o" cx="148" cy="36" rx="42" ry="24"/><path class="l" d="M122 14L122 58M174 14L174 58"/><rect class="ko" x="143" y="60" width="10" height="12" rx="2"/>
+<rect class="s" x="4" y="4" width="192" height="64" rx="3"/><path class="t" d="M25.1 36.4Q95.3 49.8 165.6 36.4"/><ellipse class="t" cx="50.9" cy="36.0" rx="5" ry="3"/><rect class="o" x="8" y="12" width="88" height="48" rx="22"/><path class="l" d="M22 14L22 58M82 14L82 58"/><path class="t" d="M12 26L92 26M12 46L92 46"/><rect class="ko" x="47" y="60" width="10" height="12" rx="2"/><circle class="k" cx="52" cy="74" r="3"/><rect class="o" x="104" y="12" width="88" height="48" rx="22"/><path class="l" d="M118 14L118 58M178 14L178 58"/><path class="t" d="M108 26L188 26M108 46L188 46"/><rect class="ko" x="143" y="60" width="10" height="12" rx="2"/><circle class="k" cx="148" cy="74" r="3"/>
 </g>
 </svg>

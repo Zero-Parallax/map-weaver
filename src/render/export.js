@@ -3,6 +3,8 @@
 import { drawLevel, drawDoor, levelPaths, levelWalls, visibleTo } from './renderer.js';
 import { drawWallGroups } from './walls.js';
 import { linksOnLevel } from '../core/links.js';
+import { playerLevel } from '../core/hidden.js';
+import { computeLevelGeometry } from '../core/level-geometry.js';
 
 // Browsers refuse canvases much bigger than this.
 export const MAX_SIDE = 16384;
@@ -22,7 +24,7 @@ export function exportFileName(map, levelIndex, suffix = '') {
 }
 
 export const VIEWS = [
-  { id: 'player', name: 'Player', title: 'No secret doors, traps or room numbers' },
+  { id: 'player', name: 'Player', title: 'No secret doors, hidden rooms, traps, secrets or room numbers' },
   { id: 'gm', name: 'GM', title: 'Everything, with numbered rooms and a room key' },
   { id: 'both', name: 'Both' },
 ];
@@ -32,12 +34,14 @@ export const VIEWS = [
  *  geometry(level): derived geometry for a level
  *  openMode:    'transparent' | 'faded' | 'solid' for open-to-below areas
  *  outsideMode: 'drawn' (rock / paper as styled) | 'transparent' (only the building)
- *  view:        'gm' | 'player' (no secret doors or traps)
+ *  view:        'gm' | 'player' (no secret doors, traps or secrets)
+ *  hideRooms:   leave hidden rooms out (default: in the player view). Foundry keeps them: its
+ *               fog of war hides them until the secret door is found.
  *  key:         roomKey() entries: this level's rooms get numbers; with keyColumn, the whole
  *               key is listed in a column to the right of the map
  */
-export async function renderLevelPng({ map, levelIndex, style, assets, geometry, pxPerSquare, openMode = 'transparent', outsideMode = 'drawn', view = 'gm', key = null, keyColumn = true }) {
-  const level = map.levels[levelIndex];
+export async function renderLevelPng({ map, levelIndex, style, assets, geometry, pxPerSquare, openMode = 'transparent', outsideMode = 'drawn', view = 'gm', hideRooms = view === 'player', key = null, keyColumn = true }) {
+  let level = map.levels[levelIndex];
   const below = map.levels[levelIndex - 1] || null;
   const size = exportSize(map, pxPerSquare);
   // GM key: numbers on this level's rooms, and the map's key in a column on the right.
@@ -59,7 +63,14 @@ export async function renderLevelPng({ map, levelIndex, style, assets, geometry,
     ctx.fillRect(0, 0, width, height);
   }
   ctx.setTransform(pxPerSquare, 0, 0, pxPerSquare, 0, 0);
-  const geo = geometry(level);
+  let geo = geometry(level);
+  if (hideRooms) {
+    const shown = playerLevel(level, geo);
+    if (shown !== level) {
+      level = shown;
+      geo = computeLevelGeometry(level, map);
+    }
+  }
   drawLevel(ctx, {
     map,
     level,

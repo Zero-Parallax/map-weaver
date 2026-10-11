@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<path class="l" d="M50 12L50 2M18 70L8 80M82 70L92 80"/><circle class="ko" cx="50" cy="50" r="38"/><circle class="m" cx="50" cy="50" r="29"/><circle class="o" cx="40" cy="42" r="6"/><circle class="o" cx="58" cy="56" r="8"/><circle class="o" cx="60" cy="38" r="4"/><circle class="o" cx="42" cy="62" r="4"/><line class="l" x1="62" y1="28" x2="88" y2="8"/>
+<circle class="hm" cx="50" cy="50" r="44"/><circle class="k" cx="89.2" cy="57.9" r="4"/><circle class="k" cx="72.1" cy="83.3" r="4"/><circle class="k" cx="42.1" cy="89.2" r="4"/><circle class="k" cx="16.7" cy="72.1" r="4"/><circle class="k" cx="10.8" cy="42.1" r="4"/><circle class="k" cx="27.9" cy="16.7" r="4"/><circle class="k" cx="57.9" cy="10.8" r="4"/><circle class="k" cx="83.3" cy="27.9" r="4"/><circle class="ko" cx="50" cy="50" r="36"/><circle class="m" cx="50" cy="50" r="28"/><circle class="o" cx="40" cy="42" r="6"/><circle class="o" cx="58" cy="56" r="7"/><circle class="o" cx="60" cy="38" r="4"/><circle class="o" cx="42" cy="62" r="4"/><path class="l" d="M14 50A36 36 0 0 1 86 50"/><line class="l" x1="62" y1="30" x2="90" y2="8"/><circle class="ko" cx="62" cy="30" r="5"/>
 </g>
 </svg>

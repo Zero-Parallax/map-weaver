@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<rect class="o" x="12" y="18" width="76" height="60" rx="6"/><rect class="s" x="12" y="18" width="76" height="22" rx="6"/><rect class="ko" x="24" y="18" width="9" height="60"/><rect class="ko" x="67" y="18" width="9" height="60"/><rect class="ko" x="41" y="58" width="18" height="16" rx="2"/><circle class="p" cx="50" cy="65" r="3"/>
+<rect class="o" x="10" y="16" width="80" height="64" rx="6"/><rect class="s" x="10" y="16" width="80" height="26" rx="6"/><path class="l" d="M12.0 61.0L88.0 61.0"/><path class="t" d="M16.3 52.5Q46.6 49.4 76.8 52.5M31.5 67.4Q48.7 71.5 66.0 67.4"/><ellipse class="t" cx="35.6" cy="52.5" rx="5" ry="3"/><line class="t" x1="14" y1="29" x2="86" y2="29"/><rect class="ko" x="24" y="16" width="9" height="64" rx="1"/><circle class="p" cx="28.5" cy="22" r="1.8"/><circle class="p" cx="28.5" cy="36" r="1.8"/><circle class="p" cx="28.5" cy="50" r="1.8"/><circle class="p" cx="28.5" cy="64" r="1.8"/><rect class="ko" x="67" y="16" width="9" height="64" rx="1"/><circle class="p" cx="71.5" cy="22" r="1.8"/><circle class="p" cx="71.5" cy="36" r="1.8"/><circle class="p" cx="71.5" cy="50" r="1.8"/><circle class="p" cx="71.5" cy="64" r="1.8"/><rect class="ko" x="41" y="52" width="18" height="18" rx="2"/><path class="pl" d="M50 57v8"/><rect class="ko" x="2" y="36" width="10" height="14" rx="2"/><rect class="ko" x="88" y="36" width="10" height="14" rx="2"/>
 </g>
 </svg>

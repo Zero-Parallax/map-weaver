@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
 <title>Escape pod</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"escape-pod","name":"Escape pod","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["crash-site"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":1,"tags":[]}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"escape-pod","name":"Escape pod","settings":["scifi"],"footprint":{"w":2,"h":2},"roomTypes":["crash-site"],"placement":"free","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":1,"tags":[],"height":"tall"}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="5" dy="8" stdDeviation="4" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.42"/></filter></defs>
 <g filter="url(#sh)">
-<polygon class="o" points="70,16 130,16 170,56 170,144 130,184 70,184 30,144 30,56"/><polygon class="k" points="72,36 128,36 146,54 146,78 128,96 72,96 54,78 54,54"/><rect class="s" x="60" y="120" width="80" height="10" rx="4"/><rect class="s" x="60" y="140" width="80" height="10" rx="4"/><rect class="ko" x="10" y="70" width="20" height="26" rx="4"/><rect class="ko" x="170" y="70" width="20" height="26" rx="4"/><rect class="ko" x="10" y="130" width="20" height="26" rx="4"/><rect class="ko" x="170" y="130" width="20" height="26" rx="4"/>
+<polygon class="h" points="196,104 163.6,134.6 148.2,164.5 118.7,186.1 79.8,192.7 39,180.4 34.8,135.4 20.8,104 22.5,66.7 42.1,31.4 77.8,6.9 116.5,31.7 150.5,40.7 179.1,65.9"/><path class="hm" d="M150 150Q176 176 190 160Q182 186 160 190Z"/><path class="d" d="M140 140L170 172M150 128L184 166"/><rect class="ko" x="30" y="50" width="20" height="28" rx="4"/><rect class="ko" x="150" y="50" width="20" height="28" rx="4"/><rect class="ko" x="30" y="122" width="20" height="28" rx="4"/><rect class="ko" x="150" y="122" width="20" height="28" rx="4"/><polygon class="s" points="80,22 120,22 156,58 156,142 120,178 80,178 44,142 44,58"/><polygon class="ko" points="70,32 130,32 146,48 146,56 130,72 70,72 54,56 54,48"/><path class="pl" d="M60 40L70 64M86 38L92 62M114 38L108 64M136 42L128 62"/><polygon class="o" points="78,86 122,86 132,96 132,120 122,130 78,130 68,120 68,96"/><polygon class="ko" points="84,92 116,92 124,100 124,116 116,124 84,124 76,116 76,100"/><path class="pl" d="M84 116L96 100"/><path class="t" d="M52 146L148 146M52 160L148 160"/><g transform="rotate(-25 52 144)"><polygon class="o" points="12,136 44,136 52,144 52,158 44,166 12,166 4,158 4,144"/><line class="t" x1="10" y1="151" x2="46" y2="151"/></g>
 </g>
 </svg>

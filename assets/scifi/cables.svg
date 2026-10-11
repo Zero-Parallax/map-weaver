@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<path class="l" d="M6 30C30 20 40 60 62 46S86 70 94 64"/><path class="l" d="M6 70C24 76 36 44 56 58S78 30 94 34"/><rect class="ko" x="52" y="50" width="12" height="10" rx="2"/>
+<path class="l" d="M6 30C30 20 40 60 62 46S80 64 86 62"/><path class="l" d="M6 70C24 76 36 44 56 58S74 34 82 34"/><g transform="rotate(-15 86 62)"><rect class="ko" x="82" y="56" width="12" height="12" rx="2"/><path class="t" d="M94 59L98 59M94 65L98 65"/></g><g transform="rotate(10 82 34)"><rect class="ko" x="78" y="28" width="12" height="12" rx="2"/><path class="t" d="M90 31L94 31M90 37L94 37"/></g>
 </svg>

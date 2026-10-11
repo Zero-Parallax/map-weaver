@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<circle class="ko" cx="25" cy="25" r="12"/><circle class="p" cx="25" cy="25" r="5"/><circle class="ko" cx="75" cy="25" r="12"/><circle class="p" cx="75" cy="25" r="5"/><circle class="ko" cx="25" cy="75" r="12"/><circle class="p" cx="25" cy="75" r="5"/><circle class="ko" cx="75" cy="75" r="12"/><circle class="p" cx="75" cy="75" r="5"/>
+<circle class="d" cx="25" cy="25" r="18"/><circle class="ko" cx="25" cy="25" r="11"/><circle class="p" cx="25" cy="25" r="5"/><circle class="d" cx="75" cy="25" r="18"/><circle class="ko" cx="75" cy="25" r="11"/><circle class="p" cx="75" cy="25" r="5"/><circle class="d" cx="25" cy="75" r="18"/><circle class="ko" cx="25" cy="75" r="11"/><circle class="p" cx="25" cy="75" r="5"/><circle class="d" cx="75" cy="75" r="18"/><circle class="ko" cx="75" cy="75" r="11"/><circle class="p" cx="75" cy="75" r="5"/><path class="t" d="M36 25L64 25M36 75L64 75"/>
 </svg>

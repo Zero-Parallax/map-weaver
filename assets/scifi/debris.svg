@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<polygon class="s" points="14,22 46,16 52,40 20,48"/><polygon class="o" points="56,50 86,58 78,84 50,76"/><polygon class="m" points="24,62 40,58 42,72"/><circle class="k" cx="20" cy="26" r="2.5"/><circle class="k" cx="44" cy="22" r="2.5"/><circle class="k" cx="60" cy="56" r="2.5"/><circle class="k" cx="80" cy="62" r="2.5"/><path class="t" d="M30 34L40 30M62 70L74 66"/>
+<polygon class="s" points="12,22 46,14 52,30 44,34 50,44 18,50"/><polygon class="o" points="54,50 88,56 80,86 58,82 62,70 50,72"/><rect class="m" x="18" y="60" width="26" height="9" rx="3"/><path class="t" d="M44 60l4 4l-3 3l4 3"/><circle class="k" cx="20" cy="26" r="2.5"/><circle class="k" cx="42" cy="20" r="2.5"/><circle class="k" cx="22" cy="44" r="2.5"/><circle class="k" cx="60" cy="56" r="2.5"/><circle class="k" cx="82" cy="62" r="2.5"/><circle class="k" cx="76" cy="80" r="2.5"/><path class="t" d="M28 30L40 28M64 66L76 70"/>
 </svg>

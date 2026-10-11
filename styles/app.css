@@ -769,3 +769,31 @@ details.more section {
 .start-card .actions {
   flex-wrap: wrap;
 }
+
+/* Help */
+.help-dialog {
+  width: min(640px, calc(100vw - 32px));
+}
+.help-body {
+  max-height: min(65vh, 640px);
+  overflow-y: auto;
+  padding-right: 6px;
+  line-height: 1.45;
+}
+.help-body h3 {
+  margin: 16px 0 4px;
+  font-size: 14px;
+}
+.help-body ul {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+.help-body li {
+  margin: 3px 0;
+}
+.macro-setup details {
+  margin: 4px 0 12px;
+}
+.macro-setup summary {
+  cursor: pointer;
+}

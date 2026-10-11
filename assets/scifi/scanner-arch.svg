@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<rect class="ko" x="4" y="30" width="24" height="40" rx="5"/><rect class="ko" x="172" y="30" width="24" height="40" rx="5"/><path class="d" d="M28 40L172 40M28 50L172 50M28 60L172 60"/><circle class="p" cx="16" cy="50" r="4"/><circle class="p" cx="184" cy="50" r="4"/>
+<rect class="h" x="26" y="30" width="148" height="40" rx="2"/><path class="t" d="M35 32L35 68M45 32L45 68M55 32L55 68M65 32L65 68M75 32L75 68M85 32L85 68M95 32L95 68M105 32L105 68M115 32L115 68M125 32L125 68M135 32L135 68M145 32L145 68M155 32L155 68M165 32L165 68"/><path class="d" d="M28 40L172 40M28 50L172 50M28 60L172 60"/><polygon class="ko" points="10,26 22,26 28,32 28,68 22,74 10,74 4,68 4,32"/><circle class="p" cx="16" cy="40" r="3"/><circle class="p" cx="16" cy="50" r="3"/><circle class="p" cx="16" cy="60" r="3"/><polygon class="ko" points="178,26 190,26 196,32 196,68 190,74 178,74 172,68 172,32"/><circle class="p" cx="184" cy="40" r="3"/><circle class="p" cx="184" cy="50" r="3"/><circle class="p" cx="184" cy="60" r="3"/>
 </g>
 </svg>
