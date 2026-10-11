@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="o" x="4" y="22" width="192" height="56"/><path class="l" d="M4 33L15 22M4 55L37 22M4 77L59 22M25 78L81 22M47 78L103 22M69 78L125 22M91 78L147 22M113 78L169 22M135 78L191 22M157 78L196 39M179 78L196 61"/><rect class="l" x="4" y="22" width="192" height="56"/>
+<rect class="o" x="4" y="22" width="192" height="56"/><polygon class="k" points="4,34 16,22 4,22 4,22"/><polygon class="k" points="4,58 40,22 28,22 4,46"/><polygon class="k" points="4,78 8,78 64,22 52,22 4,70"/><polygon class="k" points="20,78 32,78 88,22 76,22"/><polygon class="k" points="44,78 56,78 112,22 100,22"/><polygon class="k" points="68,78 80,78 136,22 124,22"/><polygon class="k" points="92,78 104,78 160,22 148,22"/><polygon class="k" points="116,78 128,78 184,22 172,22"/><polygon class="k" points="140,78 152,78 196,34 196,22 196,22"/><polygon class="k" points="164,78 176,78 196,58 196,46"/><polygon class="k" points="188,78 196,78 196,70"/><rect class="l" x="4" y="22" width="192" height="56"/>
 </svg>

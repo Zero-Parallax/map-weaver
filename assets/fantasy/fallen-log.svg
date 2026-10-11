@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<rect class="s" x="14" y="26" width="270" height="48" rx="22"/><path class="t" d="M40 38L120 34M70 60L180 64M150 36L250 40M200 58L266 56"/><ellipse class="o" cx="272" cy="50" rx="14" ry="24"/><ellipse class="t" cx="272" cy="50" rx="7" ry="13"/><path class="l" d="M90 26L80 8M210 74L222 92"/>
+<path class="l" d="M90 26L78 6M92 26L104 10M210 74L224 92"/><rect class="s" x="14" y="26" width="270" height="48" rx="22"/><path class="t" d="M36 38Q90 32 140 38T246 36M44 50Q110 56 170 50T260 52M30 62Q80 66 130 62T230 64"/><ellipse class="o" cx="272" cy="50" rx="14" ry="24"/><ellipse class="t" cx="272" cy="50" rx="8" ry="14"/><circle class="k" cx="272" cy="50" r="2.5"/><path class="hm" d="M60 40Q66 34 72 40Q66 46 60 40Z"/><path class="hm" d="M180 56Q188 50 198 56Q188 62 180 56Z"/>
 </g>
 </svg>

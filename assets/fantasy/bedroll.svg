@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="s" x="18" y="12" width="64" height="176" rx="16"/><rect class="o" x="24" y="18" width="52" height="40" rx="12"/><path class="t" d="M18 90L82 90M18 130L82 130"/>
+<rect class="s" x="18" y="12" width="64" height="176" rx="16"/><rect class="o" x="24" y="18" width="52" height="36" rx="12"/><path class="t" d="M30 36H70"/><rect class="o" x="18" y="70" width="64" height="118" rx="14"/><path class="l" d="M18 70Q50 90 82 70"/><path class="t" d="M26 120L74 116M26 156L74 152"/><rect class="ko" x="18" y="166" width="64" height="8" rx="2"/>
 </svg>

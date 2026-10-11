@@ -15,6 +15,25 @@ node serve.js
 Then open <http://127.0.0.1:5173/>. Maps are saved as JSON in the `maps/` folder.
 Set `PORT` to use another port.
 
+## Foundry VTT module
+
+Map Weaver also runs inside Foundry VTT (v14). In Foundry: **Add-on Modules → Install Module**,
+paste this manifest URL and enable **Map Weaver** in your world:
+
+```
+https://github.com/Zero-Parallax/map-weaver/releases/latest/download/module.json
+```
+
+The Scenes sidebar gets two buttons (GM only):
+
+- **Map Weaver** opens the editor in a Foundry window. **Send to scene** in its top bar builds
+  the map as a scene in this world: background images, walls, doors, lights and terrain
+  regions, a journal entry with a page per room (the GM's room key, hidden from players) and
+  GM-only map pins on every numbered room and on every secret and trap. Maps you save there are
+  kept in the world (`worlds/<world>/map-weaver/maps/`), so they travel with it.
+- **Import** creates a scene the same way from a `.mapweaver.json` file exported from Map
+  Weaver anywhere else (the web version, itch.io).
+
 ## Phones and tablets
 
 The editor works by touch: one finger draws and selects, two fingers pan and pinch-zoom. On a
@@ -165,8 +184,16 @@ room's name and GM notes (set them under More… when a room is selected); **Bot
   outdoor levels have no walls along the map's edge;
 - background images use the player version (no secret doors or traps).
 
-Files land in `exports/`. Copy the PNGs into your Foundry Data folder at the path you entered,
-create a scene, right-click it and choose **Import Data**, then pick the `.foundry-scene.json`.
+Two ways to get it into Foundry:
+
+- **One file (easiest)**: a single `.mapweaver.json` with the scene, its images and the room
+  key. With the Map Weaver module, click **Import** in the Scenes sidebar and pick it (inside
+  Foundry the editor's **Send to scene** skips the file altogether). Without the module, the
+  export window gives you an importer macro to paste into a Script macro once; run it and pick
+  the file (scene only, no room key).
+- **Images + scene file**: files land in `exports/`. Copy the PNGs into your Foundry Data folder
+  at the path you entered, create a scene, right-click it and choose **Import Data**, then pick
+  the `.foundry-scene.json`.
 
 ## Decorating
 
@@ -183,6 +210,29 @@ Corridors (rooms 3 squares or narrower) only get pieces along their walls.
 Select a room to name it, add GM notes (for the GM export's room key), and set its
 **Clutter** (none / light / heavy): cracks, puddles, stains, papers, cobwebs, cables and the
 like, scattered after the furniture without moving it.
+
+### Moods
+
+How cared-for a place is: **Pristine**, **Lived-in** (the default), **Neglected**, **Ransacked**
+or **Ruined**. Set it for the map (Map tab), override it per room (a spotless manor with a grim
+basement), or set a single piece by hand: beds, tables, shelves, consoles, lockers, med beds,
+counters, plants, seating and more are built from parts, and their panel has a **State** and a
+**Shuffle** button. Moods change the details, never where furniture stands: made beds or
+slashed mattresses, laid tables or overturned chairs, stocked shelves or books on the floor.
+Rooms also get **supplies** (ration crates, toolboxes, med kits, provisions...) that are well
+stocked in pristine and lived-in rooms, thinned out when neglected and strewn about when
+ransacked, and clutter that follows the mood. A neglected map ages unevenly: some rooms are still
+kept up, some have been turned over. Generated dungeons, caves and mines start neglected.
+
+### Hidden rooms and secrets
+
+Generated maps usually get a hidden room (a smuggler's hold, a secret study, a weapons cache...)
+tucked behind a room's wall and reached by a secret door. **More… → Add hidden room** builds one
+behind any room; the **Hidden room** checkbox makes any room secret (its doors become secret
+doors). Rooms also get the odd **secret**: a stash under a loose flagstone, a lever in a sconce,
+a floor cache or a hidden wall panel (**Secrets**: auto, none or add one). The player export
+leaves hidden rooms, secret doors, secrets and traps out; the GM export and its room key show
+and list them.
 
 ### Combat-ready rooms
 

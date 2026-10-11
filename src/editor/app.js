@@ -9,6 +9,10 @@ import { drawLevel, levelPaths } from '../render/renderer.js';
 import { linksOnLevel, linkContains } from '../core/links.js';
 import { placementContains, snapCentre, rotatedFootprint } from '../assets/library.js';
 import { decorateRoom } from '../decorator/decorate.js';
+import { roomMood } from '../assets/moods.js';
+import { addHiddenRoom, hiddenRoomCheck, deadEnds } from '../core/hidden.js';
+import { rng, hash } from '../core/rng.js';
+import { GENERATORS } from '../assets/generators.js';
 import { planDoors } from '../core/auto-doors.js';
 import { generateLayout } from '../generator/layout.js';
 import { generateLevels } from '../generator/levels.js';
@@ -183,6 +187,13 @@ export class App {
       if (reroll && tagIds.includes(id)) tag.reroll = (tag.reroll || 0) + 1;
       const inRoom = (p) => p.room === id || regionAt(geo.rooms, [p.x, p.y]) === index;
       level.placements = level.placements.filter((p) => !(p.auto && inRoom(p)));
+      const mood = roomMood(map, tag);
+      // Pieces kept from before follow the room's mood too, unless their state was set by hand.
+      for (const p of level.placements) {
+        if (!inRoom(p) || p.params?.moodSet) continue;
+        const gen = this.assets.get(p.asset)?.generator;
+        if (gen && GENERATORS[gen.id]?.moods) p.params = { ...p.params, mood };
+      }
       const existing = [];
       for (const p of level.placements) {
         const r = inRoom(p) && this.assets.resolve(p);
@@ -198,7 +209,7 @@ export class App {
         existing.push({ meta: r.meta, footprint: { w: x1 - x0, h: y1 - y0 }, x: x0, y: y0 });
       }
       const out = decorateRoom({
-        geo, region: geo.rooms.regions[index], tag, assets: metas, doors: level.doors, links, existing, mapSeed: map.seed,
+        geo, region: geo.rooms.regions[index], tag, assets: metas, doors: level.doors, links, existing, mapSeed: map.seed, mood,
         outdoor: !!this.setting?.roomTypes?.find((t) => t.id === tag.type)?.outdoor,
       });
       for (const p of out.placements) level.placements.push({ id: newId('a'), ...p });
@@ -275,10 +286,10 @@ export class App {
    * Replace this level with a generated layout: rooms, corridors, room types, doors and
    * decoration. The map grows if it is too small for the rooms asked for.
    */
-  generateLevel({ styleId, count = 8, seed = newSeed(), combat = false, levels = 1 }) {
+  generateLevel({ styleId, count = 8, seed = newSeed(), combat = false, levels = 1, secrets = true }) {
     const style = (this.setting?.generator || []).find((g) => g.id === styleId);
     if (!style) return;
-    if (levels > 1 && style.layout !== 'outdoor') return this.generateMap({ style, count, seed, combat, levels });
+    if (levels > 1 && style.layout !== 'outdoor') return this.generateMap({ style, count, seed, combat, levels, secrets });
     let grew = false;
     this.commit('Generate layout', (map, level) => {
       const side = style.layout === 'outdoor' ? 40 : Math.ceil(Math.sqrt(count * (style.layout === 'building' ? 40 : 75) * 4 / 3));
@@ -286,12 +297,15 @@ export class App {
       if (style.layout === 'ship') size.w = Math.max(size.w, 14 + Math.ceil((count - 2) / 2) * 6);
       grew = size.w !== map.size.w || size.h !== map.size.h;
       map.size = size;
+      // The style's usual mood (dungeons neglected), unless the mood was chosen by hand.
+      if (!map.mood || map.moodAuto) Object.assign(map, { mood: style.mood, moodAuto: true });
       const out = generateLayout({ style, map, count, seed, doorType: this.setting?.doors?.type });
       if (combat) for (const r of out.rooms) if (r.type !== style.corridor?.type) r.combat = true;
       Object.assign(level, { shapes: out.shapes, walls: [], doors: out.doors, edges: [], rooms: out.rooms, wallStyles: [], placements: out.placements, terrain: out.terrain });
       if (out.ground) level.ground = out.ground;
       else delete level.ground;
       this.decorateIn(map, level, level.rooms.map((r) => r.id), { doors: true });
+      if (secrets && style.layout !== 'outdoor') this.hideRoomsIn(map, level, count, seed);
     });
     this.generatedRev = this.rev;
     if (grew) this.fitView();
@@ -300,7 +314,7 @@ export class App {
   }
 
   /** Replace the whole map with generated levels joined by stairs (or ladders, lifts). */
-  generateMap({ style, count, seed, combat, levels }) {
+  generateMap({ style, count, seed, combat, levels, secrets = true }) {
     const linkType = style.links || (style.layout === 'tower' ? 'spiral' : style.layout === 'ship' ? 'ladder' : this.map.setting === 'scifi' ? 'lift' : 'stairs');
     let grew = false;
     this.commit('Generate levels', (map) => {
@@ -309,11 +323,14 @@ export class App {
       if (style.layout === 'ship') size.w = Math.max(size.w, 14 + Math.ceil((count - 2) / 2) * 6);
       grew = size.w !== map.size.w || size.h !== map.size.h;
       map.size = size;
+      // The style's usual mood (dungeons neglected), unless the mood was chosen by hand.
+      if (!map.mood || map.moodAuto) Object.assign(map, { mood: style.mood, moodAuto: true });
       const out = generateLevels({ style, map, count, levels, seed, doorType: this.setting?.doors?.type, linkType });
       if (combat) for (const lv of out.levels) for (const r of lv.rooms) if (r.type !== style.corridor?.type) r.combat = true;
       map.levels = out.levels;
       map.links = out.links;
       for (const lv of map.levels) this.decorateIn(map, lv, lv.rooms.map((r) => r.id), { doors: true });
+      if (secrets) map.levels.forEach((lv, i) => this.hideRoomsIn(map, lv, Math.round(count / levels), hash(seed, i)));
       this.levelIndex = style.layout === 'rooms' || style.layout === 'caves' ? map.levels.length - 1 : 0;
     }, { prune: false });
     this.geoCache.clear();
@@ -321,6 +338,93 @@ export class App {
     if (grew) this.fitView();
     this.setLevel(this.levelIndex);
     this.status(`Generated ${levels} levels joined by ${linkType === 'spiral' ? 'spiral stairs' : linkType === 'lift' ? 'lifts' : linkType === 'ladder' ? 'ladders' : 'stairs'}. PageUp / PageDown to look round; Undo goes back.`);
+  }
+
+  /**
+   * Hidden rooms for a generated level (call inside commit): usually one, two in big layouts,
+   * tucked behind the wall of a room away from the entrances.
+   */
+  hideRoomsIn(map, level, count, seed) {
+    const random = rng(hash(seed, 'hidden', level.id));
+    const want = (random() < 0.7 ? 1 : 0) + (count >= 10 && random() < 0.5 ? 1 : 0);
+    for (let i = 0; i < want; i++) {
+      const geo = computeLevelGeometry(level, map);
+      const hosts = geo.rooms.regions.map((r, index) => ({ r, index })).filter(({ r }) => r.tag && !r.tag.hidden && r.tag.type !== 'corridor' && !this.setting?.roomTypes?.find((t) => t.id === r.tag.type)?.outdoor);
+      for (let j = hosts.length - 1; j > 0; j--) {
+        const k = Math.floor(random() * (j + 1));
+        [hosts[j], hosts[k]] = [hosts[k], hosts[j]];
+      }
+      let made = false;
+      for (const { r, index } of hosts) {
+        const tag = addHiddenRoom(level, map, geo, index, { kinds: this.setting?.hidden || [], random, check: hiddenRoomCheck((lv) => computeLevelGeometry(lv, map)) });
+        if (tag) {
+          this.decorateIn(map, level, [r.tag.id, tag.id], { doors: false });
+          made = true;
+          break;
+        }
+      }
+      if (!made) {
+        // No room behind any wall (caves, towers): a dead-end room becomes the hidden one.
+        const ends = deadEnds(level, map, geo, ['corridor']);
+        if (!ends.length) break;
+        const tag = geo.rooms.regions[ends[Math.floor(random() * Math.min(3, ends.length))]].tag;
+        this.hideRoomIn(map, level, tag.id, true);
+      }
+    }
+  }
+
+  /** Add a hidden room behind a wall of this room, joined by a secret door. */
+  addHiddenRoom(tagId) {
+    let made = null;
+    this.commit('Add hidden room', (map, level) => {
+      const geo = computeLevelGeometry(level, map);
+      const index = geo.rooms.tagRegion.get(tagId);
+      if (index == null) return;
+      made = addHiddenRoom(level, map, geo, index, { kinds: this.setting?.hidden || [], check: hiddenRoomCheck((lv) => computeLevelGeometry(lv, map)) });
+      if (made) this.decorateIn(map, level, [tagId, made.id], { doors: false });
+    });
+    this.status(made ? `Added ${made.name}, behind a secret door. Players won't see it on their map.` : 'No space behind this room\'s walls for a hidden room (it needs empty squares, clear of other rooms).');
+    return made;
+  }
+
+  /**
+   * Make a room hidden or not. Hidden: its doors become secret doors (remembering what they
+   * were) and the player map leaves it out.
+   */
+  setRoomHidden(tagId, hidden) {
+    this.commit(hidden ? 'Hide room' : 'Unhide room', (map, level) => this.hideRoomIn(map, level, tagId, hidden), { prune: false });
+  }
+
+  /** setRoomHidden inside a commit. */
+  hideRoomIn(map, level, tagId, hidden) {
+    {
+      const tag = level.rooms.find((r) => r.id === tagId);
+      if (!tag) return;
+      const geo = computeLevelGeometry(level, map);
+      const index = geo.rooms.tagRegion.get(tagId);
+      const touches = (d) => {
+        const m = scale(add(d.a, d.b), 0.5);
+        const n = perp(norm(sub(d.b, d.a)));
+        return [add(m, scale(n, 0.5)), add(m, scale(n, -0.5))].some((p) => regionAt(geo.rooms, p) === index);
+      };
+      if (hidden) {
+        tag.hidden = true;
+        tag.autoDoors = true;
+        for (const d of level.doors) {
+          if (!touches(d) || d.type === 'secret') continue;
+          d.was = d.type;
+          d.type = 'secret';
+        }
+      } else {
+        delete tag.hidden;
+        for (const d of level.doors) {
+          if (!touches(d) || d.type !== 'secret' || !d.was) continue;
+          d.type = d.was;
+          delete d.was;
+        }
+      }
+      this.decorateIn(map, level, [tagId], { doors: false });
+    }
   }
 
   /** Ruin levels of a map in place (call inside commit): structure first, then redecorate. */
@@ -333,7 +437,13 @@ export class App {
 
   /** Ruin this level, or every level. Undo restores it. */
   ruin(amount, { all = false } = {}) {
-    this.commit('Ruin', (map, level) => this.ruinIn(map, all ? map.levels : [level], amount), { prune: false });
+    this.commit('Ruin', (map, level) => {
+      this.ruinIn(map, all ? map.levels : [level], amount);
+      if (all || map.levels.length === 1) {
+        map.mood = 'ruined';
+        delete map.moodAuto;
+      }
+    }, { prune: false });
     this.status('Ruined. Undo restores it; Save a ruined copy keeps the original as it was.');
   }
 
@@ -343,6 +453,8 @@ export class App {
     copy.id = newId('map');
     copy.name = `${this.map.name} (ruined)`;
     this.ruinIn(copy, copy.levels, amount);
+    copy.mood = 'ruined';
+    delete copy.moodAuto;
     return copy;
   }
 
@@ -614,6 +726,45 @@ export class App {
       pl.y = corner[1] + f1.h / 2;
       pl.auto = false;
     });
+  }
+
+  /** Set a piece's state by hand (mood: null = follow the room), or shuffle its details. */
+  setPieceState(id, { mood, shuffle = false } = {}) {
+    this.commit(shuffle ? 'Shuffle details' : 'Set state', (map, level) => {
+      const pl = level.placements.find((x) => x.id === id);
+      if (!pl) return;
+      const params = { ...pl.params };
+      if (shuffle) params.seed = Math.floor(Math.random() * 100000);
+      if (mood === null) {
+        delete params.moodSet;
+        const tag = level.rooms.find((r) => r.id === pl.room) || this.roomTagAt(map, level, pl);
+        params.mood = roomMood(map, tag);
+      } else if (mood) {
+        params.mood = mood;
+        params.moodSet = true;
+      }
+      pl.params = params;
+      pl.auto = false;
+    });
+  }
+
+  /** The room tag a placement stands in, if any. */
+  roomTagAt(map, level, pl) {
+    const geo = computeLevelGeometry(level, map);
+    const index = regionAt(geo.rooms, [pl.x, pl.y]);
+    return geo.rooms.regions[index]?.tag || null;
+  }
+
+  /** Change the map's mood: every room without its own mood follows (on every level). */
+  setMapMood(mood) {
+    this.commit('Map mood', (map) => {
+      map.mood = mood;
+      delete map.moodAuto;
+      for (const lv of map.levels) {
+        const ids = lv.rooms.filter((r) => !r.mood && !(r.ruin > 0)).map((r) => r.id);
+        if (ids.length) this.decorateIn(map, lv, ids, { doors: false });
+      }
+    }, { prune: false });
   }
 
   deleteSelection() {
@@ -1071,7 +1222,17 @@ export class App {
 
   /** Numbered rooms of the whole map, as the GM export shows them. */
   roomKey() {
-    return roomKey(this.map, { geometry: (lv) => this.geometry(lv), typeName: (id) => this.roomTypeName(id) });
+    return roomKey(this.map, {
+      geometry: (lv) => this.geometry(lv),
+      typeName: (id) => this.roomTypeName(id),
+      extras: (tag, level) => {
+        const out = [];
+        if (tag.hidden) out.push('Hidden room: reached by a secret door; not on the player map.');
+        const secrets = level.placements.filter((p) => p.room === tag.id && this.assets.get(p.asset)?.tags?.includes('secret')).map((p) => this.assets.get(p.asset).name.toLowerCase());
+        if (secrets.length) out.push(`Secret: ${[...new Set(secrets)].join(', ')}.`);
+        return out.join(' ');
+      },
+    });
   }
 
   drawRoomLabels(ctx, geo) {
@@ -1084,7 +1245,7 @@ export class App {
     for (const r of geo.rooms.regions) {
       if (!r.tag) continue;
       const n = numbers.get(r.tag.id);
-      const text = (n ? `${n} · ` : '') + (r.tag.name?.trim() || this.roomTypeName(r.tag.type));
+      const text = (n ? `${n} · ` : '') + (r.tag.name?.trim() || this.roomTypeName(r.tag.type)) + (r.tag.hidden ? ' (hidden)' : '');
       const x = ox + r.labelAt[0] * s;
       const y = oy + r.labelAt[1] * s;
       const w = ctx.measureText(text).width + 26;

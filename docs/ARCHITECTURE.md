@@ -57,6 +57,13 @@ Recomputed from the level when it changes:
 - `generators.js`: parametric generators (table with chairs, bench/pew, shelf, counter,
   console, rug, dais, cargo, railing). A generator asset records `{id, params, sizes}` so the
   decorator and the editor can remake it at another size.
+- `parts.js`, `parts-scifi.js`: generators for pieces built from parts that change with the
+  room's mood (bed, table and shelf live in `generators.js`): supplies, consoles, lockers,
+  med beds, kitchenettes, server racks, plants, seating, tanks and more. Generators with
+  `moods: true` take `{mood, seed}` in their params; the decorator fills them in.
+- `moods.js`: the mood scale (pristine, lived-in, neglected, ransacked, ruined), a room's
+  effective mood (`roomMood`: ruin, else its own, else the map's, with neglected maps ageing
+  unevenly), clutter and supply amounts per mood.
 - `starter.js`: the starter sets, baked to files by `tools/generate-assets.js`.
 - `library.js`: browser side. Lists assets from `GET /api/assets`, caches recoloured images.
 
@@ -79,9 +86,19 @@ Pure function, no DOM: `decorateRoom({geo, region, tag, assets, doors, links, ex
 5. **Combat ready** (`tag.combat`): add free-standing cover (the room's own cover pieces, else
    crates, barrels, drums) where it covers the most open squares not yet within two squares of
    cover, each with a clear one-square ring, until 88% of open floor is covered.
-6. **Clutter** (`meta.clutter`, `tag.clutter` 0..1): decals scattered from a separate seeded
-   stream, mostly along walls, jittered and at any angle, one per square; corner/wall clutter
-   (cobwebs) uses the normal candidates. Changing clutter never moves furniture.
+6. **Secrets** (`tags: ["secret"]`, GM only): one in every hidden room, now and then elsewhere
+   (`tag.secrets`: none or one overrides).
+7. **Supplies** (`meta.supplies`): ration crates, toolboxes and the like along the walls, in
+   amounts and states set by the mood, from their own seeded stream.
+8. **Clutter** (`meta.clutter`, `tag.clutter` 0..1, else the mood's amount): decals scattered
+   from a separate seeded stream, mostly along walls, jittered and at any angle, one per square;
+   corner/wall clutter (cobwebs) uses the normal candidates. Changing clutter never moves
+   furniture.
+
+Mood never moves furniture either: parts generators get `{mood, seed}` from a hash, not the
+layout's random stream, and ransacked rooms knock small pieces askew from their own stream.
+House rules (walkways from `flow.js`, companions and rows from `relations.js`, what each room
+type needs) shape where things go.
 
 Seed = hash(map seed, room id, room seed, reroll count), so results repeat until rerolled.
 
@@ -174,6 +191,14 @@ Phase 2:
   animation) and one Region per level for difficult terrain (rectangle `shapes`, `levels`,
   `elevation`, a `modifyMovementCost` behaviour with `system.difficulties` set to 2). The
   behaviour's system fields aren't in the type package, so check them in Foundry.
+- Hidden rooms and secrets **(done)**: `src/core/hidden.js` plans a room behind a wall (or hides
+  a dead end), joins it with a secret door, and makes the player version of a level without it.
+- One-file Foundry export and the Foundry module **(done)**: `src/export/foundry-bundle.js`
+  packs the scene, its images (base64) and the room key/secrets into a `.mapweaver.json`;
+  `foundry/` is the module (editor in a window via an iframe of this app, Import button, room key
+  journal and GM pins); `tools/build-foundry.mjs` builds it and `.github/workflows/foundry-release.yml`
+  publishes it on a `v*` tag. Inside Foundry the app talks to `window.parent.MapWeaverFoundry`
+  for saving maps into the world and for Send to scene.
 - PNG asset import with a tagging screen **(done)**: `src/assets/png-meta.js` reads and writes
   the same metadata JSON in an `iTXt` chunk (keyword `map-weaver-asset`);
   `src/editor/import-dialog.js` is the tagging screen; `PUT/DELETE /api/assets/imported/<file>.png`.

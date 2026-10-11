@@ -16,10 +16,13 @@
 //   facing:        optional; "focal" = seats that turn to face the room's showpiece (pews)
 //   clutter:       small decal (cracks, stains, papers) scattered after the furniture by the
 //                  room's clutter amount, not part of the furnishing
+//   supplies:      the things a room in use has (ration crates, trays, toolboxes): placed after
+//                  the furniture in amounts set by the room's mood (see moods.js)
 //   gmOnly:        hidden from players (traps): left out of the player PNG export
 //   cover:         half | three-quarters | full | none. Default: full if it blocks vision,
 //                  half if it blocks movement, else none. Used by combat-ready rooms.
 //   light:         {bright, dim (squares), color, animation}: a light source (Foundry export)
+//   height:        low | mid | tall: how long a shadow it casts (default mid; floor layer: none)
 //   tags:          free-form words for search
 //   generator:     {id, params} if made by a parametric generator (the app can remake it at
 //                  other sizes); sizes: allowed ranges the decorator may pick from
@@ -92,6 +95,7 @@ export function normalizeMeta(raw) {
   meta.max ??= 0;
   meta.tags ??= [];
   meta.clutter = !!meta.clutter;
+  meta.supplies = !!meta.supplies;
   meta.gmOnly = !!meta.gmOnly;
   if (!COVER.includes(meta.cover)) meta.cover = meta.blocksVision ? 'full' : meta.blocksMovement && meta.layer === 'object' ? 'half' : 'none';
   return { meta, errors };

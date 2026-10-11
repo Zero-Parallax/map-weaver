@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<g transform="rotate(-6 150 50)"><rect class="s" x="10" y="30" width="280" height="40" rx="4"/><path class="t" d="M30 42L140 40M120 58L260 60M200 40L280 42"/><path class="l" d="M290 30l-14 10l12 6l-10 8l12 6l-12 10"/></g>
+<g transform="rotate(-6 150 50)"><rect class="s" x="10" y="30" width="270" height="40" rx="4"/><path class="l" d="M12.0 50.0L278.0 50.0"/><path class="t" d="M69.0 38.8Q125.5 42.9 182.1 38.8M41.4 61.6Q109.4 62.6 177.4 61.6"/><ellipse class="t" cx="193.2" cy="59.0" rx="5" ry="3"/><path class="s" d="M280 30l12 8l-10 6l12 8l-10 6l10 12H280Z"/><path class="l" d="M280 30l12 8l-10 6l12 8l-10 6l10 12"/><rect class="ko" x="40" y="30" width="14" height="40" rx="2"/><circle class="p" cx="47" cy="40" r="2"/><circle class="p" cx="47" cy="60" r="2"/></g>
 </g>
 </svg>

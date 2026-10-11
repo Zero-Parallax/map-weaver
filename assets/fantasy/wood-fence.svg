@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<rect class="o" x="0" y="40" width="300" height="8" rx="2"/><rect class="o" x="0" y="54" width="300" height="8" rx="2"/><rect class="s" x="0" y="34" width="14" height="32" rx="3"/><rect class="s" x="93" y="34" width="14" height="32" rx="3"/><rect class="s" x="193" y="34" width="14" height="32" rx="3"/><rect class="s" x="286" y="34" width="14" height="32" rx="3"/>
+<rect class="o" x="0" y="40" width="300" height="9" rx="3"/><rect class="o" x="0" y="53" width="300" height="9" rx="3"/><path class="t" d="M10 44L135 45M150 57L290 58"/><rect class="s" x="0" y="32" width="16" height="36" rx="4"/><circle class="t" cx="8" cy="50" r="4"/><rect class="s" x="92" y="32" width="16" height="36" rx="4"/><circle class="t" cx="100" cy="50" r="4"/><rect class="s" x="192" y="32" width="16" height="36" rx="4"/><circle class="t" cx="200" cy="50" r="4"/><rect class="s" x="284" y="32" width="16" height="36" rx="4"/><circle class="t" cx="292" cy="50" r="4"/>
 </g>
 </svg>

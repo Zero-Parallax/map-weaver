@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<polygon class="k" points="14,10 186,10 194,18 194,82 186,90 14,90 6,82 6,18"/><path class="pl" d="M30 14L30 86M54 14L54 86M78 14L78 86M102 14L102 86M126 14L126 86M150 14L150 86M174 14L174 86M10 50L190 50"/>
+<rect class="ko" x="94" y="84" width="12" height="14" rx="2"/><path class="l" d="M100 92Q140 98 196 96"/><polygon class="s" points="12,8 92,8 98,14 98,80 92,86 12,86 6,80 6,14"/><rect class="ko" x="12" y="14" width="80" height="66" rx="2"/><path class="pl" d="M32 14L32 80M52 14L52 80M72 14L72 80M12 36L92 36M12 58L92 58"/><path class="pl" d="M20 70L46 22"/><polygon class="s" points="108,8 188,8 194,14 194,80 188,86 108,86 102,80 102,14"/><rect class="ko" x="108" y="14" width="80" height="66" rx="2"/><path class="pl" d="M128 14L128 80M148 14L148 80M168 14L168 80M108 36L188 36M108 58L188 58"/><path class="pl" d="M116 70L142 22"/>
 </g>
 </svg>

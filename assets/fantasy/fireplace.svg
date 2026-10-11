@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
 <title>Fireplace</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"fireplace","name":"Fireplace","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["tavern","great-hall","bedroom","kitchen","library"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[],"light":{"bright":3,"dim":6,"color":"#ff8a30","animation":"torch"}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"fireplace","name":"Fireplace","settings":["fantasy"],"footprint":{"w":2,"h":1},"roomTypes":["tavern","great-hall","bedroom","kitchen","library"],"placement":"wall","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":false,"weight":1,"min":0,"max":1,"tags":[],"light":{"bright":3,"dim":6,"color":"#ff8a30","animation":"torch"},"height":"tall"}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="5" dy="8" stdDeviation="4" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.42"/></filter></defs>
 <g filter="url(#sh)">
-<rect class="s" x="6" y="0" width="188" height="58" rx="2"/><path class="t" d="M6 20L46 20M154 20L194 20M6 40L46 40M154 40L194 40M26 0L26 20M174 0L174 20M36 20L36 40M164 20L164 40"/><rect class="ko" x="46" y="0" width="108" height="44"/><rect class="o" x="64" y="20" width="72" height="10" rx="4"/><rect class="s" x="70" y="30" width="60" height="9" rx="4"/><polygon class="p" points="100,2 103.5,12.8 114.1,8.8 107.8,18.2 117.5,24 106.3,25 107.8,36.2 100,28 92.2,36.2 93.7,25 82.5,24 92.2,18.2 85.9,8.8 96.5,12.8"/><rect class="o" x="40" y="58" width="120" height="14" rx="2"/>
+<rect class="s" x="6" y="0" width="188" height="58" rx="2"/><path class="t" d="M6 19L194 19M6 38L194 38M36 0L36 19M66 0L66 19M96 0L96 19M126 0L126 19M156 0L156 19M186 0L186 19M21 19L21 38M51 19L51 38M81 19L81 38M111 19L111 38M141 19L141 38M171 19L171 38M36 38L36 57M66 38L66 57M96 38L96 57M126 38L126 57M156 38L156 57M186 38L186 57"/><rect class="ko" x="46" y="0" width="108" height="46"/><rect class="o" x="60" y="18" width="80" height="10" rx="4"/><rect class="s" x="66" y="30" width="68" height="9" rx="4"/><path class="k" d="M108.1 24.0Q114.4 25.2 117.1 29.7Q109.9 28.4 105.1 30.3Q106.8 34.1 105.3 38.4Q102.7 34.5 98.2 31.9Q95.7 37.7 90.7 39.4Q93.5 32.6 92.7 27.5Q88.6 28.4 84.8 26.0Q89.2 24.3 92.7 20.5Q87.6 16.7 87.1 11.5Q93.0 15.8 98.2 16.1Q98.2 11.9 101.5 8.8Q102.1 13.4 105.1 17.7Q109.8 13.5 115.1 14.2Q109.6 19.0 108.1 24.0Z"/><circle class="p" cx="100" cy="24" r="7.6"/><circle class="h" cx="100" cy="24" r="3.2"/><rect class="o" x="40" y="56" width="120" height="14" rx="2"/><path class="t" d="M80 56L80 70M120 56L120 70"/><path class="l" d="M164 60L186 82M172 58L192 76"/>
 </g>
 </svg>

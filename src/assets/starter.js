@@ -11,6 +11,8 @@ import defineScifi from './starter/scifi.js';
 import defineClutter from './starter/clutter.js';
 import defineOutdoor from './starter/outdoor.js';
 import defineRuin from './starter/ruin.js';
+import defineSupplies from './starter/supplies.js';
+import defineSecrets from './starter/secrets.js';
 
 const defs = [];
 
@@ -24,7 +26,7 @@ function G(id, name, settings, generator, params, opts, sizes) {
   defs.push({ id, name, settings, ...opts, generator: { id: generator, params }, sizes });
 }
 
-for (const define of [defineCommon, defineFantasy, defineScifi, defineClutter, defineOutdoor, defineRuin]) define({ A, G });
+for (const define of [defineCommon, defineFantasy, defineScifi, defineClutter, defineOutdoor, defineRuin, defineSupplies, defineSecrets]) define({ A, G });
 
 // ---- build ---------------------------------------------------------------
 
@@ -58,7 +60,7 @@ export function buildStarterAssets() {
       max: d.max ?? 0,
       tags: d.tags || [],
     };
-    for (const k of ['facing', 'clutter', 'cover', 'terrain', 'light', 'gmOnly']) if (d[k]) meta[k] = d[k];
+    for (const k of ['facing', 'clutter', 'supplies', 'cover', 'terrain', 'light', 'gmOnly', 'height']) if (d[k]) meta[k] = d[k];
     if (d.generator) meta.generator = { ...d.generator, sizes: d.sizes || null };
     const folder = settings.length > 1 ? 'common' : settings[0];
     return { meta, drawing, folder };

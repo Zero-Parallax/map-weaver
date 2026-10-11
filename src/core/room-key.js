@@ -10,9 +10,10 @@ export const UNNUMBERED = ['corridor'];
  * Numbered rooms of a map.
  *  geometry(level): derived geometry for a level
  *  typeName(id):    display name of a room type
+ *  extras(tag, level): more notes for a room (hidden, its secrets)
  * Returns [{n, levelIndex, tag, at (label point), title, notes}].
  */
-export function roomKey(map, { geometry, typeName = (id) => id, skip = UNNUMBERED }) {
+export function roomKey(map, { geometry, typeName = (id) => id, skip = UNNUMBERED, extras = null }) {
   const out = [];
   let n = 0;
   map.levels.forEach((level, levelIndex) => {
@@ -27,7 +28,9 @@ export function roomKey(map, { geometry, typeName = (id) => id, skip = UNNUMBERE
     }
     rooms.sort((a, b) => Math.floor(a.at[1] / 4) - Math.floor(b.at[1] / 4) || a.at[0] - b.at[0]);
     for (const r of rooms) {
-      out.push({ n: ++n, levelIndex, tag: r.tag, at: r.at, title: r.tag.name?.trim() || typeName(r.tag.type), notes: r.tag.notes?.trim() || '' });
+      const extra = extras?.(r.tag, level) || '';
+      const notes = [r.tag.notes?.trim(), extra].filter(Boolean).join('\n');
+      out.push({ n: ++n, levelIndex, tag: r.tag, at: r.at, title: (r.tag.name?.trim() || typeName(r.tag.type)) + (r.tag.hidden ? ' (hidden)' : ''), notes });
     }
   });
   return out;

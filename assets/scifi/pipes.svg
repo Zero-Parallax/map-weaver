@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="o" x="0" y="6" width="200" height="14" rx="5"/><rect class="s" x="0" y="26" width="200" height="14" rx="5"/><rect class="ko" x="44" y="2" width="12" height="42" rx="3"/><rect class="ko" x="144" y="2" width="12" height="42" rx="3"/><circle class="ko" cx="100" cy="13" r="9"/><line class="pl" x1="100" y1="5" x2="100" y2="21"/>
+<rect class="o" x="0" y="6" width="200" height="16" rx="6"/><line class="t" x1="4" y1="11" x2="196" y2="11"/><rect class="s" x="0" y="28" width="200" height="16" rx="6"/><line class="pl" x1="4" y1="33" x2="196" y2="33"/><rect class="ko" x="20" y="2" width="10" height="46" rx="2"/><rect class="ko" x="150" y="2" width="10" height="46" rx="2"/><circle class="l" cx="86" cy="14" r="13"/><path class="t" d="M73 14L99 14M86 1L86 27"/><circle class="ko" cx="86" cy="14" r="4"/><circle class="o" cx="118" cy="36" r="11"/><circle class="t" cx="118" cy="36" r="11"/><line class="l" x1="118" y1="36" x2="124" y2="30"/><circle class="k" cx="118" cy="36" r="2.5"/>
 </svg>

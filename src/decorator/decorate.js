@@ -2,6 +2,16 @@
 // placement rule, without overlaps, keeping doors, stairs and balcony edges clear and every
 // entrance reachable. Seeded, so the same room + seed + reroll count gives the same result.
 //
+// It also follows house rules so rooms read as lived in:
+//   - walkways (flow.js) join the doors and lead to the room's showpiece; nothing that blocks
+//     movement stands on them, so you can always walk straight through
+//   - furniture you use from the front (shelves, counters, wardrobes) keeps that square free
+//   - companions come with their anchors: a nightstand by the bed head, stools at the bar,
+//     an anvil by the forge, candelabras either side of the altar (relations.js)
+//   - beds and wardrobes keep away from doors, storage goes to the far corners, coat racks
+//     and suit lockers stand by the door, lights spread out, beds and racks form rows
+// Every legal spot gets a score from these rules; the decorator picks among the best few.
+//
 // Works on the room's full squares (region.cells). Each square side is classified as
 //   inside (same room), wall, door, balcony (railing or drop edge) or open.
 
@@ -9,7 +19,10 @@ import { rng, hash } from '../core/rng.js';
 import { distToSegment, projectOnSegment, polylineSegments, add, scale } from '../core/geom.js';
 import { suitsRoom } from '../assets/meta.js';
 import { TERRAIN, terrainAt } from '../core/terrain.js';
-import { runGenerator } from '../assets/generators.js';
+import { runGenerator, GENERATORS } from '../assets/generators.js';
+import { DEFAULT_MOOD, MOOD_CLUTTER, MOOD_ANYWHERE, SUPPLY_AMOUNT, STOCKED_ROOMS, moodIndex, clutterSuitsMood } from '../assets/moods.js';
+import { walkways } from './flow.js';
+import { RELATIONS, ROWS, PRIVATE, STORAGE, ENTRANCE, ROOM_NEEDS, companionsOf } from './relations.js';
 
 export const SIDES = ['n', 'e', 's', 'w'];
 const STEP = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] };
@@ -167,6 +180,80 @@ function edgeCells(x, y, w, h, side) {
   }
 }
 
+const OPPOSITE = { n: 's', s: 'n', e: 'w', w: 'e' };
+
+/** The row of squares just in front of a piece whose back is to `facing` (`depth` rows deep). */
+function frontOf(r, facing, depth = 1) {
+  const out = [];
+  for (let d = 1; d <= depth; d++) {
+    if (facing === 'n') for (let i = r.x; i < r.x + r.w; i++) out.push([i, r.y + r.h - 1 + d]);
+    if (facing === 's') for (let i = r.x; i < r.x + r.w; i++) out.push([i, r.y - d]);
+    if (facing === 'w') for (let j = r.y; j < r.y + r.h; j++) out.push([r.x + r.w - 1 + d, j]);
+    if (facing === 'e') for (let j = r.y; j < r.y + r.h; j++) out.push([r.x - d, j]);
+  }
+  return out;
+}
+
+/** Gap in squares between two rects (0 = touching, negative = overlapping). */
+function rectGap(a, b) {
+  return Math.max(Math.max(a.x - (b.x + b.w), b.x - (a.x + a.w)), Math.max(a.y - (b.y + b.h), b.y - (a.y + a.h)));
+}
+
+/**
+ * Does spot `s` (a rect with rot and facing) stand in relation `rel` to anchor `t`?
+ * Returns a score bonus (negative is better) or null if the relation isn't met.
+ */
+function relationFit(rel, meta, s, t, placed) {
+  const gap = rectGap(s, t);
+  if (gap < 0) return null;
+  switch (rel.how) {
+    case 'near':
+      return gap <= (rel.dist ?? 2) ? -1 - ((rel.dist ?? 2) - gap) : null;
+    case 'beside': {
+      if (gap !== 0 || !t.facing || s.facing !== t.facing) return null;
+      const overlapX = Math.min(s.x + s.w, t.x + t.w) - Math.max(s.x, t.x);
+      const overlapY = Math.min(s.y + s.h, t.y + t.h) - Math.max(s.y, t.y);
+      if (overlapX > 0 === overlapY > 0) return null; // must share a side, not a corner
+      const backs = { n: s.y === t.y, s: s.y + s.h === t.y + t.h, w: s.x === t.x, e: s.x + s.w === t.x + t.w };
+      return backs[t.facing] ? -2 : null;
+    }
+    case 'front': {
+      if (!t.facing) return null;
+      const zone = new Set(frontOf(t, t.facing, 2).map(([i, j]) => key(i, j)));
+      if (!rectCells(s.x, s.y, s.w, s.h).some(([i, j]) => zone.has(key(i, j)))) return null;
+      if (rel.faces && rotateSide(meta.wallSide, s.rot) !== t.facing) return null;
+      return -1;
+    }
+    case 'flank': {
+      if (!t.facing) return null;
+      const alongX = t.facing === 'n' || t.facing === 's';
+      const [a0, a1, c0, c1] = alongX ? [t.x, t.x + t.w, t.y, t.y + t.h] : [t.y, t.y + t.h, t.x, t.x + t.w];
+      const [sa0, sa1, sc0, sc1] = alongX ? [s.x, s.x + s.w, s.y, s.y + s.h] : [s.y, s.y + s.h, s.x, s.x + s.w];
+      // In the same band as the anchor, or one square out from its front.
+      const outward = { n: 1, w: 1, s: -1, e: -1 }[t.facing];
+      const band0 = outward > 0 ? c0 : c0 - 1;
+      const band1 = outward > 0 ? c1 + 1 : c1;
+      if (sc1 <= band0 || sc0 >= band1) return null;
+      const left = sa1 <= a0 && a0 - sa1 <= 1;
+      const right = sa0 >= a1 && sa0 - a1 <= 1;
+      if (!left && !right) return null;
+      // Mirror the one already there, never doubling up on one side.
+      let bonus = -2;
+      for (const o of placed) {
+        if (o.meta.id !== meta.id || o.anchor !== t) continue;
+        const [oa0, oa1] = alongX ? [o.x, o.x + o.w] : [o.y, o.y + o.h];
+        const oLeft = oa1 <= a0;
+        if (oLeft === left) return null;
+        const mirrored = Math.abs(a0 - sa1 - (oa0 - a1)) < 0.01 || Math.abs(sa0 - a1 - (a0 - oa1)) < 0.01;
+        if (mirrored) bonus -= 2;
+      }
+      return bonus;
+    }
+    default:
+      return null;
+  }
+}
+
 function sideIs(room, cells, side, kind) {
   return cells.every(([x, y]) => room.cells.get(key(x, y))?.sides[side] === kind);
 }
@@ -175,13 +262,14 @@ function sideIs(room, cells, side, kind) {
  * Every legal spot for an asset in the room: {x, y (top-left), rot, w, h (rotated)}.
  * occupied: Map layer -> Set of used squares.
  */
-function candidates(room, meta, fp, occupied, centre) {
+function candidates(room, meta, fp, occupied, centre, { allRots = false } = {}) {
   const out = [];
   const floorLayer = meta.layer === 'floor';
   const rule = meta.placement;
+  const blocks = meta.layer === 'object' && meta.blocksMovement;
   for (const rot of [0, 90, 180, 270]) {
     const quarter = rot % 180 !== 0;
-    if (fp.w === fp.h && rot >= 180 && !['wall', 'corner', 'balcony', 'door'].includes(rule)) continue;
+    if (fp.w === fp.h && rot >= 180 && !allRots && !['wall', 'corner', 'balcony', 'door'].includes(rule)) continue;
     const w = quarter ? fp.h : fp.w;
     const h = quarter ? fp.w : fp.h;
     const facing = rotateSide(meta.wallSide, rot);
@@ -209,6 +297,19 @@ function candidates(room, meta, fp, occupied, centre) {
       const cx = x + w / 2;
       const cy = y + h / 2;
       let score = 0;
+      if (blocks) {
+        // Keep walkways and the space in front of other furniture clear.
+        if (squares.some(([i, j]) => room.reserved?.has(key(i, j)))) continue;
+        if (room.flow && squares.some(([i, j]) => room.flow.has(key(i, j)))) {
+          if (!room.narrow) continue;
+          score += 4;
+        }
+        // Furniture used from the front needs a free square to stand on in front of it.
+        if (rule === 'wall' && room.blocking) {
+          const front = frontOf({ x, y, w, h }, facing);
+          if (!front.some(([i, j]) => room.cells.has(key(i, j)) && !room.blocked.has(key(i, j)) && !room.blocking.has(key(i, j)))) continue;
+        }
+      }
       // Narrow rooms (corridors) keep their middle free: blocking pieces go along walls only.
       if (room.narrow && meta.blocksMovement && (rule === 'centre' || rule === 'free')) continue;
       if (rule === 'wall' || rule === 'door') {
@@ -248,7 +349,7 @@ function candidates(room, meta, fp, occupied, centre) {
         // Mats and hazard stripes go right in front of a door.
         if (!squares.some(([i, j]) => room.anchors.includes(key(i, j)))) continue;
       }
-      out.push({ x, y, rot, w, h, score });
+      out.push({ x, y, rot, w, h, score, facing });
     }
   }
   return out;
@@ -301,9 +402,11 @@ function keepsWalkable(room, blocking, squares) {
  *  doors, links: the level's doors and linksOnLevel()
  *  existing:     placements already in the room that stay (hand-placed), as
  *                [{meta, footprint (rotated), x, y}] with x, y the top-left square
+ *  mood:         how cared-for the room is (moods.js): changes how beds, tables and shelves
+ *                look, which clutter shows and how much, never where the furniture goes
  * Returns {placements, report}.
  */
-export function decorateRoom({ geo, region, tag, assets, doors, links = [], existing = [], mapSeed = 0, outdoor = false }) {
+export function decorateRoom({ geo, region, tag, assets, doors, links = [], existing = [], mapSeed = 0, outdoor = false, mood = DEFAULT_MOOD }) {
   const random = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0));
   const room = analyseRoom({ geo, region, doors, links });
   const xs = region.cells.map((c) => c[0]);
@@ -311,6 +414,7 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   room.width = Math.max(...xs) - Math.min(...xs) + 1;
   room.height = Math.max(...ys) - Math.min(...ys) + 1;
   room.narrow = Math.min(room.width, room.height) <= 3;
+  room.wide = Math.min(room.width, room.height) >= 7 && region.cells.length >= 40;
   room.anchorPoints = room.anchors.map((k) => k.split(',').map((v) => Number(v) + 0.5));
   const centre = [
     region.cells.reduce((s, c) => s + c[0] + 0.5, 0) / region.cells.length,
@@ -319,12 +423,21 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
 
   const occupied = { floor: new Set(), object: new Set(), overhead: new Set() };
   const blocking = new Set();
+  const placed = []; // rects of every piece in the room, for the house rules
   for (const e of existing) {
     for (const [i, j] of rectCells(e.x, e.y, e.footprint.w, e.footprint.h)) {
       occupied[e.meta.layer].add(key(i, j));
       if (e.meta.blocksMovement) blocking.add(key(i, j));
     }
+    placed.push({ meta: e.meta, x: e.x, y: e.y, w: e.footprint.w, h: e.footprint.h, rot: 0, facing: null });
   }
+  // Walkways between the doors (and into the room), and squares kept free in front of things.
+  room.blocking = blocking;
+  room.reserved = new Set();
+  // The walkways are worked out once the room's central showpieces (reactor, holo table)
+  // stand, so the routes go round them; until then nothing is kept clear.
+  room.flow = new Set();
+  const focalFronts = [];
 
   const density = tag.density ?? DEFAULT_DENSITY;
   const usable = [...room.cells.keys()].filter((k) => !room.blocked.has(k) && !room.keepClear.has(k)).length;
@@ -343,7 +456,8 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
   const underCap = (m) => !capOf(m) || (counts.get(m.id) || 0) < capOf(m);
   // Outdoors, "any room" pieces (torches, floor cracks) are indoor things: leave them out.
   const fits = (m) => suitsRoom(m, tag.type) && !(outdoor && m.roomTypes.includes('*'));
-  const pool = assets.filter((m) => fits(m) && !m.clutter);
+  const isSecret = (m) => m.tags.includes('secret');
+  const pool = assets.filter((m) => fits(m) && !m.clutter && !m.supplies && !isSecret(m));
   const counts = new Map();
   const placements = [];
   const report = { placed: 0, skipped: [] };
@@ -357,26 +471,81 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     return w.length - 1;
   };
 
-  const place = (meta) => {
+  const doorDist = (cx, cy) => (room.anchorPoints.length ? Math.min(...room.anchorPoints.map(([ax, ay]) => Math.hypot(cx - ax, cy - ay))) : 6);
+  const lights = () => placed.filter((p) => p.meta.light);
+
+  /** House-rule score for a spot (lower is better), on top of its placement-rule score. */
+  const houseScore = (meta, s) => {
+    const cx = s.x + s.w / 2;
+    const cy = s.y + s.h / 2;
+    let score = 0;
+    const d = doorDist(cx, cy);
+    if (PRIVATE.has(meta.id)) score += 6 / (1 + d);
+    if (STORAGE.has(meta.id)) score += 4 / (1 + d);
+    if (ENTRANCE.has(meta.id)) score -= 5 / (1 + d);
+    if (meta.light && !isFocal(meta)) {
+      const others = lights();
+      if (others.length) score -= Math.min(6, Math.min(...others.map((o) => Math.hypot(cx - (o.x + o.w / 2), cy - (o.y + o.h / 2))))) * 0.7;
+    }
+    if (ROWS[meta.id] != null) {
+      const g = ROWS[meta.id];
+      for (const o of placed) {
+        if (o.meta.id !== meta.id || o.w !== s.w || o.h !== s.h) continue;
+        const inRow = (o.y === s.y && Math.abs(o.x - s.x) === s.w + g) || (o.x === s.x && Math.abs(o.y - s.y) === s.h + g);
+        if (inRow) {
+          score -= 4;
+          break;
+        }
+      }
+    }
+    const rel = RELATIONS[meta.id];
+    if (rel) {
+      let best = null;
+      for (const t of placed) {
+        if (!rel.to.includes(t.meta.id) || t === s) continue;
+        const fit = relationFit(rel, meta, s, t, placed);
+        if (fit != null && (best == null || fit < best)) best = fit;
+      }
+      if (best != null) score += best * (rel.soft ? 1.5 : 3);
+    }
+    return score;
+  };
+
+  /**
+   * Place one piece. With `anchor` and `rel`, it is a companion: only spots that stand in that
+   * relation to the anchor count (trying free-standing spots if its own rule finds none).
+   */
+  const place = (meta, { anchor = null, rel = null } = {}) => {
     const sizes = sizeOptions(meta, random);
     for (const params of sizes) {
       const fp = footprintOf(meta, params);
       const required = (counts.get(meta.id) || 0) < (meta.min || 0);
-      if (meta.layer === 'object' && !required && fp.w * fp.h > Math.max(budget, 1)) continue;
-      let spots = candidates(room, meta, fp, occupied, centre);
+      if (meta.layer === 'object' && !required && !anchor && fp.w * fp.h > Math.max(budget, 1)) continue;
+      const opts = { allRots: !!rel?.faces };
+      let spots = candidates(room, meta, fp, occupied, centre, opts);
       // Once the corners are taken, corner clutter (barrels, crates, sacks) lines the walls
       // in busier rooms.
       if (!spots.length && meta.placement === 'corner' && density >= 0.4) {
-        spots = candidates(room, { ...meta, placement: 'wall' }, fp, occupied, centre);
+        spots = candidates(room, { ...meta, placement: 'wall' }, fp, occupied, centre, opts);
+      }
+      if (anchor) {
+        const fitting = (list) => list.map((sp) => ({ ...sp, fit: relationFit(rel, meta, sp, anchor, placed) })).filter((sp) => sp.fit != null);
+        let rated = fitting(spots);
+        if (!rated.length && meta.placement !== 'free' && meta.placement !== 'centre') rated = fitting(candidates(room, { ...meta, placement: 'free' }, fp, occupied, centre, opts));
+        spots = rated.map((sp) => ({ ...sp, score: sp.score + sp.fit * 3 }));
       }
       if (!spots.length) continue;
-      const ranked = meta.placement === 'centre' || isFocal(meta) || (meta.facing === 'focal' && room.focal);
-      if (ranked) spots.sort((a, b) => a.score - b.score).splice(Math.max(isFocal(meta) ? 2 : 3, Math.ceil(spots.length * (isFocal(meta) ? 0.03 : 0.1))));
       // Outdoors, free-standing pieces gather in clumps (woods, rock fields) with clearings.
-      const clumped = outdoor && (meta.placement === 'free' || meta.placement === 'centre');
-      // Try a few spots in random order until one keeps the room walkable.
+      const clumped = outdoor && !anchor && (meta.placement === 'free' || meta.placement === 'centre');
+      if (!clumped) {
+        // Score every spot by its rule and the house rules, with a little noise for variety,
+        // then try the best few in turn.
+        const spread = meta.placement === 'centre' || isFocal(meta) ? 0.6 : 1.5;
+        for (const sp of spots) sp.rank = sp.score + houseScore(meta, sp) + random() * spread;
+        spots.sort((a, b) => a.rank - b.rank);
+      }
       for (let attempt = 0; attempt < 8 && spots.length; attempt++) {
-        const i = clumped ? pickClumped(spots) : Math.floor(random() * spots.length);
+        const i = clumped ? pickClumped(spots) : Math.floor(random() * Math.min(isFocal(meta) ? 2 : 3, spots.length));
         const s = spots.splice(i, 1)[0];
         const squares = rectCells(s.x, s.y, s.w, s.h).map(([a, b]) => key(a, b));
         if (meta.blocksMovement) {
@@ -387,26 +556,85 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
         if (meta.layer === 'object') budget -= squares.length;
         counts.set(meta.id, (counts.get(meta.id) || 0) + 1);
         const pl = { asset: meta.id, x: s.x + s.w / 2, y: s.y + s.h / 2, rot: s.rot, auto: true, room: tag.id };
-        if (isFocal(meta) && !room.focal) room.focal = [pl.x, pl.y];
         if (params) pl.params = params;
+        if (meta.generator && GENERATORS[meta.generator.id]?.moods) {
+          // Pieces made of parts (bed, table, shelf) get the room's mood and their own seed,
+          // from a hash rather than the layout's random stream so moods never move furniture.
+          pl.params = { ...(params || {}), mood, seed: hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'piece', placements.length) % 100000 };
+        }
         placements.push(pl);
         report.placed++;
+        const rect = { meta, x: s.x, y: s.y, w: s.w, h: s.h, rot: s.rot, facing: s.facing, anchor };
+        placed.push(rect);
+        if (meta.layer === 'object' && meta.blocksMovement && meta.placement === 'wall') {
+          // Used from the front: keep the square in front free of other furniture.
+          for (const [i2, j2] of frontOf(rect, s.facing)) if (room.cells.has(key(i2, j2))) room.reserved.add(key(i2, j2));
+        }
+        if (isFocal(meta) && !room.focal) {
+          room.focal = [pl.x, pl.y];
+          // A walkway now leads up to the showpiece.
+          if (!outdoor && meta.placement === 'wall') {
+            focalFronts.push(frontOf(rect, s.facing).map(([i2, j2]) => key(i2, j2)));
+            if (room.flow.size) room.flow = walkways(room, { blocking, targets: focalFronts });
+          }
+        }
+        if (!anchor) addCompanions(meta, rect);
         return true;
       }
     }
     return false;
   };
 
+  /** Pieces that come with this one: a nightstand with a bed, stools with a bar... */
+  const addCompanions = (meta, rect) => {
+    for (const { id, rel } of companionsOf(meta.id)) {
+      const cm = pool.find((m) => m.id === id);
+      if (!cm || random() > (rel.chance ?? 0.8)) continue;
+      const [lo, hi] = Array.isArray(rel.count) ? rel.count : [rel.count ?? (rel.how === 'flank' ? 2 : 1), rel.count ?? (rel.how === 'flank' ? 2 : 1)];
+      const n = lo + Math.floor(random() * (hi - lo + 1));
+      for (let i = 0; i < n && underCap(cm); i++) if (!place(cm, { anchor: rect, rel })) break;
+    }
+  };
+
+  // Pieces that belong with an anchor (nightstands, bar stools, pilot seats) come with it as
+  // companions; they only join the general pick when the room has nothing to anchor them.
+  const dependent = (m) => {
+    const rel = RELATIONS[m.id];
+    return rel && !rel.soft && pool.some((o) => rel.to.includes(o.id));
+  };
   // 1. Required pieces first, biggest first. 2. Rugs and decals. 3. Weighted picks until the
   // budget runs out or nothing more fits.
   const required = pool.filter((m) => m.min > 0).sort((a, b) => b.footprint.w * b.footprint.h - a.footprint.w * a.footprint.h);
-  for (const m of required) for (let i = 0; i < m.min; i++) if (!place(m)) report.skipped.push(m.id);
+  // Central showpieces go first, in the middle; then the walkways are laid out round them.
+  // (Some required pieces may already have come as companions: an anvil with its forge.)
+  const placeRequired = (list) => {
+    for (const m of list) while ((counts.get(m.id) || 0) < m.min) if (!place(m)) {
+      report.skipped.push(m.id);
+      break;
+    }
+  };
+  placeRequired(required.filter((m) => m.placement === 'centre' && !dependent(m)));
+  if (!outdoor) room.flow = walkways(room, { blocking, targets: focalFronts });
+  placeRequired(required.filter((m) => m.placement !== 'centre'));
+  // What the room is for: one of each group it needs (a bed in a bedroom), unless one stands.
+  for (const group of ROOM_NEEDS[tag.type] || []) {
+    const has = (id) => (counts.get(id) || 0) > 0 || existing.some((e) => e.meta.id === id);
+    if (group.some(has)) continue;
+    const options = group.map((id) => pool.find((m) => m.id === id)).filter(Boolean);
+    while (options.length) {
+      const total = options.reduce((t, m) => t + m.weight, 0);
+      let r = random() * total;
+      const i = Math.max(0, options.findIndex((m) => (r -= m.weight) <= 0));
+      if (place(options[i])) break;
+      options.splice(i, 1);
+    }
+  }
   const floorPool = pool.filter((m) => m.layer === 'floor');
   // Traps (GM-only) are rarer: about one room in five.
   for (const m of floorPool) if (random() < (0.35 + density * 0.5) * (m.gmOnly ? 0.3 : 1) && underCap(m)) place(m);
 
   let failures = 0;
-  const main = pool.filter((m) => m.layer !== 'floor');
+  const main = pool.filter((m) => m.layer !== 'floor' && !dependent(m));
   const patience = Math.round(12 + 25 * density);
   // Space only shrinks, so a piece that found no spot once never will: stop trying it and
   // spend the rest of the budget on pieces that still fit (free-standing ones once the walls
@@ -433,10 +661,42 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     }
   }
   if (tag.ruin) ruinRoom();
+  else if (moodIndex(mood) >= 3) knockAskew();
   if (tag.combat) addCover();
+  addSecrets();
   const ruinOnly = (m) => tag.ruin > 0 && m.roomTypes.includes('ruin');
-  placements.push(...scatterClutter({ room, tag, assets: assets.filter((m) => fits(m) || ruinOnly(m)), occupied, mapSeed }));
+  placements.push(...placeSupplies({ room, tag, mood, density, assets: assets.filter((m) => m.supplies && fits(m)), occupied, mapSeed }));
+  // Neglected rooms gather cobwebs and cracks whatever they are; ransacked ones, debris.
+  const moodMess = (m) => !outdoor && m.clutter && MOOD_ANYWHERE[m.id] != null && moodIndex(mood) >= MOOD_ANYWHERE[m.id];
+  placements.push(...scatterClutter({ room, tag, mood, assets: assets.filter((m) => fits(m) || ruinOnly(m) || moodMess(m)), occupied, mapSeed }));
   return { placements, report };
+
+  /**
+   * Secrets only the GM sees: a stash under a loose flagstone, a lever in a sconce. Always one
+   * in a hidden room; now and then one elsewhere (tag.secrets: 'none' or 'one' overrides).
+   */
+  function addSecrets() {
+    if (outdoor || tag.secrets === 'none') return;
+    const sr = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'secrets'));
+    const want = tag.secrets === 'one' || tag.hidden ? 1 : sr() < 0.12 ? 1 : 0;
+    if (!want) return;
+    const kinds = assets.filter((m) => isSecret(m) && (fits(m) || tag.hidden));
+    // In a hidden room the stash (free-standing) is what it is for.
+    const order = kinds.sort((a, b) => (tag.hidden ? (a.placement === 'free' ? -1 : 1) - (b.placement === 'free' ? -1 : 1) : sr() - 0.5));
+    for (const m of order) if (place(m)) break;
+  }
+
+  /** Ransacked rooms: small free-standing pieces knocked a little askew (own random stream). */
+  function knockAskew() {
+    const rr = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'askew'));
+    for (const p of placements) {
+      const m = assets.find((a) => a.id === p.asset);
+      if (!m || m.layer !== 'object' || isFocal(m) || !['free', 'centre', 'corner'].includes(m.placement)) continue;
+      const fp = footprintOf(m, p.params);
+      if (fp.w * fp.h > 2 || rr() > 0.45) continue;
+      p.rot = (p.rot + (rr() < 0.5 ? -1 : 1) * 15 * (1 + Math.floor(rr() * 2)) + 360) % 360;
+    }
+  }
 
   /**
    * Ruined rooms: most lights are out, some pieces are gone (their space taken by rubble),
@@ -512,7 +772,10 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
     const rejected = new Set(); // spots that would cut the room off
     for (let added = 0, tries = 0; added < limit && tries < limit * 4; tries++) {
       const uncovered = open().filter((k) => !near(k));
-      if (uncovered.length <= open().length * 0.12) break;
+      // Until nearly every open square is near cover, and always a little more than the room
+      // had: ticking combat-ready should visibly add something to fight round.
+      const minAdd = open().length >= 60 ? 2 : 1;
+      if (uncovered.length <= open().length * 0.05 && added >= minAdd) break;
       const uncoveredSet = new Set(uncovered);
       let best = null;
       for (const meta of kinds) {
@@ -523,14 +786,14 @@ export function decorateRoom({ geo, region, tag, assets, doors, links = [], exis
           for (const c of room.cells.values()) {
             if (rejected.has(`${meta.id}|${c.x},${c.y},${rot}`)) continue;
             const squares = rectCells(c.x, c.y, w, h).map(([i, j]) => key(i, j));
-            if (squares.some((k) => !room.cells.has(k) || occupied.object.has(k) || room.keepClear.has(k) || room.blocked.has(k) || room.balconyCells.has(k))) continue;
+            if (squares.some((k) => !room.cells.has(k) || occupied.object.has(k) || room.keepClear.has(k) || room.blocked.has(k) || room.balconyCells.has(k) || room.reserved.has(k) || (!room.narrow && room.flow.has(k)))) continue;
             // A clear ring: no other piece and no wall right next to it.
             const ring = rectCells(c.x - 1, c.y - 1, w + 2, h + 2).map(([i, j]) => key(i, j)).filter((k) => !squares.includes(k));
             if (ring.some((k) => !room.cells.has(k) || blocking.has(k))) continue;
             let gain = 0;
             for (let j = c.y - 2; j < c.y + h + 2; j++) for (let i = c.x - 2; i < c.x + w + 2; i++) if (uncoveredSet.has(key(i, j))) gain++;
             const score = gain + random() * 0.5 + (meta.cover === 'full' ? 0.3 : 0);
-            if (gain >= 3 && (!best || score > best.score)) best = { meta, rot, w, h, x: c.x, y: c.y, squares, score };
+            if ((gain >= 3 || added < minAdd) && (!best || score > best.score)) best = { meta, rot, w, h, x: c.x, y: c.y, squares, score };
           }
         }
       }
@@ -576,6 +839,76 @@ function valueNoise(random, size) {
   };
 }
 
+// ---- supplies --------------------------------------------------------------
+
+const SIDE_ROT = { n: 0, e: 90, s: 180, w: 270 };
+
+/**
+ * The things a room in use has: ration crates, trays, toolboxes, med kits. Stocked against the
+ * walls in tidy groups (pristine, lived-in), thinned out (neglected) or strewn over the floor
+ * (ransacked). Its own random stream, so the furniture never moves. Each piece gets the mood.
+ */
+function placeSupplies({ room, tag, mood, density, assets, occupied, mapSeed }) {
+  if (!assets.length) return [];
+  const random = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'supplies'));
+  const mi = moodIndex(mood);
+  const free = (k) => room.cells.has(k) && !room.blocked.has(k) && !room.keepClear.has(k) && !room.balconyCells.has(k) && !occupied.object.has(k) && !occupied.overhead.has(k);
+  const wallSide = (c) => SIDES.find((s) => c.sides[s] === 'wall');
+  const along = [...room.cells.values()].filter((c) => {
+    const k = key(c.x, c.y);
+    return wallSide(c) && free(k) && !room.reserved?.has(k) && !room.flow?.has(k);
+  });
+  const amount = (SUPPLY_AMOUNT[mood] ?? 1) * (STOCKED_ROOMS.has(tag.type) ? 1.7 : 1) * (0.6 + density);
+  let count = Math.round(along.length * 0.16 * amount + random() * 0.8);
+  const out = [];
+  const counts = new Map();
+  const placed = new Set();
+  const cap = (m) => Math.max(1, Math.round((m.max || 3) * (STOCKED_ROOMS.has(tag.type) ? 2 : 1)));
+  for (let tries = 0; count > 0 && tries < count * 6 + 6; tries++) {
+    const choices = assets.filter((m) => (counts.get(m.id) || 0) < cap(m));
+    if (!choices.length) break;
+    let r = random() * choices.reduce((s, m) => s + m.weight, 0);
+    const meta = choices.find((m) => (r -= m.weight) <= 0) || choices[choices.length - 1];
+    let spot = null;
+    if (mi >= 3 && random() < 0.5) {
+      // Strewn: anywhere on the open floor.
+      const open = [...room.cells.values()].filter((c) => free(key(c.x, c.y)) && !placed.has(key(c.x, c.y)));
+      if (open.length) {
+        const c = open[Math.floor(random() * open.length)];
+        spot = { c, rot: Math.floor(random() * 24) * 15 };
+      }
+    } else {
+      // Against a wall, gathering with the supplies already there; corners first.
+      const spots = along.filter((c) => !placed.has(key(c.x, c.y)) && free(key(c.x, c.y)));
+      if (spots.length) {
+        const w = spots.map((c) => {
+          const walls = SIDES.filter((s) => c.sides[s] === 'wall').length;
+          const near = SIDES.some((s) => placed.has(key(c.x + STEP[s][0], c.y + STEP[s][1])));
+          return 1 + (walls >= 2 ? 2 : 0) + (near ? 4 : 0);
+        });
+        let q = random() * w.reduce((a, b) => a + b, 0);
+        const i = Math.max(0, w.findIndex((v) => (q -= v) <= 0));
+        const c = spots[i];
+        spot = { c, rot: SIDE_ROT[wallSide(c)] + (mi >= 3 ? Math.round((random() - 0.5) * 4) * 15 : 0) };
+      }
+    }
+    if (!spot) {
+      counts.set(meta.id, Infinity);
+      continue;
+    }
+    const k = key(spot.c.x, spot.c.y);
+    placed.add(k);
+    occupied.object.add(k);
+    counts.set(meta.id, (counts.get(meta.id) || 0) + 1);
+    out.push({
+      asset: meta.id, x: spot.c.x + 0.5, y: spot.c.y + 0.5, rot: (spot.rot + 360) % 360, auto: true, room: tag.id,
+      params: { mood, seed: hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'supply', out.length) % 100000 },
+    });
+    count--;
+  }
+  return out;
+}
+
 // ---- clutter ---------------------------------------------------------------
 
 /**
@@ -583,10 +916,12 @@ function valueNoise(random, size) {
  * (a little off-centre, any angle). Its own random stream, so changing the clutter amount
  * leaves the furniture where it is.
  */
-function scatterClutter({ room, tag, assets, occupied, mapSeed }) {
-  // Ruins are messier.
-  const amount = Math.max(tag.clutter ?? DEFAULT_CLUTTER, tag.ruin ? 0.4 + 0.6 * tag.ruin : 0);
-  const pool = assets.filter((m) => m.clutter && suitsRoom(m, tag.type));
+function scatterClutter({ room, tag, assets, occupied, mapSeed, mood = DEFAULT_MOOD }) {
+  // The room's own clutter setting, else its mood's; ruins are messier.
+  const amount = Math.max(tag.clutter ?? MOOD_CLUTTER[mood] ?? DEFAULT_CLUTTER, tag.ruin ? 0.4 + 0.6 * tag.ruin : 0);
+  // Only clutter that suits the mood: no spilled ale in a pristine hall, no bloodstains in a
+  // tidy bedroom. Assets passed in are already the room's own plus the mood's mess.
+  const pool = assets.filter((m) => m.clutter && clutterSuitsMood(m.id, mood));
   if (!amount || !pool.length) return [];
   const random = rng(hash(mapSeed, tag.id, tag.seed, tag.reroll || 0, 'clutter'));
   const out = [];
@@ -615,7 +950,7 @@ function scatterClutter({ room, tag, assets, occupied, mapSeed }) {
         const k = key(c.x, c.y);
         if (used.has(k) || occupied.object.has(k) || occupied.floor.has(k)) return false;
         // Rough ground (difficult terrain) stays out of doorways.
-        return !(meta.tags.includes('difficult terrain') && room.keepClear.has(k));
+        return !(meta.tags.includes('difficult terrain') && (room.keepClear.has(k) || room.flow?.has(k)));
       });
       if (free.length) {
         const w = (c) => 1 + SIDES.filter((s) => c.sides[s] === 'wall').length * 2;

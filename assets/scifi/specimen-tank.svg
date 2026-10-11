@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
 <title>Specimen tank</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"specimen-tank","name":"Specimen tank","settings":["scifi"],"footprint":{"w":1,"h":1},"roomTypes":["lab","med-bay","cloning-lab"],"placement":"corner","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":4,"tags":[],"light":{"bright":0,"dim":2,"color":"#7dffb0"}}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"specimen-tank","name":"Specimen tank","settings":["scifi"],"footprint":{"w":1,"h":1},"roomTypes":["lab","med-bay","cloning-lab"],"placement":"corner","wallSide":"n","layer":"object","blocksMovement":true,"blocksVision":true,"weight":1,"min":0,"max":4,"tags":[],"light":{"bright":0,"dim":2,"color":"#7dffb0"},"height":"tall","generator":{"id":"tank","params":{"kind":"specimen"},"sizes":null}}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="5" dy="8" stdDeviation="4" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.42"/></filter></defs>
 <g filter="url(#sh)">
-<polygon class="ko" points="26,4 74,4 96,26 96,74 74,96 26,96 4,74 4,26"/><circle class="m" cx="50" cy="50" r="36"/><path class="k" d="M40 36Q56 28 62 44Q70 60 52 66Q36 70 40 56Q46 48 40 36Z"/><circle class="o" cx="66" cy="30" r="4"/><circle class="o" cx="30" cy="62" r="3"/>
+<polygon class="ko" points="24,4 76,4 96,24 96,76 76,96 24,96 4,76 4,24"/><polygon class="m" points="28,14 72,14 86,28 86,72 72,86 28,86 14,72 14,28"/><path class="l" d="M50 52Q61.3 66.3 74.8 59.7"/><path class="l" d="M50 52Q46.2 68.4 58.7 74.4"/><path class="l" d="M50 52Q32.3 60.4 35.9 76.2"/><path class="l" d="M50 52Q36.2 45.2 28.2 55.1"/><path class="l" d="M50 52Q46.0 33.5 30.4 33.4"/><path class="l" d="M50 52Q61.9 40.1 54.5 28.4"/><ellipse class="s" cx="50" cy="50" rx="14" ry="11"/><circle class="k" cx="46" cy="48" r="3"/><circle class="k" cx="55" cy="48" r="2"/><circle class="o" cx="70" cy="26" r="3.5"/><circle class="o" cx="74" cy="36" r="2.2"/><circle class="o" cx="26" cy="70" r="2.6"/><circle class="o" cx="30" cy="60" r="2"/><circle class="o" cx="68" cy="72" r="2.6"/><circle class="o" cx="62" cy="20" r="1.8"/><circle class="o" cx="24" cy="32" r="2.2"/><path class="pl" d="M22 40A30 30 0 0 1 34 24"/><circle class="p" cx="12" cy="12" r="2.6"/><circle class="p" cx="88" cy="12" r="2.6"/><circle class="p" cx="12" cy="88" r="2.6"/><circle class="p" cx="88" cy="88" r="2.6"/>
 </g>
 </svg>

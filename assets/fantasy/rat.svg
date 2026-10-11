@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
 <title>Rat</title>
-<metadata id="map-weaver-asset"><![CDATA[{"id":"rat","name":"Rat","settings":["fantasy"],"footprint":{"w":1,"h":1},"roomTypes":["cellar","prison","crypt","storeroom","cave","kitchen","corridor"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
+<metadata id="map-weaver-asset"><![CDATA[{"id":"rat","name":"Rat","settings":["fantasy"],"footprint":{"w":1,"h":1},"roomTypes":["by-hand"],"placement":"free","wallSide":"n","layer":"floor","blocksMovement":false,"blocksVision":false,"weight":1,"min":0,"max":0,"tags":[],"clutter":true}]]></metadata>
 <style>.o{fill:var(--paper,#fff);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .s{fill:var(--shade,#c6c6c6);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
 .m{fill:var(--mid,#8d8d8d);stroke:var(--ink,#1b1b1b);stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<path class="l" d="M30 56Q14 64 18 80Q22 90 34 86"/><ellipse class="m" cx="48" cy="50" rx="18" ry="10"/><polygon class="m" points="62,44 78,50 62,56"/><circle class="s" cx="60" cy="42" r="4"/><circle class="s" cx="60" cy="58" r="4"/><circle class="k" cx="72" cy="48" r="2"/>
+<path class="l" d="M30 54Q12 60 16 78Q20 90 34 86"/><path class="t" d="M38 42l-4 -6M40 58l-4 6M56 42l2 -6M56 58l2 6"/><path class="m" d="M28 50Q30 38 48 38Q64 40 68 48Q76 50 82 50Q76 52 68 52Q64 60 48 62Q30 62 28 50Z"/><circle class="s" cx="58" cy="40" r="4.5"/><circle class="s" cx="58" cy="60" r="4.5"/><circle class="p" cx="70" cy="46" r="1.8"/><circle class="p" cx="70" cy="54" r="1.8"/><path class="t" d="M82 50l8 -4M82 50l8 4"/>
 </svg>

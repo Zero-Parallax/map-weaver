@@ -1,0 +1,65 @@
+# Build and publish the Foundry VTT module.
+#
+# Push a tag and this does the rest:
+#     git tag v0.2.0 && git push origin v0.2.0
+# or run it from the Actions tab (Run workflow) with a version: it creates the tag itself.
+#
+# tools/build-foundry.mjs stamps the version into module.json and bundles the editor; the zip
+# has module.json at its root, as Foundry expects. The release gets the zip and a manifest that
+# points at "latest", so Foundry offers updates.
+
+name: Foundry module release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Work out the version
+        id: version
+        env:
+          INPUT: ${{ github.event.inputs.version }}
+        run: |
+          v="${INPUT:-${GITHUB_REF_NAME#v}}"
+          echo "value=${v#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Test
+        run: node --test
+
+      - name: Build the module
+        run: node tools/build-foundry.mjs "${{ steps.version.outputs.value }}" "${{ github.server_url }}/${{ github.repository }}"
+
+      - name: Zip it
+        run: cd dist/foundry/map-weaver && zip -r ../map-weaver.zip . -x '*.git*'
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.value }}
+          target_commitish: ${{ github.sha }}
+          name: Map Weaver v${{ steps.version.outputs.value }}
+          prerelease: ${{ contains(steps.version.outputs.value, '-') }}
+          body: |
+            Install in Foundry (Add-on Modules → Install Module) with the manifest URL:
+            ${{ github.server_url }}/${{ github.repository }}/releases/latest/download/module.json
+          files: |
+            dist/foundry/map-weaver.zip
+            dist/foundry/module.json

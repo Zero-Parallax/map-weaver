@@ -2,10 +2,11 @@
 
 import { App } from './editor/app.js';
 import { el, field, select, segmented, checkbox } from './editor/dom.js';
-import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport, hasServer } from './io/api.js';
+import { loadCatalog, listMaps, loadMapFile, saveMapFile, saveExport, hasServer, foundryHost } from './io/api.js';
 import { renderLevelPng, exportSize, exportFileName, slug, MAX_SIDE, VIEWS } from './render/export.js';
 import { roomKey } from './core/room-key.js';
 import { buildFoundryScene, COMPLEXITY } from './export/foundry.js';
+import { IMPORTER_MACRO, imageRef, blobToBase64, makeBundle, journalData } from './export/foundry-bundle.js';
 import { OPEN_MODES } from './render/renderer.js';
 import { WALL_TEXTURES, WALL_WIDTHS } from './render/walls.js';
 import { loadMap, saveMap, newSeed, DOOR_TYPES, insertLevel, removeLevel } from './core/model.js';
@@ -14,8 +15,11 @@ import { linkTool, edgeTool } from './editor/tools/level-tools.js';
 import { assetTool, sizeFields } from './editor/tools/asset-tool.js';
 import { AssetLibrary } from './assets/library.js';
 import { ask, askText, notice } from './editor/ask.js';
+import { helpDialog } from './editor/help.js';
 import { regionAt } from './core/rooms.js';
-import { DENSITY, DEFAULT_DENSITY, CLUTTER, DEFAULT_CLUTTER } from './decorator/decorate.js';
+import { DENSITY, DEFAULT_DENSITY, CLUTTER } from './decorator/decorate.js';
+import { MOODS, DEFAULT_MOOD, roomMood } from './assets/moods.js';
+import { GENERATORS } from './assets/generators.js';
 import { selectTool, doorTool, roomTool, tagRegion } from './editor/tools/item-tools.js';
 import { rectTool, circleTool, polyTool, caveTool, brushTool, corridorTool, joinControl } from './editor/tools/shape-tools.js';
 import { wallTool, arcTool } from './editor/tools/wall-tools.js';
@@ -63,6 +67,8 @@ const catalog = await loadCatalog();
 // Without serve.js (hosted as plain files, e.g. on a phone) maps and exports are files you
 // download, and a map is opened by importing its file.
 const server = await hasServer();
+// Where maps and exports are kept: serve.js's folders, or the Foundry world inside Foundry.
+const store = server || !!foundryHost;
 const assets = new AssetLibrary();
 try {
   await assets.load(server);
@@ -104,7 +110,7 @@ async function downloadBlob(blob, name) {
 }
 
 async function save(asNew = false) {
-  if (!server) {
+  if (!store) {
     try {
       if (!(await download())) return;
       app.dirty = false;
@@ -134,7 +140,7 @@ async function confirmDiscard() {
 }
 
 async function openDialog() {
-  if (!server) return importFile();
+  if (!store) return importFile();
   if (!(await confirmDiscard())) return;
   const dialog = $('open-dialog');
   const list = $('map-list');
@@ -156,7 +162,7 @@ async function openDialog() {
                   await notice(`Could not open ${m.name}: ${err.message}`);
                 }
               },
-            }, m.name, el('small', {}, new Date(m.modified).toLocaleString()))),
+            }, m.name, m.modified ? el('small', {}, new Date(m.modified).toLocaleString()) : null)),
           )
         : [el('li', {}, 'No saved maps yet.')]),
     );
@@ -219,8 +225,8 @@ function exportDialog() {
             view, key: view === 'gm' ? key : null, keyColumn: exportOpts.key,
           });
           const name = exportFileName(app.map, i, views.length > 1 || view === 'gm' ? view : '');
-          if (server && exportOpts.save) saved.push((await saveExport(name, blob)).path);
-          if (!server || exportOpts.download) await downloadBlob(blob, name);
+          if (store && exportOpts.save) saved.push((await saveExport(name, blob)).path);
+          if (!store || exportOpts.download) await downloadBlob(blob, name);
         }
       }
       status.textContent = saved.length ? `Saved: ${saved.join(', ')}` : 'Done.';
@@ -231,7 +237,7 @@ function exportDialog() {
       go.disabled = false;
     }
   } }, 'Export');
-  dialog.append(
+  dialog.append(...[
     el('h2', {}, 'Export PNG'),
     field('Levels', segmented([{ id: 'current', name: 'This level' }, { id: 'all', name: 'All levels' }], exportOpts.which, (v) => {
       exportOpts.which = v;
@@ -246,17 +252,17 @@ function exportDialog() {
     field('Version', segmented(VIEWS, exportOpts.view, (v) => {
       exportOpts.view = v;
       refresh();
-    }), 'Player hides secret doors and traps. GM shows everything and numbers the rooms.'),
+    }), 'Player hides secret doors, hidden rooms, traps and secrets. GM shows everything and numbers the rooms.'),
     checkbox('GM: room key beside the map (names and notes from each room)', exportOpts.key, (v) => (exportOpts.key = v)),
     field('Open to below areas', select(OPEN_MODES, exportOpts.openMode, (v) => (exportOpts.openMode = v)),
       'Transparent suits stacked levels in Foundry; faded shows the level below for printing.'),
     field('Outside the building', select([{ id: 'drawn', name: 'As drawn (rock / hatching)' }, { id: 'transparent', name: 'Transparent' }], exportOpts.outsideMode, (v) => (exportOpts.outsideMode = v))),
-    server && checkbox('Save to the exports folder', exportOpts.save, (v) => (exportOpts.save = v)),
-    server && checkbox('Download in the browser', exportOpts.download, (v) => (exportOpts.download = v)),
+    store && checkbox(foundryHost ? 'Save into the world (map-weaver/exports)' : 'Save to the exports folder', exportOpts.save, (v) => (exportOpts.save = v)),
+    store && checkbox('Download in the browser', exportOpts.download, (v) => (exportOpts.download = v)),
     sizeNote,
     status,
     el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, 'Close'), go),
-  );
+  ].filter(Boolean));
   dialog.addEventListener('close', () => dialog.remove());
   document.body.append(dialog);
   refresh();
@@ -267,12 +273,40 @@ function exportDialog() {
 // ---- Foundry export --------------------------------------------------------
 
 const FOUNDRY_KEY = 'map-weaver.foundry';
-const foundryOpts = { pps: 100, folder: 'worlds/my-world/map-weaver/', complexity: 'medium', assetWalls: true, flipOneWay: false, lights: true, terrain: true };
+const foundryOpts = { method: 'bundle', pps: 100, folder: 'worlds/my-world/map-weaver/', complexity: 'medium', assetWalls: true, flipOneWay: false, lights: true, terrain: true };
 try {
   Object.assign(foundryOpts, JSON.parse(localStorage.getItem(FOUNDRY_KEY) || '{}'));
 } catch {
   // Remembered options are a convenience only.
 }
+
+/** Render every level and build the one-file Foundry bundle (see foundry-bundle.js). */
+async function foundryBundle(opts = foundryOpts, progress = () => {}) {
+  const map = app.map;
+  const files = map.levels.map((_, i) => exportFileName(map, i));
+  const images = [];
+  for (let i = 0; i < map.levels.length; i++) {
+    progress(`Rendering ${map.levels[i].name}…`);
+    // Openings are transparent so Foundry shows the level below; upper levels are transparent
+    // outside the building too. Hidden rooms stay in: Foundry's fog hides them.
+    const blob = await renderLevelPng({
+      map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv), pxPerSquare: opts.pps,
+      openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent', view: 'player', hideRooms: false,
+    });
+    images.push({ name: files[i], data: await blobToBase64(blob) });
+  }
+  progress('Building walls…');
+  const scene = buildFoundryScene(map, {
+    geometry: (lv) => app.geometry(lv), imagePath: (i) => imageRef(files[i]), pps: opts.pps,
+    complexity: opts.complexity, assetWalls: opts.assetWalls, resolve: (pl) => assets.resolve(pl), flipOneWay: opts.flipOneWay,
+    lights: opts.lights, terrain: opts.terrain,
+  });
+  const journal = journalData(map, { key: app.roomKey(), resolve: (pl) => assets.resolve(pl), pps: opts.pps });
+  return makeBundle({ slug: slug(map.name).toLowerCase(), scene, images, journal });
+}
+
+// For the Foundry module (and the browser console).
+window.__mapWeaver = { app, foundryBundle: (opts) => foundryBundle({ ...foundryOpts, ...opts }) };
 
 function foundryDialog() {
   const dialog = el('dialog', { class: 'export-dialog' });
@@ -284,20 +318,41 @@ function foundryDialog() {
       // ignore
     }
   };
+  const method = foundryHost ? 'scene' : foundryOpts.method === 'scene' ? 'bundle' : foundryOpts.method;
   const go = el('button', { type: 'button', class: 'primary', onclick: async () => {
     go.disabled = true;
     remember();
     const map = app.map;
-    const folder = foundryOpts.folder.replace(/\\/g, '/').replace(/\/?$/, '/');
-    const files = map.levels.map((_, i) => exportFileName(map, i));
+    const progress = (text) => (status.textContent = text);
     try {
+      if (method === 'scene') {
+        // Inside Foundry: hand the bundle straight to the companion module.
+        const bundle = await foundryBundle(foundryOpts, progress);
+        progress('Creating the scene in Foundry…');
+        const scene = await foundryHost.importBundle(bundle);
+        status.replaceChildren(el('p', {}, `Done: ${scene?.name || map.name} is open in Foundry, with its room key in the journal and GM pins for each room and secret.`));
+        return;
+      }
+      if (method === 'bundle') {
+        const bundle = await foundryBundle(foundryOpts, progress);
+        progress('Packing…');
+        const name = `${slug(map.name)}.mapweaver.json`;
+        const blob = new Blob([JSON.stringify(bundle)], { type: 'application/json' });
+        if (server) await saveExport(name, blob);
+        else await downloadBlob(blob, name);
+        status.replaceChildren(
+          el('p', {}, `Done: ${bundle.scene.levels.length} level${bundle.scene.levels.length > 1 ? 's' : ''}, ${bundle.scene.walls.length} walls, all in `, el('strong', {}, server ? `exports/${name}` : name), '.'),
+          el('p', {}, 'In Foundry, use Import in the Scenes sidebar (with the Map Weaver module) or run the importer macro, and pick that file.'),
+        );
+        return;
+      }
+      const folder = foundryOpts.folder.replace(/\\/g, '/').replace(/\/?$/, '/');
+      const files = map.levels.map((_, i) => exportFileName(map, i));
       for (let i = 0; i < map.levels.length; i++) {
-        status.textContent = `Rendering ${map.levels[i].name}…`;
-        // Openings are transparent so Foundry shows the level below; upper levels are
-        // transparent outside the building too.
+        progress(`Rendering ${map.levels[i].name}…`);
         const blob = await renderLevelPng({
           map, levelIndex: i, style: app.style, assets, geometry: (lv) => app.geometry(lv), pxPerSquare: foundryOpts.pps,
-          openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent', view: 'player',
+          openMode: 'transparent', outsideMode: i === 0 ? 'drawn' : 'transparent', view: 'player', hideRooms: false,
         });
         if (server) await saveExport(files[i], blob);
         else await downloadBlob(blob, files[i]);
@@ -323,17 +378,43 @@ function foundryDialog() {
     } finally {
       go.disabled = false;
     }
-  } }, 'Export for Foundry');
+  } }, method === 'scene' ? 'Create scene' : 'Export for Foundry');
   const { width, height } = exportSize(app.map, foundryOpts.pps);
-  dialog.append(
-    el('h2', {}, 'Export to Foundry VTT v14'),
+  dialog.append(...[
+    el('h2', {}, method === 'scene' ? 'Send to a Foundry scene' : 'Export to Foundry VTT v14'),
     el('p', { class: 'hint' }, `One scene with ${app.map.levels.length} level${app.map.levels.length > 1 ? 's' : ''}: a background image per level and walls, doors and railings tagged with their level.`),
     field('Pixels per square (Foundry grid size)', el('input', {
       type: 'number', min: 50, max: 400, value: foundryOpts.pps,
       onchange: (e) => (foundryOpts.pps = Math.max(50, Math.min(400, Math.round(+e.target.value) || 100))),
     }), `${width} × ${height} px at the current setting.`),
-    field('Image folder inside Foundry Data', el('input', { type: 'text', value: foundryOpts.folder, onchange: (e) => (foundryOpts.folder = e.target.value.trim()) }),
-      'Where you will copy the PNGs, e.g. worlds/my-world/maps/'),
+    method === 'scene' && el('p', { class: 'hint' }, 'Creates the scene in this world straight away, with the room key in a journal and GM-only pins for each room, secret and trap.'),
+    method !== 'scene' && field('How', segmented([{ id: 'bundle', name: 'One file (easiest)' }, { id: 'files', name: 'Images + scene file' }], method, (v) => {
+      foundryOpts.method = v;
+      remember();
+      dialog.close();
+      foundryDialog();
+    })),
+    method === 'scene' ? null : method === 'bundle'
+      ? el('div', { class: 'macro-setup' },
+          el('p', { class: 'hint' }, 'One file with the scene, its images and the room key. With the Map Weaver module in Foundry, click Import in the Scenes sidebar and pick it. No module? Use the importer macro instead (scene only).'),
+          el('details', {},
+            el('summary', {}, 'No module: set up the importer macro (once per world)'),
+            el('ol', { class: 'hint' },
+              el('li', {}, 'In Foundry, open the Macro Directory and create a new macro.'),
+              el('li', {}, 'Set its type to Script, name it Map Weaver importer, paste the macro in and save.'),
+              el('li', {}, 'Drag it to your hotbar. Run it whenever you have a new map and pick the .mapweaver.json file.')),
+            el('div', { class: 'actions' },
+              el('button', { type: 'button', onclick: async (e) => {
+                try {
+                  await navigator.clipboard.writeText(IMPORTER_MACRO);
+                  e.target.textContent = 'Copied';
+                } catch {
+                  await downloadBlob(new Blob([IMPORTER_MACRO], { type: 'text/javascript' }), 'map-weaver-importer.js');
+                }
+              } }, 'Copy macro'),
+              el('button', { type: 'button', onclick: () => downloadBlob(new Blob([IMPORTER_MACRO], { type: 'text/javascript' }), 'map-weaver-importer.js') }, 'Download macro'))))
+      : field('Image folder inside Foundry Data', el('input', { type: 'text', value: foundryOpts.folder, onchange: (e) => (foundryOpts.folder = e.target.value.trim()) }),
+          'Where you will copy the PNGs, e.g. worlds/my-world/maps/'),
     field('Wall complexity', select(Object.entries(COMPLEXITY).map(([id, c]) => ({ id, name: c.name })), foundryOpts.complexity, (v) => (foundryOpts.complexity = v)),
       'How closely walls follow curves and cave outlines.'),
     checkbox('Walls round pillars, statues and other vision-blocking assets', foundryOpts.assetWalls, (v) => (foundryOpts.assetWalls = v)),
@@ -342,6 +423,7 @@ function foundryDialog() {
     checkbox('Flip one-way railing sight (if Foundry blocks the wrong side)', foundryOpts.flipOneWay, (v) => (foundryOpts.flipOneWay = v)),
     status,
     el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, 'Close'), go),
+  ].filter(Boolean)
   );
   dialog.addEventListener('close', () => dialog.remove());
   document.body.append(dialog);
@@ -352,18 +434,20 @@ $('file-buttons').append(
   menuButton('File', () => [
     { label: 'New map…', run: () => startDialog('new') },
     { label: 'Open…', run: openDialog },
-    { label: server ? 'Save' : 'Save (download)', run: () => save() },
-    server && { label: 'Save as…', run: () => save(true) },
-    server && { label: 'Download map file', run: download },
-    server && { label: 'Import map file…', run: importFile },
+    { label: store ? 'Save' : 'Save (download)', run: () => save() },
+    store && { label: 'Save as…', run: () => save(true) },
+    store && { label: 'Download map file', run: download },
+    store && { label: 'Import map file…', run: importFile },
   ]),
-  el('button', { onclick: () => save(), title: server ? 'Save (Ctrl+S)' : 'Download the map file (Ctrl+S)' }, 'Save'),
+  el('button', { onclick: () => save(), title: store ? 'Save (Ctrl+S)' : 'Download the map file (Ctrl+S)' }, 'Save'),
   el('button', { class: 'accent', onclick: () => startDialog('generate'), title: 'Generate rooms, corridors, doors and decoration' }, 'Generate'),
   el('button', { onclick: ruinDialog, title: 'Turn this map into its ruined version' }, 'Ruin'),
   menuButton('Export', () => [
     { label: 'PNG image…', run: exportDialog },
     { label: 'Foundry VTT scene…', run: foundryDialog },
   ]),
+  foundryHost && el('button', { class: 'accent', onclick: foundryDialog, title: 'Create this map as a scene in this world' }, 'Send to scene'),
+  el('button', { onclick: helpDialog, title: 'How to use Map Weaver' }, 'Help'),
 );
 const undoBtn = el('button', { onclick: () => app.undo(), title: 'Undo (Ctrl+Z)' }, 'Undo');
 const redoBtn = el('button', { onclick: () => app.redo(), title: 'Redo (Ctrl+Y)' }, 'Redo');
@@ -635,12 +719,29 @@ function placementSection(pl) {
       el('input', { type: 'number', step: 15, value: pl.rot, onchange: (e) => app.setRotation(pl.id, Number(e.target.value) || 0) }),
       el('button', { style: { flex: 'none' }, onclick: () => app.rotateSelection(15) }, '+15°'))),
     sizeFields(meta, pl.params || {}, (params) => app.resizePlacement(pl.id, params)),
+    meta.generator && GENERATORS[meta.generator.id]?.moods && stateField(pl),
     el('div', { class: 'actions' },
       el('button', { onclick: () => app.rotateSelection(-90) }, '⟲ 90°'),
       el('button', { onclick: () => app.rotateSelection(90) }, '90° ⟳'),
       el('button', { onclick: () => app.duplicateSelection() }, 'Duplicate'),
       el('button', { class: 'danger', onclick: () => app.deleteSelection() }, 'Delete')),
   );
+}
+
+/** State of a piece made of parts (bed, table, shelf): follow the room, or set by hand. */
+function stateField(pl) {
+  const room = app.roomTagAt(app.map, app.level, pl);
+  const auto = MOODS.find((m) => m.id === roomMood(app.map, room))?.name || 'Lived-in';
+  const options = [{ id: '', name: `Auto (${auto})` }, ...MOODS.filter((m) => m.id !== 'ruined')];
+  const value = pl.params?.moodSet ? pl.params.mood : '';
+  return field('State', el('div', { class: 'row' },
+    select(options, value, (v) => app.setPieceState(pl.id, { mood: v || null })),
+    el('button', { style: { flex: 'none' }, title: 'Same state, different details', onclick: () => app.setPieceState(pl.id, { shuffle: true }) }, '⚄ Shuffle')),
+    'Made bed or rumpled, table laid or left in a mess. Auto follows the room\'s mood.');
+}
+
+function moodOptions(defaultName) {
+  return [...(defaultName ? [{ id: '', name: `Map default (${defaultName})` }] : []), ...MOODS.map((m) => ({ id: m.id, name: m.name }))];
 }
 
 function wallSection(wall) {
@@ -678,8 +779,16 @@ function roomSection() {
   });
   const density = tag?.density ?? DEFAULT_DENSITY;
   const preset = Object.entries(DENSITY).find(([, v]) => Math.abs(v - density) < 0.01)?.[0] || '';
-  const clutter = tag?.clutter ?? DEFAULT_CLUTTER;
-  const clutterPreset = Object.entries(CLUTTER).find(([, v]) => Math.abs(v - clutter) < 0.01)?.[0] || '';
+  const clutterPreset = tag?.clutter == null ? 'auto' : Object.entries(CLUTTER).find(([, v]) => Math.abs(v - tag.clutter) < 0.01)?.[0] || '';
+  const mapMood = MOODS.find((x) => x.id === (app.map.mood || DEFAULT_MOOD));
+  const ownMood = tag?.ruin > 0 ? 'ruined' : tag?.mood || '';
+  const setRoomMood = (v) => edit('Room mood', (t) => {
+    // Ruined here means the furniture only (Ruin in the top bar also breaks the walls).
+    if (v === 'ruined') t.ruin = Math.max(t.ruin || 0, 0.7);
+    else delete t.ruin;
+    if (v && v !== 'ruined') t.mood = v;
+    else delete t.mood;
+  });
   return section(
     tag?.name?.trim() || 'Room',
     field('Type', select(types, tag?.type || '', (v) => {
@@ -696,6 +805,7 @@ function roomSection() {
       }
     })),
     !tag && el('p', { class: 'hint' }, 'Give the room a type to furnish it.'),
+    tag && field('Mood', select(moodOptions(roomMood(app.map, { ...tag, mood: undefined, ruin: undefined }) === mapMood.id ? mapMood.name : `${mapMood.name}: this room ${MOODS.find((x) => x.id === roomMood(app.map, { ...tag, mood: undefined, ruin: undefined })).name.toLowerCase()}`), ownMood, setRoomMood), MOODS.find((x) => x.id === roomMood(app.map, tag)).hint),
     tag && field('Furniture', segmented([{ id: 'light', name: 'Light' }, { id: 'medium', name: 'Medium' }, { id: 'heavy', name: 'Heavy' }], preset, (v) => edit('Room density', (t) => (t.density = DENSITY[v])))),
     tag && el('div', { class: 'actions' },
       el('button', { class: 'primary', onclick: () => rerollRoom(tag.id), title: 'A new random layout' }, '↻ Reroll')),
@@ -714,15 +824,19 @@ function roomSection() {
           if (t) t.notes = e.target.value.trim() || undefined;
         }, { prune: false }),
       }, tag.notes || '')),
-      tag && field('Clutter', segmented([{ id: 'none', name: 'None' }, { id: 'light', name: 'Light' }, { id: 'heavy', name: 'Heavy' }], clutterPreset, (v) => edit('Room clutter', (t) => (t.clutter = CLUTTER[v]))),
-        'Cracks, stains, papers, cobwebs: small floor details.'),
+      tag && field('Clutter', segmented([{ id: 'auto', name: 'Auto' }, { id: 'none', name: 'None' }, { id: 'light', name: 'Light' }, { id: 'heavy', name: 'Heavy' }], clutterPreset, (v) => edit('Room clutter', (t) => (v === 'auto' ? delete t.clutter : (t.clutter = CLUTTER[v])))),
+        'Cracks, stains, papers, cobwebs: small floor details. Auto follows the mood.'),
       tag && checkbox('Combat ready: spread cover over the floor, keep lanes open', !!tag.combat, (v) => edit('Combat ready', (t) => (t.combat = v || undefined))),
+      tag && checkbox('Hidden room: secret doors in, left off the player map', !!tag.hidden, (v) => app.setRoomHidden(tag.id, v)),
+      tag && field('Secrets', segmented([{ id: '', name: 'Auto' }, { id: 'none', name: 'None' }, { id: 'one', name: 'Add one' }], tag.secrets || '', (v) => edit('Room secrets', (t) => (v ? (t.secrets = v) : delete t.secrets))),
+        'A stash, a hidden lever or panel: shown on the GM map only. Auto: now and then, always in hidden rooms.'),
       tag && field('Exact furniture amount', el('input', { type: 'range', min: 0, max: 1, step: 0.05, value: density, onchange: (e) => edit('Room density', (t) => (t.density = Number(e.target.value))) })),
       wallLookField(region, index, rooms, at),
       tag && el('div', { class: 'actions' },
         el('button', { onclick: () => app.decorate([tag.id]), title: 'Replace this room\'s automatic pieces (same layout)' }, 'Decorate again'),
         el('button', { onclick: () => app.clearDecoration([tag.id]), title: 'Remove automatic pieces; hand-placed ones stay' }, 'Clear'),
-        el('button', { onclick: () => app.addDoors([tag.id]), title: 'Door into each neighbouring room that can\'t be reached yet' }, 'Add doors')),
+        el('button', { onclick: () => app.addDoors([tag.id]), title: 'Door into each neighbouring room that can\'t be reached yet' }, 'Add doors'),
+        el('button', { onclick: () => app.addHiddenRoom(tag.id), title: 'A small secret room behind one of this room\'s walls, through a secret door' }, 'Add hidden room')),
       el('p', { class: 'hint' }, `${region.cells.length} full squares, about ${Math.round(region.area)} sq in all.`)),
   );
 }
@@ -794,6 +908,10 @@ function mapSection() {
         if (useLook) Object.assign(map.style, s.defaults);
       }, { prune: false });
     })),
+    field('Mood', select(moodOptions(null), m.mood || DEFAULT_MOOD, (v) => {
+      if (v === 'ruined') return ruinDialog();
+      app.setMapMood(v);
+    }), 'How cared-for the place is. Rooms can override it: a grim basement under a spotless manor.'),
     field('Palette', select(catalog.styles.palettes, m.style.palette, (v) => styleEdit('Palette', 'palette', v))),
     field('Shading', select(catalog.styles.shadings, m.style.shading, (v) => styleEdit('Shading', 'shading', v))),
     field('Grid', select(catalog.styles.grids, m.style.grid, (v) => styleEdit('Grid', 'grid', v))),
@@ -909,7 +1027,7 @@ async function saveRuinedCopy() {
   const copy = app.ruinedCopy(app.opts.ruinAmount ?? 0.7);
   const base = app.fileName || app.map.name;
   try {
-    if (server) {
+    if (store) {
       const name = await askText('Save the ruined copy as:', `${base} (ruined)`, { ok: 'Save' });
       if (!name) return;
       const res = await saveMapFile(name, saveMap(copy));
@@ -931,7 +1049,7 @@ async function saveRuinedCopy() {
 function startDialog(mode = 'generate') {
   const dialog = el('dialog', { class: 'export-dialog start-dialog' });
   let settingId = app.map.setting;
-  const gen = { style: app.opts.genStyle, rooms: app.opts.genRooms ?? 8, levels: app.opts.genLevels ?? 1, combat: !!app.opts.genCombat };
+  const gen = { style: app.opts.genStyle, rooms: app.opts.genRooms ?? 8, levels: app.opts.genLevels ?? 1, combat: !!app.opts.genCombat, secrets: app.opts.genSecrets ?? true };
   const body = el('div');
   const render = () => {
     const setting = catalog.settings.get(settingId);
@@ -944,7 +1062,7 @@ function startDialog(mode = 'generate') {
       if (mode === 'new' && !(await confirmDiscard())) return;
       if (replacing && !(await ask(gen.levels > 1 && style.layout !== 'outdoor' ? 'Replace the whole map with generated levels? (Undo brings it back.)' : 'Replace everything on this level? (Undo brings it back.)', { ok: 'Generate', danger: true }))) return;
       dialog.close();
-      Object.assign(app.opts, { genStyle: gen.style, genRooms: gen.rooms, genLevels: gen.levels, genCombat: gen.combat });
+      Object.assign(app.opts, { genStyle: gen.style, genRooms: gen.rooms, genLevels: gen.levels, genCombat: gen.combat, genSecrets: gen.secrets });
       if (mode === 'new') app.newMap(settingId);
       else if (settingId !== app.map.setting) {
         const s2 = catalog.settings.get(settingId);
@@ -954,7 +1072,7 @@ function startDialog(mode = 'generate') {
         }, { prune: false });
       }
       const go = () => {
-        app.generateLevel({ styleId: gen.style, count: gen.rooms, combat: gen.combat, levels: style.layout === 'outdoor' ? 1 : gen.levels });
+        app.generateLevel({ styleId: gen.style, count: gen.rooms, combat: gen.combat, secrets: gen.secrets, levels: style.layout === 'outdoor' ? 1 : gen.levels });
         app.fitView();
         offerAgain(`${style.name} generated.`, go);
       };
@@ -982,6 +1100,7 @@ function startDialog(mode = 'generate') {
           render();
         })),
         checkbox('Combat-ready rooms (cover spread over the floor)', gen.combat, (v) => (gen.combat = v)),
+        style?.layout !== 'outdoor' && checkbox('Hidden rooms and secrets (only on the GM map)', gen.secrets, (v) => (gen.secrets = v)),
         el('div', { class: 'actions' }, el('button', { type: 'button', class: 'primary', onclick: generate }, 'Generate'))),
       mode === 'new' && el('section', { class: 'start-card' },
         el('h3', {}, 'Or'),
@@ -1003,7 +1122,9 @@ function startDialog(mode = 'generate') {
   dialog.append(
     el('h2', {}, mode === 'new' ? 'New map' : 'Generate'),
     body,
-    el('menu', {}, el('button', { type: 'button', onclick: () => dialog.close() }, mode === 'new' ? 'Close' : 'Cancel')),
+    el('menu', {},
+      mode === 'new' && el('button', { type: 'button', onclick: helpDialog, style: { marginRight: 'auto' } }, 'How to use'),
+      el('button', { type: 'button', onclick: () => dialog.close() }, mode === 'new' ? 'Close' : 'Cancel')),
   );
   dialog.addEventListener('close', () => dialog.remove());
   document.body.append(dialog);

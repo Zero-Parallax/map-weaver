@@ -13,5 +13,5 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<rect class="s" x="6" y="6" width="88" height="88"/><rect class="m" x="18" y="18" width="64" height="64"/><rect class="k" x="32" y="32" width="36" height="36"/><path class="l" d="M6 6L32 32M94 6L68 32M6 94L32 68M94 94L68 68"/>
+<rect class="s" x="6" y="6" width="88" height="88"/><polygon class="o" points="6,6 94,6 74,26 26,26"/><polygon class="h" points="6,6 26,26 26,74 6,94"/><path class="t" d="M26 16L74 16M42 8L42 16M58 8L58 16M34 16L34 24M50 16L50 24M66 16L66 24"/><rect class="k" x="26" y="26" width="48" height="48"/><polygon class="p" points="36,35 39,43 33,43"/><polygon class="p" points="50,31 53,39 47,39"/><polygon class="p" points="62,39 65,47 59,47"/><polygon class="p" points="42,51 45,59 39,59"/><polygon class="p" points="58,55 61,63 55,63"/><path class="l" d="M6 6L26 26M94 6L74 26M6 94L26 74M94 94L74 74"/>
 </svg>

@@ -13,8 +13,8 @@
 .t{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
 .pl{fill:none;stroke:var(--paper,#fff);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}</style>
-<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
+<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>
 <g filter="url(#sh)">
-<polygon class="s" points="18,26 82,26 76,70 24,70"/><rect class="o" x="26" y="30" width="24" height="34" rx="2"/><rect class="o" x="50" y="30" width="24" height="34" rx="2"/><line class="l" x1="50" y1="30" x2="50" y2="80"/>
+<circle class="m" cx="50" cy="76" r="14"/><rect class="s" x="44" y="50" width="12" height="28" rx="3"/><polygon class="s" points="14,22 86,22 80,62 20,62"/><path class="l" d="M18.0 42.0L82.0 42.0"/><path class="t" d="M31.9 34.4Q55.4 32.9 78.9 34.4M21.4 48.8Q46.8 52.8 72.2 48.8"/><ellipse class="t" cx="47.8" cy="33.0" rx="5" ry="3"/><path class="o" d="M22 28Q36 24 50 30Q64 24 78 28V58Q64 54 50 60Q36 54 22 58Z"/><line class="l" x1="50" y1="30" x2="50" y2="60"/><path class="t" d="M28 36L44 38M28 44L44 46M56 38L72 36M56 46L70 44"/><path class="l" d="M50 60V74"/>
 </g>
 </svg>

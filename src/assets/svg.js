@@ -27,8 +27,14 @@ export const STYLE = `
 .d{fill:none;stroke:var(--ink,#1b1b1b);stroke-width:3.5;stroke-dasharray:8 7;stroke-linecap:round}
 `.trim();
 
-// Soft ink shadow under furniture so it stands off the floor.
-const SHADOW = '<defs><filter id="sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="3" dy="5" stdDeviation="3" style="flood-color:var(--ink,#1b1b1b);flood-opacity:0.35"/></filter></defs>';
+// Soft ink shadow under furniture so it stands off the floor. Taller things cast a longer
+// shadow (meta.height: low = seats and beds, mid = tables and counters, tall = cabinets,
+// machinery, tanks and trees), so the height of a room's contents reads at a glance.
+const SHADOWS = { low: [2, 3, 2, 0.3], mid: [3, 5, 3, 0.35], tall: [5, 8, 4, 0.42] };
+function shadow(height) {
+  const [dx, dy, sd, op] = SHADOWS[height] || SHADOWS.mid;
+  return `<defs><filter id="sh" x="-20%" y="-20%" width="145%" height="145%"><feDropShadow dx="${dx}" dy="${dy}" stdDeviation="${sd}" style="flood-color:var(--ink,#1b1b1b);flood-opacity:${op}"/></filter></defs>`;
+}
 
 const n = (v) => Math.round(v * 10) / 10;
 
@@ -113,7 +119,7 @@ export function assetSvg(meta, drawing) {
     `<title>${escapeXml(meta.name)}</title>`,
     writeMeta(meta),
     `<style>${STYLE}</style>`,
-    ...(meta.layer === 'floor' ? [String(drawing)] : [SHADOW, `<g filter="url(#sh)">`, String(drawing), '</g>']),
+    ...(meta.layer === 'floor' ? [String(drawing)] : [shadow(meta.height), `<g filter="url(#sh)">`, String(drawing), '</g>']),
     '</svg>',
     '',
   ].join('\n');

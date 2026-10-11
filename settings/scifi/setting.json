@@ -152,6 +152,7 @@
       "outdoor": true
     }
   ],
+  "hidden": [{"type": "cargo-bay", "name": "Smuggler's hold"}, {"type": "armoury", "name": "Weapons cache"}, {"type": "server-room", "name": "Hidden server room"}, {"type": "lab", "name": "Secret lab"}, {"type": "detention", "name": "Secret cell"}, {"type": "apartment", "name": "Safe room"}],
   "generator": [
     {"id":"ship","name":"Starship","layout":"ship","corridor":{"type":"corridor"},"rooms":[
       {"type":"bridge","place":"front","max":1},
@@ -193,12 +194,12 @@
       {"type":"security","max":1},
       {"type":"hydroponics-bay","max":1}
     ]},
-    {"id":"mine","name":"Mine or ruins","layout":"caves","corridor":{"type":"mine"},"rooms":[
+    {"id":"mine","mood":"neglected","name":"Mine or ruins","layout":"caves","corridor":{"type":"mine"},"rooms":[
       {"type":"mine","weight":5},
       {"type":"alien-ruins","weight":2},
       {"type":"workshop","max":1}
     ]},
-    {"id":"crash-site","name":"Crash site","layout":"outdoor","ground":"rock","region":{"type":"crash-site","density":0.45},"road":0,"river":0.4,"riverKind":"chasm","pools":{"lava":0.3,"chasm":0.3}},
+    {"id":"crash-site","mood":"ransacked","name":"Crash site","layout":"outdoor","ground":"rock","region":{"type":"crash-site","density":0.45},"road":0,"river":0.4,"riverKind":"chasm","pools":{"lava":0.3,"chasm":0.3}},
     {"id":"jungle","name":"Alien jungle","layout":"outdoor","ground":"grass","region":{"type":"jungle","density":0.55},"road":0.5,"river":0.8,"bridge":"gantry-bridge","pools":{"water":0.4,"mud":0.4}},
     {"id":"outpost","name":"Colony outpost","layout":"outdoor","ground":"sand","region":{"type":"colony-yard","density":0.35},"road":1,"roadKind":"paving","river":0,"pools":{},"buildings":{"min":2,"max":5,"rooms":[{"type":"apartment","weight":3},{"type":"workshop","max":1},{"type":"clinic","max":1},{"type":"mess-hall","max":1},{"type":"security","max":1},{"type":"lab","max":1}]}},
     {"id":"volcanic","name":"Volcanic wastes","layout":"outdoor","ground":"rock","region":{"type":"wasteland","density":0.4},"road":0.8,"river":1,"riverKind":"lava","bridge":"gantry-bridge","pools":{"lava":0.5,"chasm":0.3}},
